@@ -107,7 +107,7 @@ for itime = 1:numel(t)
         fnames = unique(ncfiles);
         for ifloat = 1:numel(fnames)
             rng('shuffle');
-            tmpfile = ['argotmp',num2str(randi([1000 9999],1,1),'%d'),'.nc']; 
+            tmpfile = ['argotmp',num2str(randi([1000 9999],1,1),'%d'),'.nc'];
             % Download data file
             try
                 urlwrite(fnames{ifloat},tmpfile);
@@ -140,7 +140,7 @@ for itime = 1:numel(t)
                 bbp(itime) = bbp(itime)+1;
             end
             netcdf.close(nc)
-            delete(tmpfile) 
+            delete(tmpfile)
         end
     end
 end

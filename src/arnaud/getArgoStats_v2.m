@@ -15,7 +15,7 @@ date_stop = datenum(2019,9,1);
 
 update_files = 0;
 fglobal = 'ar_index_global_prof.txt';
-fbio = 'argo_bio-profile_index.txt';
+fbio = 'argo_bio-profi le_index.txt';
 greylist = 'ar_greylist.txt';
 
 fprintf(['Processing info:\n',datestr(date_start,'yyyymmdd'),'-',datestr(date_stop,'yyyymmdd'),...
