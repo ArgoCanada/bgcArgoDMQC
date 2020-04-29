@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from .core import *
 from . import unit
 from . import plt
+from . import io
 
 __all__ = ['plt', 'unit']
 
