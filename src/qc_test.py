@@ -10,7 +10,7 @@ import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec
 import seaborn as sns
 
-import qc
+import sagepy
 
 sns.set(style='ticks', palette='colorblind', context='paper')
 
@@ -59,17 +59,17 @@ woa_path = '/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/DATA/WOA2018'
 local_path = '/Users/ChrisGordon/Desktop/argo/data/meds'
 wmo = '4900497'
 
-data = qc.load_argo_data(local_path, wmo)
+data = sagepy.load_argo_data(local_path, wmo)
 
 track = np.array([data['SDN'],data['LATITUDE'],data['LONGITUDE']]).T
 
-xtrack, woa_track, woa_data = qc.load_woa_data(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
-woa_interp, wt, yrday = qc.interp_woa_data(xtrack, woa_track, woa_data)
+xtrack, woa_track, woa_data = sagepy.load_woa_data(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
+woa_interp, wt, yrday = sagepy.interp_woa_data(xtrack, woa_track, woa_data)
 z = woa_track[0]
-# z, woa = qc.woa_to_float_track(track, 'O2sat', local_path=woa_path)
+# z, woa = sagepy.woa_to_float_track(track, 'O2sat', local_path=woa_path)
 
 woa = dict(z=z, data=woa_interp)
-gains, flt_surf, woa_surf = qc.calc_gain(data, woa, inair=False)
+gains, flt_surf, woa_surf = sagepy.calc_gain(data, woa, inair=False)
 
 # -----------------------------------------------------------------------------
 # Make analogous plots to SAGE-O2 GUI
@@ -77,11 +77,11 @@ gains, flt_surf, woa_surf = qc.calc_gain(data, woa, inair=False)
 sdn = data['SDN']
 fig, axes = plt.subplots(2,1,sharex=True)
 
-g1 = qc.plt.float_woa_surface(sdn, flt_surf[:,2], woa_surf, ax=axes[0])
-g2 = qc.plt.gains(sdn, gains, inair=False, ax=axes[1])
+g1 = sagepy.plt.float_woa_surface(sdn, flt_surf[:,2], woa_surf, ax=axes[0])
+g2 = sagepy.plt.gains(sdn, gains, inair=False, ax=axes[1])
 
-fig.savefig('../reports/figures/woa_float_gains.png', dpi=350, bbox_inches='tight')
-plt.close(fig)
+# fig.savefig('../reports/figures/woa_float_gains.png', dpi=350, bbox_inches='tight')
+# plt.close(fig)
 
 # -----------------------------------------------------------------------------
 # Compare python results to SAGE output
@@ -109,8 +109,8 @@ for tick in axes[1].get_xticklabels():
 
 plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
-fig.savefig('../reports/figures/woa_py_matlab_compare.png', dpi=350, bbox_inches='tight')
-plt.close(fig)
+# fig.savefig('../reports/figures/woa_py_matlab_compare.png', dpi=350, bbox_inches='tight')
+# plt.close(fig)
 
 mdict = loadmat('/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/MFILES/GUIS/SAGE_O2Argo/gui_data.mat')
 matlab_gains = np.squeeze(mdict['GAINS'])
@@ -127,8 +127,8 @@ for tick in axes[1].get_xticklabels():
 
 plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
-fig.savefig('../reports/figures/gains_py_matlab_compare.png', dpi=350, bbox_inches='tight')
-plt.close(fig)
+# fig.savefig('../reports/figures/gains_py_matlab_compare.png', dpi=350, bbox_inches='tight')
+# plt.close(fig)
 
 matlab_surf_sat = np.squeeze(mdict['SURF_SAT'][:,1])
 
@@ -144,5 +144,6 @@ for tick in axes[1].get_xticklabels():
 
 plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
-fig.savefig('../reports/figures/float_py_matlab_compare.png', dpi=350, bbox_inches='tight')
-plt.close(fig)
+# fig.savefig('../reports/figures/float_py_matlab_compare.png', dpi=350, bbox_inches='tight')
+# plt.close(fig)
+plt.show()

@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-import sys, os
+import sys
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pylab as pl
@@ -62,23 +63,25 @@ def load_argo_data(local_path, wmo):
     # to add all quality flags to output
     #
     # -------------------------------------------------------------------------
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path.replace('\\', '/'))
 
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
-    BRtraj = os.path.join(local_path, wmo, '{}_BRtraj.nc'.format(wmo))
-    Sprof  = os.path.join(local_path, wmo, '{}_Sprof.nc'.format(wmo))
-    meta   = os.path.join(local_path, wmo, '{}_meta.nc'.format(wmo))
+    BRtraj = local_path / wmo / '{}_BRtraj.nc'.format(wmo)
+    Sprof  = local_path / wmo / '{}_Sprof.nc'.format(wmo)
+    meta   = local_path / wmo / '{}_meta.nc'.format(wmo)
 
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
-    if not os.path.isfile(BRtraj):
+    if not BRtraj.exists():
         BRtraj_flag = False
         sys.stdout.write('Continuing without BRtraj file\n')
 
     # Sprof and meta are required, so raise error if they are not there
-    if not os.path.isfile(Sprof):
+    if not Sprof.exists():
         raise FileNotFoundError('No such Sprof file: {}'.format(Sprof))
-    if not os.path.isfile(meta):
+    if not meta.exists():
         raise FileNotFoundError('No such meta file: {}'.format(meta))
 
     # only load if file was found
@@ -210,6 +213,9 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
 
         return lon_ix
 
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path.replace('\\', '/'))
+
     # translate variable input to corresponding WOA filename structure:
     input_to_woa_param = dict(
         T='t',
@@ -262,7 +268,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
     for i in range(12):
         mo = i+1
         woa_file = base_woa_file + '{:02d}_01.nc'.format(mo)
-        nc = Dataset(os.path.join(local_path,woa_dir,woa_file), 'r')
+        nc = Dataset(local_path,woa_dir / woa_file, 'r')
 
         if i == 0:
             z   = nc.variables['depth'][:]
