@@ -10,6 +10,7 @@ import pylab as pl
 from netCDF4 import Dataset
 
 from . import unit
+from . import util
 
 def apply_qc_adjustment():
 
@@ -186,71 +187,8 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
     #
     # -------------------------------------------------------------------------
 
-    def get_lat_index(lat, lat_bounds):
-        # function to pull appropriate WOA latitude values
-        lat_ix = np.logical_and(lat >= lat_bounds[0], lat <= lat_bounds[1])
-        lat_ix = np.where(lat_ix)[0]
-        if lat_ix[0] != 0:
-            lat_ix = np.append(np.array([lat_ix[0]-1]), lat_ix)
-
-        if lat_ix[-1] != lat_ix.shape[0] - 1:
-            lat_ix = np.append(lat_ix, np.array([lat_ix[-1]+1]))
-
-        return lat_ix
-
-    def get_lon_index(lon, lon_bounds, cross180):
-        # function to pull appropriate WOA longitude values, handles crossing 180
-        if cross180:
-            lon_ix = np.logical_or(lon <= lon_bounds[0], lon >= lon_bounds[1])
-            lon_ix = np.where(lon_ix)[0]
-            diff_index = np.where(np.diff(lon_ix) != 1)[0][0]
-            half1_lon_ix = np.append(lon_ix[:diff_index], np.array([lon_ix[diff_index]+1]))
-            half2_lon_ix = np.append(np.array([lon_ix[diff_index+1] - 1]), lon_ix[diff_index+1:])
-            lon_ix = np.append(half1_lon_ix, half2_lon_ix)
-        else:
-            lon_ix = np.logical_and(lon >= lon_bounds[0], lon <= lon_bounds[1])
-            lon_ix = np.where(lon_ix)[0]
-            if lon_ix[0] != 0:
-                lon_ix = np.append(np.array([lon_ix[0]-1]), lon_ix)
-
-            if lon_ix[-1] != lon_ix.shape[0] - 1:
-                lon_ix = np.append(lon_ix, np.array([lon_ix[-1]+1]))
-
-        return lon_ix
-
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path.replace('\\', '/'))
-
-    # translate variable input to corresponding WOA filename structure:
-    input_to_woa_param = dict(
-        T='t',
-        S='s',
-        O2='o',
-        O2sat='O',
-        NO3='n',
-        Si='i',
-        PO4='p',
-    )
-
-    input_to_woa_ftype = dict(
-        T='A5B2',
-        S='A5B2',
-        O2='all',
-        O2sat='all',
-        NO3='all',
-        Si='all',
-        PO4='all',
-    )
-
-    input_to_woa_folder = dict(
-        T='temperature',
-        S='salinity',
-        O2='oxygen',
-        O2sat='o2sat',
-        NO3='nitrate',
-        Si='silicate',
-        PO4='phosphate',
-    )
 
     # check if float track crosses -180/180 meridian
     cross180 = False
@@ -263,9 +201,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
     lat_bounds = (np.min(track[:,1]), np.max(track[:,1]))
 
     # set up extraction files, variables
-    woa_ftype = input_to_woa_ftype[param]
-    woa_param = input_to_woa_param[param]
-    woa_dir   = input_to_woa_folder[param]
+    woa_param, woa_ftype, woa_dir = util.decode_woa_var(param)
     var_name  = woa_param + '_an'
 
     base_woa_file = 'woa18_{}_{}'.format(woa_ftype, woa_param)
@@ -287,8 +223,8 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
             if zlim[1] > z[-1]:
                 warnings.warn('Max requested depth {} greater than WOA max depth {}\n'.format(zlim[1], z[-1]), Warning)
 
-            lat_ix = get_lat_index(lat, lat_bounds)
-            lon_ix = get_lon_index(lon, lon_bounds, cross180)
+            lat_ix = util.get_lat_index(lat, lat_bounds)
+            lon_ix = util.get_lon_index(lon, lon_bounds, cross180)
 
             # extract lat/lon values
             lat_sub = lat[lat_ix]

@@ -1,8 +1,12 @@
 #!/usr/bin/python
 
+import sys
+
 from pathlib import Path
 import ftplib
 import gzip
+
+from . import util
 
 def get_woa18(varname, local_path='./', ftype='netcdf'):
     # -------------------------------------------------------------------------
@@ -42,7 +46,14 @@ def get_woa18(varname, local_path='./', ftype='netcdf'):
     #
     # -------------------------------------------------------------------------
 
-    return None
+    url = 'ftp.nodc.noaa.gov'
+    param, ftype, ftpdir = util.decode_woa_var(varname)
+
+    ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
+
+    
+
+    return ftp
 
 def get_argo(*args):
     # -------------------------------------------------------------------------
@@ -72,3 +83,8 @@ def get_argo(*args):
     # -------------------------------------------------------------------------
 
     return None
+
+# if __name__ == '__main__':
+#     sys.stdout.write('Running io.py as __main__ - testing diagnostics of each function\n')
+
+#     ftp = get_woa18('o2sat')
