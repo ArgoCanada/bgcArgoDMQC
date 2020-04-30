@@ -68,7 +68,7 @@ def load_argo_data(local_path, wmo):
     # -------------------------------------------------------------------------
 
     # make local_path a Path() object from a string, account for windows path
-    local_path = Path(local_path.replace('\\', '/'))
+    local_path = Path(local_path)
 
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
@@ -188,7 +188,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
     # -------------------------------------------------------------------------
 
     # make local_path a Path() object from a string, account for windows path
-    local_path = Path(local_path.replace('\\', '/'))
+    local_path = Path(local_path)
 
     # check if float track crosses -180/180 meridian
     cross180 = False

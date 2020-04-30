@@ -16,8 +16,8 @@ def decode_woa_var(varname):
     )
 
     input_to_woa_ftype = dict(
-        T='A5B2',
-        S='A5B2',
+        T='A5B7',
+        S='A5B7',
         O2='all',
         O2sat='all',
         NO3='all',

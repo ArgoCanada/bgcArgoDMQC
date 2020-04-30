@@ -46,12 +46,47 @@ def get_woa18(varname, local_path='./', ftype='netcdf'):
     #
     # -------------------------------------------------------------------------
 
+    local_path = Path(local_path)
     url = 'ftp.nodc.noaa.gov'
-    param, ftype, ftpdir = util.decode_woa_var(varname)
+    param, dtype, ftpdir = util.decode_woa_var(varname)
 
     ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
+    ftp.cwd('pub/woa/WOA18/DATA/{}/{}/{}/1.00/'.format(ftpdir, ftype, dtype))
 
-    
+    local_path = local_path / ftpdir
+
+    if not local_path.is_dir():
+        local_path.mkdir()
+
+    for fn in ftp.nlst():
+        local_file = local_path / fn
+        if not local_file.exists():
+            print(local_file)
+            # open the local file
+            lf = open(local_file, 'wb')
+            # retrieve the file on FTP server,
+            ftp.retrbinary('RETR ' + fn, lf.write)
+
+
+    return ftp
+
+def get_ncep(local_path='./'):
+
+    local_path = Path(local_path)
+    url = 'ftp.cdc.noaa.gov'
+
+    ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
+    ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
+
+    for yr in range(2010, 2021):
+        fn = 'pres.sfc.gauss.{}.nc'.format(yr)
+        local_file = local_path / fn
+        if not local_file.exists():
+            print(local_file)
+            # open the local file
+            lf = open(local_file, 'wb')
+            # retrieve the file on FTP server,
+            ftp.retrbinary('RETR ' + fn, lf.write)
 
     return ftp
 
@@ -60,8 +95,8 @@ def get_argo(*args):
     # get_argo
     # -------------------------------------------------------------------------
     #
-    # Function to load in all data from a single float, using BRtraj, meta,
-    # and Sprof files
+    # Function to download all data from a single float, or individual 
+    # profiles
     #
     # INPUT:
     #           Inputs may vary depending on desired performance. Multiple
@@ -83,8 +118,3 @@ def get_argo(*args):
     # -------------------------------------------------------------------------
 
     return None
-
-# if __name__ == '__main__':
-#     sys.stdout.write('Running io.py as __main__ - testing diagnostics of each function\n')
-
-#     ftp = get_woa18('o2sat')
