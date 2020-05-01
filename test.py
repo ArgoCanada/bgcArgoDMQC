@@ -108,9 +108,9 @@ plt.close(fig)
 
 # fig, axes = resid_plot(sdn, woa_surf, matlab_woa_surf, l1='WOA python', l2='WOA matlab SAGE', lr='matlab - python', xl='', yl='O2sat (%)')
 
-# mhr  = mdates.MonthLocator(interval=4)
-# mihr = mdates.MonthLocator()
-# fmt  = mdates.DateFormatter('%b %Y')
+mhr  = mdates.MonthLocator(interval=4)
+mihr = mdates.MonthLocator()
+fmt  = mdates.DateFormatter('%b %Y')
 
 # axes[0].set_xticklabels([])
 # axes[1].xaxis.set_major_locator(mhr)
