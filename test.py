@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 import sys
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 
 from scipy.io import loadmat
 
@@ -53,10 +56,20 @@ def resid_plot(x, y1, y2, l1='$y_1$', l2='$y_2$', lr='$y_2 - y_1$', legend=True,
     return fig, axes
 
 # -----------------------------------------------------------------------------
+# Download MEDS oxygen floats
+# -----------------------------------------------------------------------------
+meds_float_list = 'meds_doxy_floats.csv'
+df = pd.read_csv(meds_float_list)
+
+# remove leading Q from float numbers and any spaces
+wmo_nums = np.array([n.strip('Q').strip(' ') for n in df.WMO_NUMBER])
+ftp = sagepy.io.get_argo('/ifremer/argo/dac/meds', wmo_nums, local_path='/Users/gordonc/Documents/data/Argo/meds')
+
+# -----------------------------------------------------------------------------
 # Do gain calculation on an older float without in-air data
 # -----------------------------------------------------------------------------
-woa_path = '/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/DATA/WOA2018'
-local_path = './argo/data/meds'
+woa_path = '/Users/gordonc/Documents/data/WOA18'
+local_path = '/Users/gordonc/Documents/data/Argo/meds'
 wmo = '4900497'
 
 data = sagepy.load_argo_data(local_path, wmo)
@@ -79,69 +92,69 @@ fig, axes = plt.subplots(2,1,sharex=True)
 g1 = sagepy.plt.float_woa_surface(sdn, flt_surf[:,2], woa_surf, ax=axes[0])
 g2 = sagepy.plt.gains(sdn, gains, inair=False, ax=axes[1])
 
-# fig.savefig('../reports/figures/woa_float_gains.png', dpi=350, bbox_inches='tight')
-# plt.close(fig)
+fig.savefig('../reports/figures/woa_float_gains.png', dpi=350, bbox_inches='tight')
+plt.close(fig)
 
 # -----------------------------------------------------------------------------
 # Compare python results to SAGE output
 # -----------------------------------------------------------------------------
 
-mdict = loadmat('/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/MFILES/GUIS/SAGE_O2Argo/test_data.mat')
+# mdict = loadmat('/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/MFILES/GUIS/SAGE_O2Argo/test_data.mat')
 
-matlab_woa_data = mdict['d']
-matlab_woa_interp = mdict['d_interp']
-matlab_woa_surf = matlab_woa_interp[0,:]
+# matlab_woa_data = mdict['d']
+# matlab_woa_interp = mdict['d_interp']
+# matlab_woa_surf = matlab_woa_interp[0,:]
 
-fig, axes = resid_plot(sdn, woa_surf, matlab_woa_surf, l1='WOA python', l2='WOA matlab SAGE', lr='matlab - python', xl='', yl='O2sat (%)')
+# fig, axes = resid_plot(sdn, woa_surf, matlab_woa_surf, l1='WOA python', l2='WOA matlab SAGE', lr='matlab - python', xl='', yl='O2sat (%)')
 
-mhr  = mdates.MonthLocator(interval=4)
-mihr = mdates.MonthLocator()
-fmt  = mdates.DateFormatter('%b %Y')
+# mhr  = mdates.MonthLocator(interval=4)
+# mihr = mdates.MonthLocator()
+# fmt  = mdates.DateFormatter('%b %Y')
 
-axes[0].set_xticklabels([])
-axes[1].xaxis.set_major_locator(mhr)
-axes[1].xaxis.set_major_formatter(fmt)
-axes[1].xaxis.set_minor_locator(mihr)
+# axes[0].set_xticklabels([])
+# axes[1].xaxis.set_major_locator(mhr)
+# axes[1].xaxis.set_major_formatter(fmt)
+# axes[1].xaxis.set_minor_locator(mihr)
 
-for tick in axes[1].get_xticklabels():
-    tick.set_rotation(45)
+# for tick in axes[1].get_xticklabels():
+#     tick.set_rotation(45)
 
-plt.subplots_adjust(wspace=0.6, hspace=0.4)
+# plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
 # fig.savefig('../reports/figures/woa_py_matlab_compare.png', dpi=350, bbox_inches='tight')
 # plt.close(fig)
 
-mdict = loadmat('/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/MFILES/GUIS/SAGE_O2Argo/gui_data.mat')
-matlab_gains = np.squeeze(mdict['GAINS'])
+# mdict = loadmat('/Users/ChrisGordon/Documents/MATLAB/ARGO_PROCESSING/MFILES/GUIS/SAGE_O2Argo/gui_data.mat')
+# matlab_gains = np.squeeze(mdict['GAINS'])
 
-fig, axes = resid_plot(sdn, gains, matlab_gains, l1='Gains python', l2='Gains matlab SAGE', lr='matlab - python', xl='', yl='Gain (unitless)')
+# fig, axes = resid_plot(sdn, gains, matlab_gains, l1='Gains python', l2='Gains matlab SAGE', lr='matlab - python', xl='', yl='Gain (unitless)')
 
-axes[0].set_xticklabels([])
-axes[1].xaxis.set_major_locator(mhr)
-axes[1].xaxis.set_major_formatter(fmt)
-axes[1].xaxis.set_minor_locator(mihr)
+# axes[0].set_xticklabels([])
+# axes[1].xaxis.set_major_locator(mhr)
+# axes[1].xaxis.set_major_formatter(fmt)
+# axes[1].xaxis.set_minor_locator(mihr)
 
-for tick in axes[1].get_xticklabels():
-    tick.set_rotation(45)
+# for tick in axes[1].get_xticklabels():
+#     tick.set_rotation(45)
 
-plt.subplots_adjust(wspace=0.6, hspace=0.4)
+# plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
 # fig.savefig('../reports/figures/gains_py_matlab_compare.png', dpi=350, bbox_inches='tight')
 # plt.close(fig)
 
-matlab_surf_sat = np.squeeze(mdict['SURF_SAT'][:,1])
+# matlab_surf_sat = np.squeeze(mdict['SURF_SAT'][:,1])
 
-fig, axes = resid_plot(sdn, flt_surf[:,2], matlab_surf_sat, l1='Float python', l2='Float matlab SAGE', lr='matlab - python', xl='', yl='O2sat (%)')
+# fig, axes = resid_plot(sdn, flt_surf[:,2], matlab_surf_sat, l1='Float python', l2='Float matlab SAGE', lr='matlab - python', xl='', yl='O2sat (%)')
 
-axes[0].set_xticklabels([])
-axes[1].xaxis.set_major_locator(mhr)
-axes[1].xaxis.set_major_formatter(fmt)
-axes[1].xaxis.set_minor_locator(mihr)
+# axes[0].set_xticklabels([])
+# axes[1].xaxis.set_major_locator(mhr)
+# axes[1].xaxis.set_major_formatter(fmt)
+# axes[1].xaxis.set_minor_locator(mihr)
 
-for tick in axes[1].get_xticklabels():
-    tick.set_rotation(45)
+# for tick in axes[1].get_xticklabels():
+#     tick.set_rotation(45)
 
-plt.subplots_adjust(wspace=0.6, hspace=0.4)
+# plt.subplots_adjust(wspace=0.6, hspace=0.4)
 
 # fig.savefig('../reports/figures/float_py_matlab_compare.png', dpi=350, bbox_inches='tight')
 # plt.close(fig)

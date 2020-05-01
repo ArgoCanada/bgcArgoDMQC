@@ -209,7 +209,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
     for i in range(12):
         mo = i+1
         woa_file = base_woa_file + '{:02d}_01.nc'.format(mo)
-        nc = Dataset(local_path,woa_dir / woa_file, 'r')
+        nc = Dataset(local_path / woa_dir / woa_file, 'r')
 
         if i == 0:
             z   = nc.variables['depth'][:]
