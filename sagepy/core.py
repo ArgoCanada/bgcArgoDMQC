@@ -43,6 +43,9 @@ def load_argo_data(local_path, wmo):
     #               PSAL: Salinity (psu)
     #               DOXY: Dissolved Oxygen (micromole/kg)
     #               O2sat: Oxygen percent saturation (%)
+    #               PPOX_DOXY: Oxygen partial pressure (atm) [if avail.]
+    #               TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
+    #               inair: Boolean to indicate if in-air data exists
     #
     #               *** CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE ***
     #               ***     ANALOGOUS <VAR>_GRID FIELDS THAT MATCH THE     ***
@@ -404,6 +407,38 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     z = woa_track[0]
 
     return z, woa_interp
+
+def ncep_to_float_track(track, local_path='./'):
+
+    # -------------------------------------------------------------------------
+    # woa_to_float_track
+    # -------------------------------------------------------------------------
+    #
+    # Function to load NCEP reanalysis data for comparison with autonomous
+    # float in-air data. Data to be interpolated along the provided 
+    # track (t, lat, lon).
+    #
+    # INPUT:
+    #           track: array with the columns (SDN, lat, lon)
+    #           local_path: local directory where WOA files are stored, assumes
+    #                       current directory if no input
+    #
+    # OUTPUT:
+    #           z: WOA depth array
+    #           woa_interp: 2D array of requested WOA parameter (depth x time)
+    #
+    # AUTHOR:   Christopher Gordon
+    #           Fisheries and Oceans Canada
+    #           chris.gordon@dfo-mpo.gc.ca
+    #
+    # LAST UPDATE: 23-04-2020
+    #
+    # CHANGE LOG:
+    #
+    # -------------------------------------------------------------------------
+
+    return None
+
 
 def calc_gain(data, ref, inair=True, zlim=25.):
     # -------------------------------------------------------------------------

@@ -12,3 +12,6 @@ brtraj = '/Users/gordonc/Documents/data/Argo/meds/{}/{}_BRtraj.nc'.format(wmo,wm
 sprof = brtraj.replace('BRtraj', 'Sprof')
 bnc = Dataset(Path(brtraj), 'r')
 snc = Dataset(Path(sprof), 'r')
+
+fn = '/Users/gordonc/Documents/data/NCEP/pres.sfc.gauss.2020.nc'
+ncep = Dataset(Path(fn), 'r')
