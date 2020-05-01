@@ -139,6 +139,14 @@ def load_argo_data(local_path, wmo):
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
 
+    if BRtraj_flag:
+        ppox_doxy = BRtraj_nc.variables['PPOX_DOXY'][:]
+        floatData['pO2'] = ppox_doxy.compressed()
+        floatData['TRAJ_CYCLE'] = np.ma.masked_array(BRtraj_nc.variables['CYCLE_NUMBER'][:].data, mask=ppox_doxy.mask).compressed()
+        floatData['inair'] = True
+    else:
+        floatData['inair'] = False
+
     return floatData
 
 def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
