@@ -155,7 +155,6 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr'):
             wmo = str(flt)
 
         # ------------------ SUMMARY FILES (Sprof, BRtraj, meta) --------------
-        
         # change ftp directory
         print(wmo)
         ftp.cwd(wmo)

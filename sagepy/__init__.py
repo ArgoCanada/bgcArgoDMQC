@@ -8,7 +8,7 @@ from . import unit
 from . import plt
 from . import io
 
-__all__ = ['plt', 'unit']
+__all__ = ['plt', 'unit', 'io']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
