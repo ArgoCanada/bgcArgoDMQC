@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pylab as pl
+from scipy.interpolate import interp1d
 
 from netCDF4 import Dataset
 
@@ -268,11 +269,12 @@ def interp_woa_data(track, woa_track, data):
     # load_woa_data
     # -------------------------------------------------------------------------
     #
-    # Function to load WOA18 climatological data for comparison with autonomous
-    # floats. Data to be interpolated along the provided track (t, lat, lon).
+    # Function to interpolate WOA18 climatological data along the provided 
+    # track (t, lat, lon).
     #
     # INPUT:
     #           track: array with the columns (SDN, lat, lon)
+    #           woa_track: tuple with WOA time, lat, lon arrays
     #           data: output array from load_woa_data()
     #
     # OUTPUT:
@@ -299,7 +301,6 @@ def interp_woa_data(track, woa_track, data):
     M = z.shape[0]
     N = track.shape[0]
     yrday = np.array([dn - pl.datestr2num('{}-01-01'.format(pl.num2date(dn).year)) for dn in track[:,0]])
-    print(yrday)
     woa_yrday = np.array([pl.datestr2num('2020-{:02d}-15'.format(i+1)) - pl.datestr2num('2020-01-01') for i in range(12)])
 
     # array for output
@@ -418,7 +419,7 @@ def load_ncep_data(track, varname, local_path='./'):
     #
     # INPUT:
     #           track: array with the columns (SDN, lat, lon)
-    #           local_path: local directory where WOA files are stored, assumes
+    #           local_path: local directory where NCEP files are stored, assumes
     #                       current directory if no input
     #
     # OUTPUT:
@@ -427,7 +428,7 @@ def load_ncep_data(track, varname, local_path='./'):
     #           Fisheries and Oceans Canada
     #           chris.gordon@dfo-mpo.gc.ca
     #
-    # LAST UPDATE: 23-04-2020
+    # LAST UPDATE: 04-05-2020
     #
     # CHANGE LOG:
     #
@@ -438,13 +439,14 @@ def load_ncep_data(track, varname, local_path='./'):
 
     if varname == 'pres':
         base_file = 'pres.sfc.gauss'
+        land_file = local_path / 'land' / 'land.sfc.gauss.nc'
     elif varname == 'rhum':
         base_file = 'rhum.sig995'
+        land_file = local_path / 'land' / 'land.nc'
     else:
         raise ValueError('Invalid varname input')
 
-    landfile = local_path / 'land.sfc.gauss.nc'
-    lnc = Dataset(landfile, 'r')
+    lnc = Dataset(land_file, 'r')
 
     # check if float track crosses -180/180 meridian
     cross180 = False
@@ -457,7 +459,8 @@ def load_ncep_data(track, varname, local_path='./'):
     lat_bounds = (np.min(track[:,1]), np.max(track[:,1]))
 
     sdn = track[:,0]
-    yrs = (pl.num2date(np.min(sdn)).year, pl.num2date(np.max(sdn)))
+    yrs = (pl.num2date(np.min(sdn)).year, pl.num2date(np.max(sdn)).year)
+    Nyear = yrs[1]-yrs[0]
     
     # counter index for going across years
     j = 0
@@ -471,6 +474,7 @@ def load_ncep_data(track, varname, local_path='./'):
         if y == yrs[0]:
             lat = nc.variables['lat'][:]
             lon = nc.variables['lon'][:]
+            lon[lon > 180] = lon[lon > 180] - 360
             lat_ix = util.get_lat_index(lat, lat_bounds)
             lon_ix = util.get_lon_index(lon, lon_bounds, cross180)
             
@@ -485,17 +489,85 @@ def load_ncep_data(track, varname, local_path='./'):
                 lon_sub[negative_lon] = lon_sub[negative_lon] + 360
                 xlon[lix] = xlon[lix] + 360
             
-            landmask = lnc.variables['land'][:][lon_ix,:,:][lat_ix,:][0]
-            data = np.nan*np.ones((len(time)*(yrs[1]-yrs[0]), len(lat_sub), len(lon_sub)))
+            landmask = lnc.variables['land'][:][0,:,:][:,lon_ix][lat_ix,:].astype(bool)
+            ncep_time = np.nan*np.ones((len(time)*Nyear))
+            data = np.nan*np.ones((len(time)*Nyear, len(lat_sub), len(lon_sub)))
         
         vdata = nc.variables[varname][:]
-        for i in len(time):
-            data_2d =  vdata[lon_ix,:,:][lat_ix,:][i]
-            
-            # data[j,:,:] =
+        for i in range(len(time)):
+            data_2d =  vdata[i,:,:][:,lon_ix][lat_ix,:]
+            data_2d[landmask] = np.nan
+            data[j,:,:] = data_2d
+            ncep_time[j] = time[i]
             j += 1
 
-    return None
+        xtrack = track.copy()
+        xtrack[:,2] = xlon
+        ncep_track = [ncep_time, lat_sub, lon_sub]
+
+    return xtrack, ncep_track, data
+
+def interp_ncep_data(track, ncep_track, data):
+
+    # extract ncep variables
+    ncep_time, lat_sub, lon_sub = ncep_track
+
+    # get float lats and lons, round out times at endpoints
+    xt   = np.ones((track.shape[0]+2))
+    xlat = np.ones((track.shape[0]+2))
+    xlon = np.ones((track.shape[0]+2))
+
+    xt[1:-1]   = track[:,0]
+    xlat[1:-1] = track[:,1]
+    xlon[1:-1] = track[:,2]
+
+    xt[0]   = np.floor(xt[1])
+    xt[-1]  = np.ceil(xt[-2])
+    xlat[0] = xlat[1]
+    xlat[-1] = xlat[-2]
+    xlon[0] = xlon[1]
+    xlon[-1] = xlon[-2]
+
+    # interpolate float to ncep time grid
+    f = interp1d(xt, xlat, bounds_error=False)
+    ilat = f(ncep_time)
+    f = interp1d(xt, xlon, bounds_error=False)
+    ilon = f(ncep_time)
+
+    # remove NaN values
+    ix = ~np.isnan(ilat)
+    ilat = ilat[ix]
+    ilon = ilon[ix]
+    time_sub = ncep_time[ix]
+
+    # loop through NCEP time and get data at each location
+    ncep_data = np.nan*np.ones((time_sub.shape[0],))
+    for i in range(time_sub.shape[0]):
+        # temporal weighted average
+        time_pt = np.where(ncep_time >= time_sub[i])[0][0]
+        if time_pt == 0:
+            tmp = data[time_pt,:,:]
+        else:
+            wt = (ncep_time[time_pt] - time_sub[i]) / (ncep_time[time_pt] - ncep_time[time_pt-1])
+            tmp = wt*data[time_pt-1,:,:] + (1-wt)*data[time_pt,:,:]
+        
+        # latitudinal weighted average
+        lat_pt = np.where(lat_sub >= ilat[i])[0][-1]
+        wt = (lat_sub[lat_pt] - ilat[i]) / (lat_sub[lat_pt] - lat_sub[lat_pt+1])
+        tmp = wt*tmp[lat_pt+1,:] + (1-wt)*tmp[lat_pt,:]
+
+        # longitudinal weighted average - final pt. 
+        lon_pt = np.where(lon_sub >= ilon[i])[0][0]
+        wt = (lon_sub[lon_pt] - ilon[i]) / (lon_sub[lon_pt] - lon_sub[lon_pt-1])
+        tmp = wt*tmp[lon_pt-1] + (1-wt)*tmp[lon_pt]
+
+        ncep_data[i] = tmp
+
+    # interpolate back to float time
+    f = interp1d(time_sub, ncep_data, bounds_error=False)
+    ncep_interp = f(track[:,0])
+
+    return ncep_interp
 
 def ncep_to_float_track():
 
@@ -540,7 +612,21 @@ def calc_gain(data, ref, inair=True, zlim=25.):
 
     if inair:
         sys.stdout.write('NCEP/in-air functionality not built yet, returning array of ones for sake of testing\n')
-        g = np.ones((ref.shape[0],))
+        g = np.nan*np.ones((ref.shape[0],))
+
+        surf_ix = data['PRES'] <= zlim
+        surf_ppox = data['O2Sat'][surf_ix]
+        cycle = data['CYCLE_GRID'][surf_ix]
+
+        surf_data = np.nan*np.ones((ref.shape[0],4))
+        for i,c in enumerate(np.unique(cycle)):
+            subset_ppox = surf_ppox[cycle == c]
+            surf_data[i,0] = c
+            surf_data[i,1] = np.sum(~np.isnan(subset_ppox))
+            surf_data[i,2] = np.nanmean(subset_ppox)
+            surf_data[i,3] = np.nanstd(subset_ppox)
+
+            g[i] = ref[i]/surf_data[i,2]
     else:
         sys.stdout.write('Calculating gains using WOA surface data and float O2 percent saturation')
         surf_ix = data['PRES'] <= zlim
@@ -565,8 +651,9 @@ def calc_gain(data, ref, inair=True, zlim=25.):
             surf_data[i,3] = np.nanstd(subset_o2sat)
 
             g[i] = ref_o2sat/surf_data[i,2]
+        
 
-    return g, surf_data, woa_surf
+    return g, surf_data
 
 def aic(data,resid):
     # -------------------------------------------------------------------------

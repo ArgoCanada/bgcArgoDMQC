@@ -85,6 +85,23 @@ woa = dict(z=z, data=woa_interp)
 gains, flt_surf, woa_surf = sagepy.calc_gain(data, woa, inair=False)
 
 # -----------------------------------------------------------------------------
+# Do gain calculation on an new float with in-air data
+# -----------------------------------------------------------------------------
+woa_path = '/Users/gordonc/Documents/data/WOA18'
+ncep_path = '/Users/gordonc/Documents/data/NCEP'
+local_path = '/Users/gordonc/Documents/data/Argo/meds'
+wmo = '4902481'
+
+data = sagepy.load_argo_data(local_path, wmo)
+track = np.array([data['SDN'],data['LATITUDE'],data['LONGITUDE']]).T
+
+xtrack, ncep_track, ncep_data = sagepy.load_ncep_data(track, 'pres', local_path=ncep_path)
+ncep_interp = sagepy.interp_ncep_data(xtrack, ncep_track, ncep_data)
+
+# ncep_interp isn't the right reference data - need to do conversion code still
+gains, surf_data = sagepy.calc_gain(data, ncep_interp, inair=True, zlim=25.)
+
+# -----------------------------------------------------------------------------
 # Make analogous plots to SAGE-O2 GUI
 # -----------------------------------------------------------------------------
 sdn = data['SDN']

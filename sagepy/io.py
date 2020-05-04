@@ -83,6 +83,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
     #
     # INPUT:
     #           varname: 'pres' (pressure) or 'rhum' (relative humidity)
+    #               or 'land' (to get land mask)
     #           local_path: path to save files to, defaults
     #               to current directory
     #           overwrite: boolean flag, if False, does not re-download
@@ -110,9 +111,14 @@ def get_ncep(varname, local_path='./', overwrite=False):
     if varname == 'pres':
         ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
 
+        local_path = local_path / varname
+        if not local_path.is_dir():
+            local_path.mkdir()
+
         for yr in range(2010, 2021):
             fn = 'pres.sfc.gauss.{}.nc'.format(yr)
             local_file = local_path / fn
+
             if not local_file.exists() | overwrite:
                 print(local_file)
                 # open the local file
@@ -124,6 +130,10 @@ def get_ncep(varname, local_path='./', overwrite=False):
 
         ftp.cwd('Datasets/ncep.reanalysis/surface/')
 
+        local_path = local_path / varname
+        if not local_path.is_dir():
+            local_path.mkdir()
+
         for yr in range(2010, 2021):
             fn = 'rhum.sig995.{}.nc'.format(yr)
             local_file = local_path / fn
@@ -133,6 +143,26 @@ def get_ncep(varname, local_path='./', overwrite=False):
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
+
+    elif varname == 'land':
+
+        local_path = local_path / varname
+        if not local_path.is_dir():
+            local_path.mkdir()
+
+        ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
+        fn = 'land.sfc.gauss.nc'
+        local_file = local_path / fn
+        if not local_file.exists() | overwrite:
+            lf = open(local_file, 'wb')
+            ftp.retrbinary('RETR ' + fn, lf.write)
+
+        ftp.cwd('../../ncep.reanalysis/surface/')
+        fn = 'land.nc'
+        local_file = local_path / fn
+        if not local_file.exists() | overwrite:
+            lf = open(local_file, 'wb')
+            ftp.retrbinary('RETR ' + fn, lf.write)
     
     else:
         raise ValueError('Invalid varname input')
