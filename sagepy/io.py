@@ -8,7 +8,7 @@ import gzip
 
 from . import util
 
-def get_woa18(varname, local_path='./', ftype='netcdf'):
+def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     # -------------------------------------------------------------------------
     # get_woa18
     # -------------------------------------------------------------------------
@@ -32,6 +32,9 @@ def get_woa18(varname, local_path='./', ftype='netcdf'):
     #               ascii: .dat
     #               csv: .csv
     #               netcdf: .nc
+    #           overwrite: boolean flag, if False, does not re-download
+    #               existing files, if true, will download no matter what, 
+    #               defaults to False
     #
     # OUTPUT:
     #           ftp: the ftplib server object
@@ -60,7 +63,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf'):
 
     for fn in ftp.nlst():
         local_file = local_path / fn
-        if not local_file.exists():
+        if not local_file.exists() | overwrite:
             print(local_file)
             # open the local file
             lf = open(local_file, 'wb')
@@ -70,7 +73,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf'):
 
     return ftp
 
-def get_ncep(local_path='./'):
+def get_ncep(varname, local_path='./', overwrite=False):
     # -------------------------------------------------------------------------
     # get_woa18
     # -------------------------------------------------------------------------
@@ -79,8 +82,12 @@ def get_ncep(local_path='./'):
     # pressure data 
     #
     # INPUT:
+    #           varname: 'pres' (pressure) or 'rhum' (relative humidity)
     #           local_path: path to save files to, defaults
     #               to current directory
+    #           overwrite: boolean flag, if False, does not re-download
+    #               existing files, if true, will download no matter what, 
+    #               defaults to False
     #
     # OUTPUT:
     #           ftp: the ftplib server object
@@ -99,21 +106,40 @@ def get_ncep(local_path='./'):
     url = 'ftp.cdc.noaa.gov'
 
     ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
-    ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
 
-    for yr in range(2010, 2021):
-        fn = 'pres.sfc.gauss.{}.nc'.format(yr)
-        local_file = local_path / fn
-        if not local_file.exists():
-            print(local_file)
-            # open the local file
-            lf = open(local_file, 'wb')
-            # retrieve the file on FTP server,
-            ftp.retrbinary('RETR ' + fn, lf.write)
+    if varname == 'pres':
+        ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
+
+        for yr in range(2010, 2021):
+            fn = 'pres.sfc.gauss.{}.nc'.format(yr)
+            local_file = local_path / fn
+            if not local_file.exists() | overwrite:
+                print(local_file)
+                # open the local file
+                lf = open(local_file, 'wb')
+                # retrieve the file on FTP server,
+                ftp.retrbinary('RETR ' + fn, lf.write)
+    
+    elif varname == 'rhum':
+
+        ftp.cwd('Datasets/ncep.reanalysis/surface/')
+
+        for yr in range(2010, 2021):
+            fn = 'rhum.sig995.{}.nc'.format(yr)
+            local_file = local_path / fn
+            if not local_file.exists() | overwrite:
+                print(local_file)
+                # open the local file
+                lf = open(local_file, 'wb')
+                # retrieve the file on FTP server,
+                ftp.retrbinary('RETR ' + fn, lf.write)
+    
+    else:
+        raise ValueError('Invalid varname input')
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr'):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
     # -------------------------------------------------------------------------
     # get_argo
     # -------------------------------------------------------------------------
@@ -127,6 +153,10 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr'):
     #           float or argo defined geographical area. A single path to a 
     #           file may be provided to download that file. A list of files 
     #           may be provided as well.
+    #
+    #           overwrite: boolean flag, if False, does not re-download
+    #               existing files, if true, will download no matter what, 
+    #               defaults to False
     #
     # OUTPUT:
     #
@@ -171,7 +201,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr'):
             # define the local file to have the same name as on the FTP server
             wmo_file = wmo_path / fn
             # only download the file if it doesn't already exist locally
-            if not wmo_file.exists():
+            if not wmo_file.exists() | overwrite:
                 print(wmo_file)
                 # open the local file
                 lf = open(wmo_file, 'wb')
@@ -190,7 +220,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr'):
 
             for fn in files:
                 profile_file = profile_path / fn
-                if not profile_file.exists():
+                if not profile_file.exists() | overwrite:
                     print(profile_file)
                     lf = open(profile_file, 'wb')
                     ftp.retrbinary('RETR ' + fn, lf.write)

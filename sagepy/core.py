@@ -401,17 +401,15 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     #
     # -------------------------------------------------------------------------
 
-
     xtrack, woa_track, woa_data = load_woa_data(track, param, zlim=zlim, local_path=local_path)
     woa_interp, wt, yrday = interp_woa_data(xtrack, woa_track, woa_data)
     z = woa_track[0]
 
     return z, woa_interp
 
-def ncep_to_float_track(track, local_path='./'):
-
+def load_ncep_data(track, varname, local_path='./'):
     # -------------------------------------------------------------------------
-    # woa_to_float_track
+    # load_ncep_data
     # -------------------------------------------------------------------------
     #
     # Function to load NCEP reanalysis data for comparison with autonomous
@@ -424,8 +422,6 @@ def ncep_to_float_track(track, local_path='./'):
     #                       current directory if no input
     #
     # OUTPUT:
-    #           z: WOA depth array
-    #           woa_interp: 2D array of requested WOA parameter (depth x time)
     #
     # AUTHOR:   Christopher Gordon
     #           Fisheries and Oceans Canada
@@ -436,6 +432,72 @@ def ncep_to_float_track(track, local_path='./'):
     # CHANGE LOG:
     #
     # -------------------------------------------------------------------------
+
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path)
+
+    if varname == 'pres':
+        base_file = 'pres.sfc.gauss'
+    elif varname == 'rhum':
+        base_file = 'rhum.sig995'
+    else:
+        raise ValueError('Invalid varname input')
+
+    landfile = local_path / 'land.sfc.gauss.nc'
+    lnc = Dataset(landfile, 'r')
+
+    # check if float track crosses -180/180 meridian
+    cross180 = False
+    if np.max(np.abs(np.diff(track[:,2]))) > 340:
+        cross180 = True
+        lix = track[:,2] < 0
+        lon_bounds = (np.max(track[lix,2]), np.min(track[~lix,2]))
+    else:
+        lon_bounds = (np.min(track[:,2]), np.max(track[:,2]))
+    lat_bounds = (np.min(track[:,1]), np.max(track[:,1]))
+
+    sdn = track[:,0]
+    yrs = (pl.num2date(np.min(sdn)).year, pl.num2date(np.max(sdn)))
+    
+    # counter index for going across years
+    j = 0
+    for y in range(yrs[0], yrs[1]):
+        ncep_file = local_path / varname / '{}.{}.nc'.format(base_file, y)
+        nc = Dataset(ncep_file, 'r')
+
+        time = nc.variables['time'][:]
+        time = time/24 + pl.datestr2num('1800-01-01')
+
+        if y == yrs[0]:
+            lat = nc.variables['lat'][:]
+            lon = nc.variables['lon'][:]
+            lat_ix = util.get_lat_index(lat, lat_bounds)
+            lon_ix = util.get_lon_index(lon, lon_bounds, cross180)
+            
+            # extract lat/lon values
+            lat_sub = lat[lat_ix]
+            lon_sub = lon[lon_ix]
+
+            xlon = track[:,2]
+
+            if cross180:
+                negative_lon = lon_sub < 0
+                lon_sub[negative_lon] = lon_sub[negative_lon] + 360
+                xlon[lix] = xlon[lix] + 360
+            
+            landmask = lnc.variables['land'][:][lon_ix,:,:][lat_ix,:][0]
+            data = np.nan*np.ones((len(time)*(yrs[1]-yrs[0]), len(lat_sub), len(lon_sub)))
+        
+        vdata = nc.variables[varname][:]
+        for i in len(time):
+            data_2d =  vdata[lon_ix,:,:][lat_ix,:][i]
+            
+            # data[j,:,:] =
+            j += 1
+
+    return None
+
+def ncep_to_float_track():
 
     return None
 
