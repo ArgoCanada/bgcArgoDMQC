@@ -74,6 +74,9 @@ def load_argo_data(local_path, wmo):
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
 
+    if type(wmo) is not str:
+        wmo = str(wmo)
+
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
     BRtraj = local_path / wmo / '{}_BRtraj.nc'.format(wmo)
@@ -85,6 +88,13 @@ def load_argo_data(local_path, wmo):
     if not BRtraj.exists():
         BRtraj_flag = False
         sys.stdout.write('Continuing without BRtraj file\n')
+    elif BRtraj.exists():
+        BRtraj_nc = Dataset(BRtraj, 'r')
+        if 'PPOX_DOXY' not in BRtraj_nc.variables.keys():
+            BRtraj_flag = False
+            sys.stdout.write('BRtraj file exists, but no in-air data exists, continuing without using BRtraj file\n')
+    else:
+        BRtraj_nc = None
 
     # Sprof and meta are required, so raise error if they are not there
     if not Sprof.exists():
@@ -92,14 +102,9 @@ def load_argo_data(local_path, wmo):
     if not meta.exists():
         raise FileNotFoundError('No such meta file: {}'.format(meta))
 
-    # only load if file was found
-    if BRtraj_flag:
-        BRtraj_nc = Dataset(BRtraj)
-    else:
-        BRtraj_nc = None
     # load synthetic and meta profiles
-    Sprof_nc = Dataset(Sprof)
-    meta_nc  = Dataset(meta)
+    Sprof_nc = Dataset(Sprof, 'r')
+    meta_nc  = Dataset(meta, 'r')
 
     # number of profile cycles
     M = Sprof_nc.dimensions['N_LEVELS'].size
