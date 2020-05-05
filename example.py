@@ -11,6 +11,16 @@ import sagepy
 # example.py - script to demonstrate functionality of sagepy module
 # ----------------------------------------------------------------------------
 #
+# Example script for demonstrating functionality that should run on most
+# machines once provided with some path designations by the user. The script 
+# is broken up into the following sections: 
+#
+# section 0: setup, designate paths
+# section 1: download necessary data, if data already exists they won't be
+# re-downloaded so requires no change form the user if paths are correct
+# section 2: load and interpolate the data
+# section 3: perform QC calculations with the data
+# section 4: visualize the float and reference data, and computed QC info
 #
 # ----------------------------------------------------------------------------
 
