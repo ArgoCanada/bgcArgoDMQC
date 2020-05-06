@@ -38,6 +38,10 @@ woa_path  = './WOA18'
 ncep_path = './NCEP'
 argo_path = './Argo'
 
+woa_path  = '/Users/gordonc/Documents/data/WOA18'
+ncep_path = '/Users/gordonc/Documents/data/NCEP'
+argo_path = '/Users/gordonc/Documents/data/Argo/meds'
+
 # uncomment these lines to make the above directories
 # Path(woa_path).mkdir()
 # Path(ncep_path).mkdir()
@@ -46,7 +50,7 @@ argo_path = './Argo'
 # two argo floats - specific floats chosen to use as examples, but can be 
 # altered with no performance change (as long as dac infomation corresponds
 # to float numbers properly)
-float_numbers = [4900497,4902481]
+wmo_number = 4902481
 dac_path = '/ifremer/argo/dac/meds'
 
 # ----------------------------------------------------------------------------
@@ -57,32 +61,27 @@ sagepy.io.get_woa18('O2sat', local_path=woa_path) # oxygen % saturation
 sagepy.io.get_ncep('pres', local_path=ncep_path) # surface air pressure in Pa
 
 # download all data for argo floats
-sagepy.io.get_argo(dac_path, float_numbers, local_path=argo_path)
+sagepy.io.get_argo(dac_path, [wmo_number], local_path=argo_path)
 
 # ----------------------------------------------------------------------------
 # section 2 - loading and interpolating reference data
 # ----------------------------------------------------------------------------
 # load in data from an argo float WITH NO in-air measurements
-float_data_1 = sagepy.load_argo_data(argo_path, float_numbers[0])
+float_data = sagepy.load_argo_data(argo_path, wmo_number)
 # make 'track' array with columns (time, lat, lon) to be used in interpolation
-track = np.array([float_data_1['SDN'], float_data_1['LATITUDE'], float_data_1['LONGITUDE']]).T
+track = np.array([float_data['SDN'], float_data['LATITUDE'], float_data['LONGITUDE']]).T
 # get WOA data interpolated along track and associated depth levels
 # NOTE: this function combines sagepy.load_woa_data() and 
 # sagepy.interp_woa_data() for convenience, but each can be called 
 # individually if desired
 z, woa_interp = sagepy.woa_to_float_track(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
 # put interpolated WOA data in dict for use later to calculate gains
-ref_data = dict(z=z, data=woa_interp)
+ref_data = dict(z=z, WOA=woa_interp)
 
-# # load in data from an argo float WITH in-air measurements 
-# float_data_2 = sagepy.load_argo_data(argo_path, float_numbers[1])
-# # put in array for to be used in interpolaton
-# track = np.array([float_data_2['SDN'], float_data_2['LATITUDE'], float_data_2['LONGITUDE']]).T
-# # get NCEP in-air data along track, again this is a convenience function and
-# # sagepy.load_ncep_data() and sagepy.interp_ncep_data() can be called
-# # separately
-# ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_path)
-# ncep_rhum_interp = sagepy.ncep_to_float_track('rhum', track, local_path=ncep_path)
+# get NCEP in-air data along track, again this is a convenience function and
+# sagepy.load_ncep_data() and sagepy.interp_ncep_data() can be called
+# separately
+ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_path)/100
 
 # ----------------------------------------------------------------------------
 # section 3 - using the float and reference data to do QC
@@ -90,21 +89,27 @@ ref_data = dict(z=z, data=woa_interp)
 
 # calculate the gains based on WOA data, also returns the calculated surface
 # data since WOA is depth resolved - specify limit here, default is 25dbar
-woa_gains, surf_data = sagepy.calc_gain(float_data_1, ref_data, inair=False, zlim=25)
+woa_gains, surf_data = sagepy.calc_gain(float_data, ref_data, inair=False, zlim=25)
 
-# # to calculate the gains based on NCEP data. we first must calculate the 
-# # partial pressure of oxygen from NCEP pressure and humidity
-# ncep_pO2 = sagepy.unit.calc_atmos_pO2(ncep_pres_interp, ncep_rhum_interp)
-# # gain calculation defaults to inair, don't need boolean
-# ncep_gains, inair_data = sagepy.calc_gain(float_data_2, ncep_pO2)
+# gain calculation defaults to inair, don't need boolean
+T = np.nan*np.ones(ncep_pres_interp.shape)
+for i,c in enumerate(float_data['CYCLES']):
+    T[i] = np.nanmean(float_data['TEMP_DOXY'][float_data['TRAJ_CYCLE'] == c])
+
+p_H2O=sagepy.unit.pH2O(T)
+ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp, p_H2O)
+ncep_gains, inair_data = sagepy.calc_gain(float_data, ref_ppox)
 
 # ----------------------------------------------------------------------------
 # section 4 - plot the results
 # ----------------------------------------------------------------------------
-sdn = float_data_1['SDN']
-fig, axes = plt.subplots(2,1,sharex=True)
+sdn = float_data['SDN']
+fig, axes = plt.subplots(4,1,sharex=True)
 
 g1 = sagepy.plt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
 g2 = sagepy.plt.gains(sdn, woa_gains, inair=False, ax=axes[1])
+
+g1 = sagepy.plt.float_woa_surface(sdn, inair_data[:,2], ref_ppox, ax=axes[2])
+g2 = sagepy.plt.gains(sdn, ncep_gains, inair=False, ax=axes[3])
 
 plt.show()

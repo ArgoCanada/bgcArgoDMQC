@@ -150,7 +150,8 @@ def load_argo_data(local_path, wmo):
 
     if BRtraj_flag:
         ppox_doxy = BRtraj_nc.variables['PPOX_DOXY'][:]
-        floatData['pO2'] = ppox_doxy.compressed()
+        floatData['PPOX_DOXY'] = ppox_doxy.compressed()
+        floatData['TEMP_DOXY'] = np.ma.masked_array(BRtraj_nc.variables['TEMP_DOXY'][:].data, mask=ppox_doxy.mask).compressed()
         floatData['TRAJ_CYCLE'] = np.ma.masked_array(BRtraj_nc.variables['CYCLE_NUMBER'][:].data, mask=ppox_doxy.mask).compressed()
         floatData['inair'] = True
     else:
@@ -574,9 +575,12 @@ def interp_ncep_data(track, ncep_track, data):
 
     return ncep_interp
 
-def ncep_to_float_track():
+def ncep_to_float_track(varname, track, local_path='./'):
 
-    return None
+    xtrack, ncep_track, data = load_ncep_data(track, varname, local_path=local_path)
+    ncep_interp = interp_ncep_data(xtrack, ncep_track, data)
+
+    return ncep_interp
 
 
 def calc_gain(data, ref, inair=True, zlim=25.):
@@ -592,10 +596,10 @@ def calc_gain(data, ref, inair=True, zlim=25.):
     #           data: float data dict object, output from load_argo_data()
     #           ref: reference data set, either NCEP pO2 or WOA O2sat
     #           inair: boolean flag to indicate if comparison to NCEP in-air
-    #                  data or WOA surface data should be done, default to
-    #                  in-air, but function also performs check
+    #               data or WOA surface data should be done, default to
+    #               in-air, but function also performs check
     #           zlim: lower limit to define as 'surface' and take mean within,
-    #                 default value 25 dbar
+    #                 default value 25 dbar, for use only when inair is False
     #
     # OUTPUT:
     #           g: vector of gains
@@ -612,26 +616,26 @@ def calc_gain(data, ref, inair=True, zlim=25.):
     # -------------------------------------------------------------------------
 
     # check which reference data to use
-    if inair and 'pO2' not in data.keys():
+    if inair and 'PPOX_DOXY' not in data.keys():
         raise ValueError('Flag ''inair'' set to True but partial pressure data not available')
 
     if inair:
-        sys.stdout.write('NCEP/in-air functionality not built yet, returning array of ones for sake of testing\n')
         g = np.nan*np.ones((ref.shape[0],))
 
-        surf_ix = data['PRES'] <= zlim
-        surf_ppox = data['O2Sat'][surf_ix]
-        cycle = data['CYCLE_GRID'][surf_ix]
+        # float partial pressure measurements at each cycle
+        ppox  = data['PPOX_DOXY']
+        cycle = data['CYCLES']
 
-        surf_data = np.nan*np.ones((ref.shape[0],4))
-        for i,c in enumerate(np.unique(cycle)):
-            subset_ppox = surf_ppox[cycle == c]
-            surf_data[i,0] = c
-            surf_data[i,1] = np.sum(~np.isnan(subset_ppox))
-            surf_data[i,2] = np.nanmean(subset_ppox)
-            surf_data[i,3] = np.nanstd(subset_ppox)
+        mean_float_data = np.nan*np.ones((ref.shape[0],4))
+        for i,c in enumerate(cycle):
+            subset_ppox = ppox[data['TRAJ_CYCLE'] == c]
+            mean_float_data[i,0] = c
+            mean_float_data[i,1] = np.sum(~np.isnan(subset_ppox))
+            mean_float_data[i,2] = np.nanmean(subset_ppox)
+            mean_float_data[i,3] = np.nanstd(subset_ppox)
 
-            g[i] = ref[i]/surf_data[i,2]
+            g[i] = ref[i]/mean_float_data[i,2]
+
     else:
         sys.stdout.write('Calculating gains using WOA surface data and float O2 percent saturation')
         surf_ix = data['PRES'] <= zlim
@@ -639,26 +643,26 @@ def calc_gain(data, ref, inair=True, zlim=25.):
         cycle = data['CYCLE_GRID'][surf_ix]
 
         z_woa = ref['z']
-        woa_data = ref['data']
+        woa_data = ref['WOA']
 
         woa_index = np.where(z_woa <= zlim)[0]
         woa_surf = np.nanmean(woa_data[woa_index,:],axis=0)
         woa_surf = woa_data[0,:]
 
-        surf_data = np.nan*np.ones((woa_surf.shape[0],4))
+        mean_float_data = np.nan*np.ones((woa_surf.shape[0],4))
         g = np.nan*np.ones((woa_surf.shape[0],))
         for i,c in enumerate(np.unique(cycle)):
             ref_o2sat = woa_surf[i]
             subset_o2sat = surf_o2sat[cycle == c]
-            surf_data[i,0] = c
-            surf_data[i,1] = np.sum(~np.isnan(subset_o2sat))
-            surf_data[i,2] = np.nanmean(subset_o2sat)
-            surf_data[i,3] = np.nanstd(subset_o2sat)
+            mean_float_data[i,0] = c
+            mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
+            mean_float_data[i,2] = np.nanmean(subset_o2sat)
+            mean_float_data[i,3] = np.nanstd(subset_o2sat)
 
-            g[i] = ref_o2sat/surf_data[i,2]
+            g[i] = ref_o2sat/mean_float_data[i,2]
         
 
-    return g, surf_data
+    return g, mean_float_data
 
 def aic(data,resid):
     # -------------------------------------------------------------------------

@@ -57,7 +57,7 @@ def oxy_sol(S, T, unit='micromole/kg'):
 
     return O2sol
 
-def pH2O(S, T):
+def pH2O(T):
     # -------------------------------------------------------------------------
     # pH2O
     # -------------------------------------------------------------------------
@@ -65,11 +65,10 @@ def pH2O(S, T):
     # Calculate vapor pressure of water
     #
     # INPUT:
-    #           S: salinity, psu
     #           T: temperature, deg C
     #
     # OUTPUT:
-    #           pH2O: vapor pressure of water, Pa
+    #           vapor_pressure: vapor pressure of water, Pa
     #
     # AUTHOR:   Christopher Gordon
     #           Fisheries and Oceans Canada
@@ -84,38 +83,42 @@ def pH2O(S, T):
     # temperature in kelvin
     Tk = T + 273.15
 
-    # define coefficient array
-    D = np.array([24.2543, -67.4509, -4.8489, -5.44e-4])
-    # compute exponent
-    Dsum = D[0] + D[1]*(100/(Tk)) + D[2]*np.log(Tk/100) + D[3]*S
+    # from Johnson et al. (2015)
+    vapor_pressure = np.exp(52.57 - (6690.9/Tk) - 4.681*np.log(Tk))
 
-    return 1013.25*np.exp(Dsum)
+    return vapor_pressure
 
-def pO2(Pncep, pH2O):
-    # -------------------------------------------------------------------------
-    # pO2
-    # -------------------------------------------------------------------------
-    #
-    # Calculate vapor pressure of water
-    #
-    # INPUT:
-    #           Pncep: NCEP air pressure at sea surface, Pa
-    #           pH2O: vapor pressure of water, Pa
-    #
-    # OUTPUT:
-    #           pO2: partial pressure of atmospheric oxygen, Pa
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # LAST UPDATE: 06-05-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+def pO2(DOXY, S, T):
 
-    # mole fraction of oxygen 
+    # temperature in kelvin
+    Tk = T + 273.15
+    # scaled temperature
+    Ts = np.log((298.15 - T)/Tk)
+
+    # Benson & Krause (cm^3/dm^3)
+    # temperature coefficients
+    pA = [3.88767, -0.256847, 4.94457, 4.05010, 3.22014, 2.00907]
+    # salinity coefficients
+    pB = [-8.17083e-3, -1.03410e-2, -7.37614e-3, -6.24523e-3]
+    Co = -4.88682e-7
+    O2_volume =  22.3916
     XO2 = 0.20946
 
-    return (Pncep - pH2O) * XO2
+    # Used for conversions from [O2] to pO2:
+    p1  = np.polyval(pB,Ts)
+    S_corr = S*p1 + Co*S**2
+    L      = np.polyval(pA,Ts) + S_corr;
+    # Oxygen solubility real gas, mmol/m3
+    O2sol  = (1000/O2_volume) * np.exp(L)
+
+    PPOX_DOXY = DOXY/O2sol * (1013.25 - pH2O(T)) * XO2
+
+    return PPOX_DOXY
+
+def atmos_pO2(P, pH2O):
+    # molar fraction of oxygen in air
+        XO2 = 0.20946
+        # reference partial pressure of oxygen in air
+        ppox = (P - pH2O) * XO2
+
+        return ppox

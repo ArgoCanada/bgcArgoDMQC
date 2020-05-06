@@ -25,7 +25,7 @@ def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
         fig = ax.get_figure()
 
     ax.plot(sdn, flt, linewidth=2, label='Float')
-    ax.plot(sdn, woa, linewidth=2, label='WOA')
+    ax.plot(sdn, woa, linewidth=2, label='Reference')
 
     if legend:
         ax.legend(loc=3)
@@ -37,8 +37,6 @@ def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
     ax.xaxis.set_major_locator(mhr)
     ax.xaxis.set_major_formatter(fmt)
     ax.xaxis.set_minor_locator(mihr)
-
-    ax.set_ylabel('O$_2$ $\%$ Saturation ($\%$)')
 
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
@@ -70,8 +68,6 @@ def gains(sdn, gains, inair=True, ax=None, legend=True):
     ax.xaxis.set_major_locator(mhr)
     ax.xaxis.set_major_formatter(fmt)
     ax.xaxis.set_minor_locator(mihr)
-
-    ax.set_ylabel('Gain (unitless, $\%$O$_2^{\mathregular{WOA}}$/$\%$O$_2^{\mathregular{float}}$)')
 
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
