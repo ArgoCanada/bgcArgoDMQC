@@ -381,3 +381,12 @@ def bic(data,resid):
         bic_value = np.log(1/(n*SSE) + errorlim**2) + K*np.log(n)/n
 
     return bic_value
+
+def get_var_by(v1, v2, float_data):
+    
+    index = np.unique(float_data[v2])
+    out_array = np.nan*np.ones((len(index)))
+    for i,v in enumerate(index):
+        out_array[i] = np.nanmean(float_data[v1][float_data[v2] == v])
+    
+    return out_array
