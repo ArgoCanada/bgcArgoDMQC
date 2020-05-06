@@ -67,19 +67,19 @@ sagepy.io.get_argo(dac_path, [wmo_number], local_path=argo_path)
 # section 2 - loading and interpolating reference data
 # ----------------------------------------------------------------------------
 # load in data from an argo float WITH NO in-air measurements
-float_data = sagepy.load_argo_data(argo_path, wmo_number)
+float_data = sagepy.argo(argo_path, wmo_number)
 # make 'track' array with columns (time, lat, lon) to be used in interpolation
 track = np.array([float_data['SDN'], float_data['LATITUDE'], float_data['LONGITUDE']]).T
 # get WOA data interpolated along track and associated depth levels
-# NOTE: this function combines sagepy.load_woa_data() and 
-# sagepy.interp_woa_data() for convenience, but each can be called 
+# NOTE: this function combines sagepy.io.load_woa_data() and 
+# sagepy.interp.interp_woa_data() for convenience, but each can be called 
 # individually if desired
 z, woa_interp = sagepy.woa_to_float_track(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
 # put interpolated WOA data in dict for use later to calculate gains
 ref_data = dict(z=z, WOA=woa_interp)
 
 # get NCEP in-air data along track, again this is a convenience function and
-# sagepy.load_ncep_data() and sagepy.interp_ncep_data() can be called
+# sagepy.io.load_ncep_data() and sagepy.interp.interp_ncep_data() can be called
 # separately
 ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_path)/100
 
@@ -92,10 +92,7 @@ ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_pat
 woa_gains, surf_data = sagepy.calc_gain(float_data, ref_data, inair=False, zlim=25)
 
 # gain calculation defaults to inair, don't need boolean
-T = np.nan*np.ones(ncep_pres_interp.shape)
-for i,c in enumerate(float_data['CYCLES']):
-    T[i] = np.nanmean(float_data['TEMP_DOXY'][float_data['TRAJ_CYCLE'] == c])
-
+T = sagepy.get_var_by('DOXY_TEMP', 'CYCLES', float_data)
 p_H2O=sagepy.unit.pH2O(T)
 ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp, p_H2O)
 ncep_gains, inair_data = sagepy.calc_gain(float_data, ref_ppox)
