@@ -3,4 +3,5 @@
 *.txt
 .vscode
 meds_doxy_floats.csv
-/__pycache__/
+sagepy/__pycache__/
+*cpython*
