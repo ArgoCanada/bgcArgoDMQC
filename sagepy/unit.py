@@ -4,7 +4,7 @@ import numpy as np
 
 def oxy_sol(S, T, unit='micromole/kg'):
     # -------------------------------------------------------------------------
-    # load_float_data.py
+    # oxy_sol
     # -------------------------------------------------------------------------
     #
     # Calculate oxygen saturation concentration in seawater as a function of
@@ -14,8 +14,12 @@ def oxy_sol(S, T, unit='micromole/kg'):
     # Biogeochemical Dynamics" ch. 3, p. 81, table 3.2.4.
     #
     # INPUT:
+    #           S: salinity, psu
+    #           T: temperature, deg C
+    #           unit: micromole/kg or millimole/m3, default if micromole/kg
     #
     # OUTPUT:
+    #           O2sol: oxygen solubility, unit same as input unit
     #
     # AUTHOR:   Christopher Gordon
     #           Fisheries and Oceans Canada
@@ -33,7 +37,7 @@ def oxy_sol(S, T, unit='micromole/kg'):
 
     # check for improper units
     if unit != 'micromole/kg' and unit != 'millimole/m3':
-        raise ValueError('Unrecognized unit string - valid units are ''micro'' or ''milli''.')
+        raise ValueError('Unrecognized unit string - valid units are ''micromole/kg'' or ''millimole/m3''.')
 
     if unit == 'micromole/kg':
         A = [3.80369, -9.86643e-2, 5.10006, 4.17887, 3.20291, 5.80871]
@@ -52,3 +56,66 @@ def oxy_sol(S, T, unit='micromole/kg'):
     O2sol = np.exp(L)
 
     return O2sol
+
+def pH2O(S, T):
+    # -------------------------------------------------------------------------
+    # pH2O
+    # -------------------------------------------------------------------------
+    #
+    # Calculate vapor pressure of water
+    #
+    # INPUT:
+    #           S: salinity, psu
+    #           T: temperature, deg C
+    #
+    # OUTPUT:
+    #           pH2O: vapor pressure of water, Pa
+    #
+    # AUTHOR:   Christopher Gordon
+    #           Fisheries and Oceans Canada
+    #           chris.gordon@dfo-mpo.gc.ca
+    #
+    # LAST UPDATE: 06-05-2020
+    #
+    # CHANGE LOG:
+    #
+    # -------------------------------------------------------------------------
+    
+    # temperature in kelvin
+    Tk = T + 273.15
+
+    # define coefficient array
+    D = np.array([24.2543, -67.4509, -4.8489, -5.44e-4])
+    # compute exponent
+    Dsum = D[0] + D[1]*(100/(Tk)) + D[2]*np.log(Tk/100) + D[3]*S
+
+    return 1013.25*np.exp(Dsum)
+
+def pO2(Pncep, pH2O):
+    # -------------------------------------------------------------------------
+    # pO2
+    # -------------------------------------------------------------------------
+    #
+    # Calculate vapor pressure of water
+    #
+    # INPUT:
+    #           Pncep: NCEP air pressure at sea surface, Pa
+    #           pH2O: vapor pressure of water, Pa
+    #
+    # OUTPUT:
+    #           pO2: partial pressure of atmospheric oxygen, Pa
+    #
+    # AUTHOR:   Christopher Gordon
+    #           Fisheries and Oceans Canada
+    #           chris.gordon@dfo-mpo.gc.ca
+    #
+    # LAST UPDATE: 06-05-2020
+    #
+    # CHANGE LOG:
+    #
+    # -------------------------------------------------------------------------
+
+    # mole fraction of oxygen 
+    XO2 = 0.20946
+
+    return (Pncep - pH2O) * XO2
