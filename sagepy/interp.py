@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import numpy as np
+import pylab as pl
 from scipy.interpolate import interp1d
 
 def interp_ncep_data(track, ncep_track, data):

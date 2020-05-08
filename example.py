@@ -92,9 +92,9 @@ ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_pat
 woa_gains, surf_data = sagepy.calc_gain(float_data, ref_data, inair=False, zlim=25)
 
 # gain calculation defaults to inair, don't need boolean
-T = sagepy.get_var_by('DOXY_TEMP', 'CYCLES', float_data)
+T = sagepy.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', float_data)
 p_H2O=sagepy.unit.pH2O(T)
-ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp, p_H2O)
+ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp[:-1], p_H2O)
 ncep_gains, inair_data = sagepy.calc_gain(float_data, ref_ppox)
 
 # ----------------------------------------------------------------------------
@@ -106,7 +106,7 @@ fig, axes = plt.subplots(4,1,sharex=True)
 g1 = sagepy.plt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
 g2 = sagepy.plt.gains(sdn, woa_gains, inair=False, ax=axes[1])
 
-g1 = sagepy.plt.float_woa_surface(sdn, inair_data[:,2], ref_ppox, ax=axes[2])
-g2 = sagepy.plt.gains(sdn, ncep_gains, inair=False, ax=axes[3])
+g3 = sagepy.plt.float_woa_surface(sdn[:-1], inair_data[:,2], ref_ppox, ax=axes[2])
+g4 = sagepy.plt.gains(sdn[:-1], ncep_gains, inair=False, ax=axes[3])
 
 plt.show()

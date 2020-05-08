@@ -254,10 +254,11 @@ def calc_gain(data, ref, inair=True, zlim=25.):
         # float partial pressure measurements at each cycle
         ppox  = data['PPOX_DOXY']
         cycle = data['CYCLES']
+        inair_cycle = data['TRAJ_CYCLE']
 
         mean_float_data = np.nan*np.ones((ref.shape[0],4))
-        for i,c in enumerate(cycle):
-            subset_ppox = ppox[data['TRAJ_CYCLE'] == c]
+        for i,c in enumerate(np.unique(inair_cycle)):
+            subset_ppox = ppox[inair_cycle == c]
             mean_float_data[i,0] = c
             mean_float_data[i,1] = np.sum(~np.isnan(subset_ppox))
             mean_float_data[i,2] = np.nanmean(subset_ppox)
