@@ -159,7 +159,13 @@ def argo(local_path, wmo):
         floatData['inair'] = False
 
     return floatData
-    
+
+def track(float_data):
+    # make 'track' array with columns (time, lat, lon) to be used in interpolation
+    track = np.array([float_data['SDN'], float_data['LATITUDE'], float_data['LONGITUDE']]).T
+
+    return track
+
 def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     # -------------------------------------------------------------------------
     # woa_to_float_track
@@ -205,6 +211,32 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     return z, woa_interp
 
 def ncep_to_float_track(varname, track, local_path='./'):
+    # -------------------------------------------------------------------------
+    # ncep_to_float_track
+    # -------------------------------------------------------------------------
+    #
+    # Function to load NCEP reanalysis data for comparison with autonomous
+    # floats. Data to be interpolated along the provided track (t, lat, lon).
+    # Combines function load_ncep_data() and interp_ncep_data() for convenience,
+    # see documentation for those funcions for more detail.
+    #
+    # INPUT:
+    #           varname: either 'PRES' (pressure) or 'RHUM' (relative humidity)
+    #           track: array with the columns (SDN, lat, lon)
+    #
+    # OUTPUT:
+    #           z: WOA depth array
+    #           woa_interp: 2D array of requested WOA parameter (depth x time)
+    #
+    # AUTHOR:   Christopher Gordon
+    #           Fisheries and Oceans Canada
+    #           chris.gordon@dfo-mpo.gc.ca
+    #
+    # LAST UPDATE: 29-04-2020
+    #
+    # CHANGE LOG:
+    #
+    # -------------------------------------------------------------------------
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
     ncep_interp = interp.interp_ncep_data(xtrack, ncep_track, data)
@@ -384,6 +416,36 @@ def bic(data,resid):
     return bic_value
 
 def get_var_by(v1, v2, float_data):
+    # -------------------------------------------------------------------------
+    # get_var_by
+    # -------------------------------------------------------------------------
+    #
+    # function to calculate the mean of one variable (v1) indexed by a second
+    # variable (v2) in a float_data dictionary (output of sagepy.argo), though
+    # it would work with any python dict
+    #
+    # INPUT:
+    #           v1: string input of a key in float_data
+    #           v2: string input of a key in float_data
+    #           float_data: python dict() object
+    #
+    # OUTPUT:
+    #           out_array: 1D numpy array with mean values
+    #
+    # AUTHOR:   Christopher Gordon
+    #           Fisheries and Oceans Canada
+    #           chris.gordon@dfo-mpo.gc.ca
+    #
+    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    # written by Tanya Maurer & Josh Plant
+    #
+    # LAST UPDATE: 20-04-2020
+    #
+    # CHANGE LOG:
+    #
+    # -------------------------------------------------------------------------
+
     
     index = np.unique(float_data[v2])
     out_array = np.nan*np.ones((len(index)))

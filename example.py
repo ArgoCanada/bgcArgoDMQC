@@ -68,8 +68,10 @@ sagepy.io.get_argo(dac_path, [wmo_number], local_path=argo_path)
 # ----------------------------------------------------------------------------
 # load in data from an argo float WITH NO in-air measurements
 float_data = sagepy.argo(argo_path, wmo_number)
+
 # make 'track' array with columns (time, lat, lon) to be used in interpolation
-track = np.array([float_data['SDN'], float_data['LATITUDE'], float_data['LONGITUDE']]).T
+track = sagepy.track(float_data)
+
 # get WOA data interpolated along track and associated depth levels
 # NOTE: this function combines sagepy.io.load_woa_data() and 
 # sagepy.interp.interp_woa_data() for convenience, but each can be called 
@@ -93,8 +95,8 @@ woa_gains, surf_data = sagepy.calc_gain(float_data, ref_data, inair=False, zlim=
 
 # gain calculation defaults to inair, don't need boolean
 T = sagepy.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', float_data)
-p_H2O=sagepy.unit.pH2O(T)
-ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp[:-1], p_H2O)
+pH2O = sagepy.unit.pH2O(T)
+ref_ppox = sagepy.unit.atmos_pO2(ncep_pres_interp[:-1], pH2O)
 ncep_gains, inair_data = sagepy.calc_gain(float_data, ref_ppox)
 
 # ----------------------------------------------------------------------------
