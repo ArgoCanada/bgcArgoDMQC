@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 from matplotlib.gridspec import GridSpec
 import seaborn as sns
 
-import sagepy
+import bgcArgo as bgc
 
 sns.set(style='ticks', palette='colorblind', context='paper')
 
@@ -65,7 +65,7 @@ def resid_plot(x, y1, y2, l1='$y_1$', l2='$y_2$', lr='$y_2 - y_1$', legend=True,
 
 # # remove leading Q from float numbers and any spaces
 # wmo_nums = np.array([n.strip('Q').strip(' ') for n in df.WMO_NUMBER])
-# ftp = sagepy.io.get_argo('/ifremer/argo/dac/meds', wmo_nums, local_path='/Users/gordonc/Documents/data/Argo/meds')
+# ftp = bgc.io.get_argo('/ifremer/argo/dac/meds', wmo_nums, local_path='/Users/gordonc/Documents/data/Argo/meds')
 
 # -----------------------------------------------------------------------------
 # Do both types of gain calculation on an new float with in-air data
@@ -75,22 +75,22 @@ ncep_path = '/Users/gordonc/Documents/data/NCEP'
 local_path = '/Users/gordonc/Documents/data/Argo/meds'
 wmo = '4902481'
 
-data = sagepy.argo(local_path, wmo)
+data = bgc.argo(local_path, wmo)
 track = np.array([data['SDN'],data['LATITUDE'],data['LONGITUDE']]).T
 
-xtrack, woa_track, woa_data = sagepy.io.load_woa_data(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
-woa_interp, wt, yrday = sagepy.interp.interp_woa_data(xtrack, woa_track, woa_data)
+xtrack, woa_track, woa_data = bgc.io.load_woa_data(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
+woa_interp, wt, yrday = bgc.interp.interp_woa_data(xtrack, woa_track, woa_data)
 z = woa_track[0]
-# z, woa = sagepy.woa_to_float_track(track, 'O2sat', local_path=woa_path)
+# z, woa = bgc.woa_to_float_track(track, 'O2sat', local_path=woa_path)
 
 woa = dict(z=z, WOA=woa_interp)
-woa_gains, surf_data = sagepy.calc_gain(data, woa, inair=False)
+woa_gains, surf_data = bgc.calc_gain(data, woa, inair=False)
 
-xtrack, ncep_track, ncep_data = sagepy.io.load_ncep_data(track, 'pres', local_path=ncep_path)
-ncep_interp = sagepy.interp.interp_ncep_data(xtrack, ncep_track, ncep_data)
+xtrack, ncep_track, ncep_data = bgc.io.load_ncep_data(track, 'pres', local_path=ncep_path)
+ncep_interp = bgc.interp.interp_ncep_data(xtrack, ncep_track, ncep_data)
 
 # ncep_interp isn't the right reference data - need to do conversion code still
-gains, inair_data = sagepy.calc_gain(data, ncep_interp, inair=True, zlim=25.)
+gains, inair_data = bgc.calc_gain(data, ncep_interp, inair=True, zlim=25.)
 
 # -----------------------------------------------------------------------------
 # Make analogous plots to SAGE-O2 GUI
@@ -98,8 +98,8 @@ gains, inair_data = sagepy.calc_gain(data, ncep_interp, inair=True, zlim=25.)
 sdn = data['SDN']
 fig, axes = plt.subplots(2,1,sharex=True)
 
-g1 = sagepy.plt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
-g2 = sagepy.plt.gains(sdn, gains, inair=False, ax=axes[1])
+g1 = bgc.plt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
+g2 = bgc.plt.gains(sdn, gains, inair=False, ax=axes[1])
 
 fig.savefig(Path('./figures/sage_test/woa_float_gains.png'), dpi=350, bbox_inches='tight')
 plt.close(fig)
@@ -170,7 +170,7 @@ fmt  = mdates.DateFormatter('%b %Y')
 # plt.show()
 
 sage_ncep = loadmat(Path('/Users/gordonc/Documents/data/SAGE-O2/ncep_4902481.mat'))['PRES'][:,0]
-ncep_pres_interp = sagepy.ncep_to_float_track('pres', track, local_path=ncep_path)
+ncep_pres_interp = bgc.ncep_to_float_track('pres', track, local_path=ncep_path)
 
 resid_plot(track[1:32,0], sage_ncep, ncep_pres_interp[1:32])
 plt.show()

@@ -14,11 +14,51 @@ from . import interp
 from . import unit
 from . import util
 
+# ----------------------------------------------------------------------------
+# FLOAT CLASS
+# ----------------------------------------------------------------------------
+
+class argo:
+    def __init__(self, wmo):
+        self.__floatdict__ = load_argo(ARGO_PATH, wmo)
+
+        self.PRES = self.__floatdict__['PRES']
+        self.TEMP = self.__floatdict__['TEMP']
+        self.PSAL = self.__floatdict__['PSAL']
+        self.DOXY = self.__floatdict__['DOXY']
+
+    def to_dict(self):
+        return self.__floatdict__
+    
+    def to_dataframe(self):
+        import pandas as pd
+
+        return pd.DataFrame()
+
+# ----------------------------------------------------------------------------
+# FUNCTIONS
+# ----------------------------------------------------------------------------
+
+ARGO_PATH = './'
+WOA_PATH  = None
+NCEP_PATH = None
+
+def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
+
+    global ARGO_PATH
+    ARGO_PATH = argo_path
+
+    global WOA_PATH
+    WOA_PATH = woa_path
+
+    global NCEP_PATH
+    NCEP_PATH = ncep_path
+
 def apply_qc_adjustment():
 
     return None
 
-def argo(local_path, wmo):
+def load_argo(local_path, wmo):
     # -------------------------------------------------------------------------
     # argo
     # -------------------------------------------------------------------------

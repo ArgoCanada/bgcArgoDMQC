@@ -1,4 +1,4 @@
-# sagepy
+# bgcArgo
 
 `python` module created to emulate the [SOCCOM BGC Argo QC methods](https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING), as well as some additional functionality
 
