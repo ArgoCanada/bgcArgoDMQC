@@ -9,3 +9,8 @@
 - [netCDF4](https://pypi.org/project/netCDF4/) module for `.nc` files
 - [pandas](https://pandas.pydata.org/) and [seaborn](https://seaborn.pydata.org/) are recommended but not required
 
+## version history
+
+0.1: April 20, 2020 - Initial creation
+
+0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class
