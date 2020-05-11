@@ -6,3 +6,4 @@ meds_doxy_floats.csv
 sagepy/__pycache__/
 *cpython*
 *.pyc
+/.ipynb_checkpoints/
