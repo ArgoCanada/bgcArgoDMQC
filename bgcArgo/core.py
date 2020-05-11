@@ -14,11 +14,32 @@ from . import interp
 from . import unit
 from . import util
 
+ARGO_PATH = './'
+WOA_PATH  = None
+NCEP_PATH = None
+
 # ----------------------------------------------------------------------------
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
 
+ARGO_PATH = './'
+WOA_PATH  = None
+NCEP_PATH = None
+
+def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
+
+    global ARGO_PATH
+    ARGO_PATH = argo_path
+    global WOA_PATH
+    WOA_PATH  = woa_path
+    global NCEP_PATH
+    NCEP_PATH = ncep_path
+
+
 class argo:
+
+    set_dirs = set_dirs
+
     def __init__(self, wmo):
         self.__floatdict__ = load_argo(ARGO_PATH, wmo)
 
@@ -27,6 +48,10 @@ class argo:
         self.PSAL = self.__floatdict__['PSAL']
         self.DOXY = self.__floatdict__['DOXY']
 
+        self.argo_path = ARGO_PATH
+        self.woa_path  = WOA_PATH
+        self.ncep_path = NCEP_PATH
+    
     def to_dict(self):
         return self.__floatdict__
     
@@ -38,21 +63,6 @@ class argo:
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
-
-ARGO_PATH = './'
-WOA_PATH  = None
-NCEP_PATH = None
-
-def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
-
-    global ARGO_PATH
-    ARGO_PATH = argo_path
-
-    global WOA_PATH
-    WOA_PATH = woa_path
-
-    global NCEP_PATH
-    NCEP_PATH = ncep_path
 
 def apply_qc_adjustment():
 
