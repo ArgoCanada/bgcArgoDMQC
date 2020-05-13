@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import sys
+
 import numpy as np
 import pylab as pl
 from scipy.interpolate import interp1d
@@ -18,11 +20,11 @@ def interp_ncep_data(track, ncep_track, data):
     xlat[1:-1] = track[:,1]
     xlon[1:-1] = track[:,2]
 
-    xt[0]   = np.floor(xt[1])
-    xt[-1]  = np.ceil(xt[-2])
-    xlat[0] = xlat[1]
+    xt[0]    = np.floor(xt[1])
+    xt[-1]   = np.ceil(xt[-2])
+    xlat[0]  = xlat[1]
     xlat[-1] = xlat[-2]
-    xlon[0] = xlon[1]
+    xlon[0]  = xlon[1]
     xlon[-1] = xlon[-2]
 
     # interpolate float to ncep time grid

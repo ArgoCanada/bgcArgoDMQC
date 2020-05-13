@@ -13,6 +13,7 @@ from . import io
 from . import interp
 from . import unit
 from . import util
+from . import plt
 
 ARGO_PATH = './'
 WOA_PATH  = None
@@ -44,7 +45,7 @@ class argo:
     set_dirs = set_dirs
 
     def __init__(self, wmo):
-        self.__floatdict__ = load_argo(ARGO_PATH, wmo)
+        self.__floatdict__ = load_argo(ARGO_PATH, wmo, grid=True)
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -77,9 +78,63 @@ class argo:
 
         return pd.DataFrame()
 
-    def calc_gain(self, ref='NCEP'):
-        gains = np.ones((4,3))
-        return gains
+    def get_track(self):
+        self.track = track(self.__floatdict__)
+
+        return self.track
+
+    def get_ncep(self):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+
+        self.NCEP = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
+        
+        return self.NCEP
+
+    def get_woa(self):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+        
+        self.z_WOA, self.WOA = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
+
+        return self.WOA
+
+    def calc_gains(self, ref='NCEP'):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+
+        if ref == 'NCEP':
+            # check if reference data is already calculated
+            if not hasattr(self, 'NCEP'):
+                self.get_ncep()
+
+            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[:-1], unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__)))/100
+            self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX)
+            self.gains = self.__NCEPgains__
+
+        if ref == 'WOA':
+            # check if reference data is already calculated
+            if not hasattr(self, 'WOA'):
+                self.get_woa()
+
+            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False)
+            self.gains = self.__WOAgains__
+        
+        return self.gains
+
+    def plot(self, kind, **kwargs):
+
+        if kind == 'gain':
+            ref = kwargs['ref']
+            if ref == 'NCEP':
+                fig, axes = plt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
+            elif ref == 'WOA':
+                fig, axes = plt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
+
+        return fig, axes
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS
@@ -184,12 +239,6 @@ def load_argo(local_path, wmo, grid=False):
     # beginning of output dict with basic info, following variables in SAGEO2
     floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M, CYCLES=np.arange(1,N+1))
 
-    # ftype = ''
-    # for let in meta_nc.variables['PLATFORM_TYPE'][:]:
-    #     ftype = ftype + let.decode('UTF-8')
-
-    # floatData['floatType'] = ftype
-
     pres = Sprof_nc.variables['PRES'][:]
 
     t = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
@@ -209,6 +258,13 @@ def load_argo(local_path, wmo, grid=False):
     floatData['LONGITUDE'] = lon
 
     if grid:
+
+        ftype = ''
+        for let in meta_nc.variables['PLATFORM_TYPE'][:].compressed():
+            ftype = ftype + let.decode('UTF-8')
+
+        floatData['floatType'] = ftype
+
         lat_grid = np.ma.masked_array(np.tile(lat,(M,1)).T, mask=pres.mask).compressed()
         lon_grid = np.ma.masked_array(np.tile(lon,(M,1)).T, mask=pres.mask).compressed()
     
@@ -294,7 +350,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     # see documentation for those funcions for more detail.
     #
     # INPUT:
-    #           varname: either 'PRES' (pressure) or 'RHUM' (relative humidity)
+    #           varname: either 'pres' (pressure) or 'rhum' (relative humidity)
     #           track: array with the columns (SDN, lat, lon)
     #
     # OUTPUT:
@@ -354,6 +410,7 @@ def calc_gain(data, ref, inair=True, zlim=25.):
         raise ValueError('Flag ''inair'' set to True but partial pressure data not available')
 
     if inair:
+        sys.stdout.write('\nCalculating gains using NCEP surface pressure and float in-air measurements...\n')
         g = np.nan*np.ones((ref.shape[0],))
 
         # float partial pressure measurements at each cycle
@@ -371,8 +428,10 @@ def calc_gain(data, ref, inair=True, zlim=25.):
 
             g[i] = ref[i]/mean_float_data[i,2]
 
+        return g, mean_float_data
+
     else:
-        sys.stdout.write('Calculating gains using WOA surface data and float O2 percent saturation')
+        sys.stdout.write('\nCalculating gains using WOA surface data and float O2 percent saturation...\n')
         surf_ix = data['PRES'] <= zlim
         surf_o2sat = data['O2Sat'][surf_ix]
         cycle = data['CYCLE_GRID'][surf_ix]
@@ -397,7 +456,7 @@ def calc_gain(data, ref, inair=True, zlim=25.):
             g[i] = ref_o2sat/mean_float_data[i,2]
         
 
-    return g, mean_float_data
+        return g, mean_float_data, woa_surf
 
 def aic(data,resid):
     # -------------------------------------------------------------------------

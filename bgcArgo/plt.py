@@ -17,7 +17,7 @@ class pltClass:
     def __init__(self):
         self.info = 'Python qc package plt class'
 
-def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
+def float_ncep_inair(sdn, flt, ncep, ax=None, legend=True):
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -25,7 +25,7 @@ def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
         fig = ax.get_figure()
 
     ax.plot(sdn, flt, linewidth=2, label='Float')
-    ax.plot(sdn, woa, linewidth=2, label='Reference')
+    ax.plot(sdn, ncep, linewidth=2, label='NCEP')
 
     if legend:
         ax.legend(loc=3)
@@ -37,6 +37,40 @@ def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
     ax.xaxis.set_major_locator(mhr)
     ax.xaxis.set_major_formatter(fmt)
     ax.xaxis.set_minor_locator(mihr)
+
+    ax.set_ylabel('pO$_2$ (mbar)')
+
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(45)
+
+    g = pltClass()
+    g.fig = fig
+    g.ax  = ax
+
+    return g
+
+def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
+
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.get_figure()
+
+    ax.plot(sdn, flt, linewidth=2, label='Float')
+    ax.plot(sdn, woa, linewidth=2, label='WOA18')
+
+    if legend:
+        ax.legend(loc=3)
+
+    mhr  = mdates.MonthLocator(interval=4)
+    mihr = mdates.MonthLocator()
+    fmt  = mdates.DateFormatter('%b %Y')
+
+    ax.xaxis.set_major_locator(mhr)
+    ax.xaxis.set_major_formatter(fmt)
+    ax.xaxis.set_minor_locator(mihr)
+
+    ax.set_ylabel('O$_2$ Saturation %')
 
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
@@ -69,6 +103,8 @@ def gains(sdn, gains, inair=True, ax=None, legend=True):
     ax.xaxis.set_major_formatter(fmt)
     ax.xaxis.set_minor_locator(mihr)
 
+    ax.set_ylabel('O$_2$ Gain (unitless)')
+
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
 
@@ -77,3 +113,19 @@ def gains(sdn, gains, inair=True, ax=None, legend=True):
     g.ax  = ax
 
     return g
+
+def gainplot(sdn, float_data, ref_data, gainvals, ref):
+
+    fig, axes = plt.subplots(2,1,sharex=True)
+
+    if ref == 'NCEP':
+
+        g1 = float_ncep_inair(sdn, float_data, ref_data, ax=axes[0])
+        g2 = gains(sdn, gainvals, inair=False, ax=axes[1])
+
+    elif ref == 'WOA':
+
+        g1 = float_woa_surface(sdn, float_data, ref_data, ax=axes[0])
+        g2 = gains(sdn, gainvals, inair=False, ax=axes[1])
+
+    return fig, axes
