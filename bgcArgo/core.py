@@ -15,10 +15,6 @@ from . import unit
 from . import util
 from . import plt
 
-ARGO_PATH = './'
-WOA_PATH  = None
-NCEP_PATH = None
-
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
@@ -69,6 +65,12 @@ class argo:
         self.TEMP = self.__floatdict__['TEMP']
         self.PSAL = self.__floatdict__['PSAL']
         self.DOXY = self.__floatdict__['DOXY']
+
+        # not naturally gridded variables
+        self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']
+        self.SDN_GRID = self.__floatdict__['SDN_GRID']
+        self.LATITUDE_GRID = self.__floatdict__['LATITUDE_GRID']
+        self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
     
     def to_dict(self):
         return self.__floatdict__
@@ -76,7 +78,19 @@ class argo:
     def to_dataframe(self):
         import pandas as pd
 
-        return pd.DataFrame()
+        df = pd.DataFrame()
+        df['CYCLE'] = self.CYCLE_GRID
+        df['SDN'] = self.SDN_GRID
+        df['LATITUDE'] = self.LATITUDE_GRID
+        df['LONGITUDE'] = self.LONGITUDE_GRID
+        df['PRES'] = self.PRES
+        df['TEMP'] = self.TEMP
+        df['PSAL'] = self.PSAL
+        df['DOXY'] = self.DOXY
+
+        self.df = df
+
+        return df
 
     def get_track(self):
         self.track = track(self.__floatdict__)
@@ -130,11 +144,20 @@ class argo:
         if kind == 'gain':
             ref = kwargs['ref']
             if ref == 'NCEP':
-                fig, axes = plt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
+                g = plt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
             elif ref == 'WOA':
-                fig, axes = plt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
+                g = plt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
 
-        return fig, axes
+        if kind == 'cscatter':
+            var = kwargs['varname']
+            kwargs.pop('varname')
+
+            if not hasattr(self, 'df'):
+                self.to_dataframe()
+
+            g = plt.var_cscatter(self.df, varname=var, **kwargs)
+
+        return g
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS

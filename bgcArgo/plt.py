@@ -11,11 +11,18 @@ try:
     import seaborn as sns
     sns.set(style='ticks', context='paper', palette='colorblind')
 except:
-    sys.stdout.write('Although the seaborn package is not required, it is recommended\n')
+    sys.stdout.write('Although the seaborn package is not required, it is recommended for plotting\n')
+
+try:
+    import cmocean.cm as cmo
+    cmocean_flag = True
+except:
+    sys.stdout.write('Although the seaborn package is not required, it is recommended for plotting\n')
+    cmocean_flag = False
 
 class pltClass:
     def __init__(self):
-        self.info = 'Python qc package plt class'
+        self.__info__ = 'Python qc package plt class'
 
 def float_ncep_inair(sdn, flt, ncep, ax=None, legend=True):
 
@@ -44,8 +51,8 @@ def float_ncep_inair(sdn, flt, ncep, ax=None, legend=True):
         tick.set_rotation(45)
 
     g = pltClass()
-    g.fig = fig
-    g.ax  = ax
+    g.fig  = fig
+    g.axes = [ax]
 
     return g
 
@@ -76,8 +83,8 @@ def float_woa_surface(sdn, flt, woa, ax=None, legend=True):
         tick.set_rotation(45)
 
     g = pltClass()
-    g.fig = fig
-    g.ax  = ax
+    g.fig  = fig
+    g.axes = [ax]
 
     return g
 
@@ -108,12 +115,13 @@ def gains(sdn, gains, inair=True, ax=None, legend=True):
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
 
+
     g = pltClass()
-    g.fig = fig
-    g.ax  = ax
+    g.fig  = fig
+    g.axes = [ax]
 
     return g
-
+    
 def gainplot(sdn, float_data, ref_data, gainvals, ref):
 
     fig, axes = plt.subplots(2,1,sharex=True)
@@ -128,4 +136,81 @@ def gainplot(sdn, float_data, ref_data, gainvals, ref):
         g1 = float_woa_surface(sdn, float_data, ref_data, ax=axes[0])
         g2 = gains(sdn, gainvals, inair=False, ax=axes[1])
 
-    return fig, axes
+    g = pltClass()
+    g.fig  = fig
+    g.axes = axes
+
+    return g
+
+def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=None, **kwargs):
+    # define colormaps
+    if cmocean_flag:
+        color_maps = dict(
+            TEMP=cmo.thermal,
+            PSAL=cmo.haline, 
+            PDEN=cmo.dense,
+            CHLA=cmo.algae,
+            BBP=cmo.matter,
+            DOXY=cmo.ice,
+            DOWNWELLING_IRRADIANCE=cmo.solar,
+        )
+    else:
+        color_maps = dict(
+            TEMP=plt.cm.inferno,
+            PSAL=plt.cm.viridis, 
+            PDEN=plt.cm.cividis,
+            CHLA=plt.cm.YlGn,
+            BBP=plt.cm.pink_r,
+            DOXY=plt.cm.YlGnBu_r,
+            DOWNWELLING_IRRADIANCE=plt.cm.magma,
+        )
+
+    if clabel is None:
+        var_units = dict(
+            TEMP='Temperature ({}C)'.format(chr(176)),
+            PSAL='Practical Salinity', 
+            PDEN='Potential Density (kg m${-3}$)',
+            CHLA='Chlorophyll (mg m$^{-3}$',
+            BBP='$\mathsf{b_{bp}}$ (m$^{-1}$)',
+            DOXY='Dissolved Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
+        )
+        clabel = var_units[varname]
+
+    if cmap is None:
+        cmap = color_maps[varname]
+
+    
+    if ax is None:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.get_figure()
+
+    df = df.loc[df.PRES < ylim[1]+50]
+
+    im = ax.scatter(df.SDN, df.PRES, c=df[varname], s=50, cmap=cmap, vmin=1.05*df[varname].min(), vmax=0.95*df[varname].max(), **kwargs)
+    cb = plt.colorbar(im, ax=ax)
+    cb.set_label(clabel)
+    ax.set_ylim(ylim)
+    ax.invert_yaxis()
+
+    ax.set_ylabel('Depth (dbar)')
+
+    w, h = fig.get_figwidth(), fig.get_figheight()
+    fig.set_size_inches(w*2, h)
+
+    mhr  = mdates.MonthLocator(interval=4)
+    mihr = mdates.MonthLocator()
+    fmt  = mdates.DateFormatter('%b %Y')
+
+    ax.xaxis.set_major_locator(mhr)
+    ax.xaxis.set_major_formatter(fmt)
+    ax.xaxis.set_minor_locator(mihr)
+
+    g = pltClass()
+    g.fig  = fig
+    g.axes = [ax]
+    g.cb = cb
+
+    return g
+
