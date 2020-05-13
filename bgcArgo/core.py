@@ -19,7 +19,7 @@ WOA_PATH  = None
 NCEP_PATH = None
 
 # ----------------------------------------------------------------------------
-# FLOAT CLASS
+# LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
 
 ARGO_PATH = './'
@@ -35,6 +35,9 @@ def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
     global NCEP_PATH
     NCEP_PATH = ncep_path
 
+# ----------------------------------------------------------------------------
+# FLOAT CLASS
+# ----------------------------------------------------------------------------
 
 class argo:
 
@@ -43,14 +46,28 @@ class argo:
     def __init__(self, wmo):
         self.__floatdict__ = load_argo(ARGO_PATH, wmo)
 
+        # local path info
+        self.argo_path = ARGO_PATH
+        self.woa_path  = WOA_PATH
+        self.ncep_path = NCEP_PATH
+
+        # metadata and dimension variables
+        self.floatName = self.__floatdict__['floatName']
+        # self.floatType = self.__floatdict__['floatType']
+        self.N_CYCLES = self.__floatdict__['N_CYCLES']
+        self.N_LEVELS = self.__floatdict__['N_LEVELS']
+        self.CYCLES = self.__floatdict__['CYCLES']
+
+        # time and location data
+        self.SDN = self.__floatdict__['SDN']
+        self.LATITUDE = self.__floatdict__['LATITUDE']
+        self.LONGITUDE = self.__floatdict__['LONGITUDE']
+
+        # bgc and core variables
         self.PRES = self.__floatdict__['PRES']
         self.TEMP = self.__floatdict__['TEMP']
         self.PSAL = self.__floatdict__['PSAL']
         self.DOXY = self.__floatdict__['DOXY']
-
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
     
     def to_dict(self):
         return self.__floatdict__
@@ -60,6 +77,10 @@ class argo:
 
         return pd.DataFrame()
 
+    def calc_gain(self, ref='NCEP'):
+        gains = np.ones((4,3))
+        return gains
+
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
@@ -68,7 +89,7 @@ def apply_qc_adjustment():
 
     return None
 
-def load_argo(local_path, wmo):
+def load_argo(local_path, wmo, grid=False):
     # -------------------------------------------------------------------------
     # argo
     # -------------------------------------------------------------------------
@@ -163,24 +184,18 @@ def load_argo(local_path, wmo):
     # beginning of output dict with basic info, following variables in SAGEO2
     floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M, CYCLES=np.arange(1,N+1))
 
-    ftype = ''
-    for let in meta_nc.variables['PLATFORM_TYPE'][:].compressed():
-        ftype = ftype + let.decode('UTF-8')
+    # ftype = ''
+    # for let in meta_nc.variables['PLATFORM_TYPE'][:]:
+    #     ftype = ftype + let.decode('UTF-8')
 
-    floatData['floatType'] = ftype
+    # floatData['floatType'] = ftype
 
     pres = Sprof_nc.variables['PRES'][:]
 
     t = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
-    t_grid = np.ma.masked_array(np.tile(t,(M,1)).T, mask=pres.mask)
 
     lat = Sprof_nc.variables['LATITUDE'][:].compressed()
     lon = Sprof_nc.variables['LONGITUDE'][:].compressed()
-
-    lat_grid = np.ma.masked_array(np.tile(lat,(M,1)).T, mask=pres.mask).compressed()
-    lon_grid = np.ma.masked_array(np.tile(lon,(M,1)).T, mask=pres.mask).compressed()
-
-    cycle_grid = np.ma.masked_array(np.tile(floatData['CYCLES'],(M,1)).T, mask=pres.mask)
 
     # use the pressure mask for all variables to ensure dimensions match
     floatData['PRES'] = pres.compressed()
@@ -189,13 +204,21 @@ def load_argo(local_path, wmo):
     floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
 
     floatData['SDN'] = t
-    floatData['SDN_GRID']  = t_grid.compressed()
-    floatData['CYCLE_GRID'] = cycle_grid.compressed()
 
     floatData['LATITUDE'] = lat
     floatData['LONGITUDE'] = lon
-    floatData['LATITUDE_GRID'] = lat_grid
-    floatData['LONGITUDE_GRID'] = lon_grid
+
+    if grid:
+        lat_grid = np.ma.masked_array(np.tile(lat,(M,1)).T, mask=pres.mask).compressed()
+        lon_grid = np.ma.masked_array(np.tile(lon,(M,1)).T, mask=pres.mask).compressed()
+    
+        t_grid = np.ma.masked_array(np.tile(t,(M,1)).T, mask=pres.mask)
+        cycle_grid = np.ma.masked_array(np.tile(floatData['CYCLES'],(M,1)).T, mask=pres.mask)
+    
+        floatData['SDN_GRID']  = t_grid.compressed()
+        floatData['CYCLE_GRID'] = cycle_grid.compressed()
+        floatData['LATITUDE_GRID'] = lat_grid
+        floatData['LONGITUDE_GRID'] = lon_grid
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
 
