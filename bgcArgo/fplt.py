@@ -244,7 +244,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
             if ylabel is None:
                 ylabel = 'Pressure (dbar)'
         elif zvar == 'PDEN':
-            ylim = (26.8, 28)
+            ylim = (df.PDEN.min(), df.PDEN.max())
             if ylabel is None:
                 ylabel = 'Density (kg m$^{-3}$)'
 
