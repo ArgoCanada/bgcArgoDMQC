@@ -7,13 +7,17 @@ from pathlib import Path
 import numpy as np
 import pylab as pl
 
+import matplotlib.pyplot as plt
+
+import seawater as sw
+
 from netCDF4 import Dataset
 
 from . import io
 from . import interp
 from . import unit
 from . import util
-from . import plt
+from . import fplt
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
@@ -65,6 +69,8 @@ class argo:
         self.TEMP = self.__floatdict__['TEMP']
         self.PSAL = self.__floatdict__['PSAL']
         self.DOXY = self.__floatdict__['DOXY']
+        # potential density
+        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES)
 
         # not naturally gridded variables
         self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']
@@ -86,6 +92,7 @@ class argo:
         df['PRES'] = self.PRES
         df['TEMP'] = self.TEMP
         df['PSAL'] = self.PSAL
+        df['PDEN'] = self.PDEN
         df['DOXY'] = self.DOXY
 
         self.df = df
@@ -144,18 +151,25 @@ class argo:
         if kind == 'gain':
             ref = kwargs['ref']
             if ref == 'NCEP':
-                g = plt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
+                g = fplt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
             elif ref == 'WOA':
-                g = plt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
+                g = fplt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
 
         if kind == 'cscatter':
-            var = kwargs['varname']
-            kwargs.pop('varname')
+            var = kwargs.pop('varname')
 
             if not hasattr(self, 'df'):
                 self.to_dataframe()
 
-            g = plt.var_cscatter(self.df, varname=var, **kwargs)
+            g = fplt.var_cscatter(self.df, varname=var, **kwargs)
+
+        if kind == 'profiles':
+            varlist = kwargs.pop('varlist')
+
+            if not hasattr(self, 'df'):
+                self.to_dataframe()
+
+            g = fplt.profiles(self.df, varlist=varlist, **kwargs)
 
         return g
 

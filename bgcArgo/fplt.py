@@ -214,3 +214,60 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
 
     return g
 
+def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+
+    if xlabels is None:
+        var_units = dict(
+            TEMP='Temperature ({}C)'.format(chr(176)),
+            PSAL='Practical Salinity', 
+            PDEN='Potential Density (kg m$^{-3}$)',
+            CHLA='Chlorophyll (mg m$^{-3}$',
+            BBP='$\mathsf{b_{bp}}$ (m$^{-1}$)',
+            DOXY='Dissolved Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
+        )
+        xlabels = [var_units[v] for v in varlist]
+
+    if axes is None:
+        fig, axes = plt.subplots(1, len(varlist), sharey=True)
+        if len(varlist) == 1:
+            axes = [axes]
+    elif len(varlist) > 1:
+        fig = axes[0].get_figure()
+    else:
+        fig = axes.get_figure()
+        axes = [axes]
+
+    if ylim is None:
+        if zvar == 'PRES':
+            ylim=(0,2000)
+            if ylabel is None:
+                ylabel = 'Pressure (dbar)'
+        elif zvar == 'PDEN':
+            ylim = (26.8, 28)
+            if ylabel is None:
+                ylabel = 'Density (kg m$^{-3}$)'
+
+    df = df.loc[df[zvar] < ylim[1]*1.1]
+
+    for i,v in enumerate(varlist):
+        for n in range(Nprof):
+            subset_df = df.loc[df.CYCLE == Ncycle + n]
+
+            axes[i].plot(subset_df[v], subset_df[zvar], **kwargs)
+            
+        axes[i].set_ylim(ylim[::-1])
+        axes[i].set_xlabel(xlabels[i])
+
+    axes[0].set_ylabel(ylabel)
+
+    w, h = fig.get_figwidth(), fig.get_figheight()
+    fig.set_size_inches(w*len(varlist)/3, h)
+
+    g = pltClass()
+    g.fig  = fig
+    g.axes = axes
+
+    plt.show()
+
+    return g
