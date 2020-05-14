@@ -70,7 +70,7 @@ class argo:
         self.PSAL = self.__floatdict__['PSAL']
         self.DOXY = self.__floatdict__['DOXY']
         # potential density
-        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES)
+        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # not naturally gridded variables
         self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']

@@ -75,7 +75,7 @@ ncep_path = '/Users/gordonc/Documents/data/NCEP'
 local_path = '/Users/gordonc/Documents/data/Argo/meds'
 wmo = '4902481'
 
-data = bgc.argo(local_path, wmo)
+data = bgc.load_argo(local_path, wmo, grid=True)
 track = np.array([data['SDN'],data['LATITUDE'],data['LONGITUDE']]).T
 
 xtrack, woa_track, woa_data = bgc.io.load_woa_data(track, 'O2sat', zlim=(0,1000), local_path=woa_path)
@@ -84,13 +84,13 @@ z = woa_track[0]
 # z, woa = bgc.woa_to_float_track(track, 'O2sat', local_path=woa_path)
 
 woa = dict(z=z, WOA=woa_interp)
-woa_gains, surf_data = bgc.calc_gain(data, woa, inair=False)
+woa_gains, surf_data, woa_surf = bgc.calc_gain(data, woa, inair=False)
 
 xtrack, ncep_track, ncep_data = bgc.io.load_ncep_data(track, 'pres', local_path=ncep_path)
 ncep_interp = bgc.interp.interp_ncep_data(xtrack, ncep_track, ncep_data)
 
 # ncep_interp isn't the right reference data - need to do conversion code still
-gains, inair_data = bgc.calc_gain(data, ncep_interp, inair=True, zlim=25.)
+gains, inair_data = bgc.calc_gain(data, ncep_interp/100, inair=True, zlim=25.)
 
 # -----------------------------------------------------------------------------
 # Make analogous plots to SAGE-O2 GUI
@@ -98,10 +98,10 @@ gains, inair_data = bgc.calc_gain(data, ncep_interp, inair=True, zlim=25.)
 sdn = data['SDN']
 fig, axes = plt.subplots(2,1,sharex=True)
 
-g1 = bgc.plt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
-g2 = bgc.plt.gains(sdn, gains, inair=False, ax=axes[1])
+g1 = bgc.fplt.float_woa_surface(sdn, surf_data[:,2], woa_interp[0,:], ax=axes[0])
+g2 = bgc.fplt.gains(sdn, woa_gains, inair=False, ax=axes[1])
 
-fig.savefig(Path('./figures/sage_test/woa_float_gains.png'), dpi=350, bbox_inches='tight')
+fig.savefig(Path('../figures/sage_test/woa_float_gains.png'), dpi=350, bbox_inches='tight')
 plt.close(fig)
 
 # -----------------------------------------------------------------------------
@@ -172,5 +172,17 @@ fmt  = mdates.DateFormatter('%b %Y')
 sage_ncep = loadmat(Path('/Users/gordonc/Documents/data/SAGE-O2/ncep_4902481.mat'))['PRES'][:,0]
 ncep_pres_interp = bgc.ncep_to_float_track('pres', track, local_path=ncep_path)
 
-resid_plot(track[1:32,0], sage_ncep, ncep_pres_interp[1:32])
-plt.show()
+fig, axes = resid_plot(track[1:32,0], sage_ncep/1000, ncep_pres_interp[1:32]/1000,  l1='NCEP python', l2='NCEP matlab SAGE', lr='matlab - python', xl='', yl='Air Pressure (kPa)')
+
+axes[0].set_xticklabels([])
+axes[1].xaxis.set_major_locator(mhr)
+axes[1].xaxis.set_major_formatter(fmt)
+axes[1].xaxis.set_minor_locator(mihr)
+
+for tick in axes[1].get_xticklabels():
+    tick.set_rotation(45)
+
+plt.subplots_adjust(wspace=0.6, hspace=0.4)
+
+fig.savefig(Path('../figures/sage_test/ncep_py_matlab_compare.png'), dpi=350, bbox_inches='tight')
+plt.close(fig)
