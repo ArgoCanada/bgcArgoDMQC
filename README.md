@@ -13,7 +13,8 @@ calculate oxygen gains
 - Must run on `python3`, not supported on `python2.x`
 - The [seawater](https://pypi.org/project/seawater/) package
 - [netCDF4](https://pypi.org/project/netCDF4/) module for `.nc` files
-- [pandas](https://pandas.pydata.org/) and [seaborn](https://seaborn.pydata.org/) are recommended but not required
+- [pandas](https://pandas.pydata.org/) and [seaborn](https://seaborn.pydata.org/) are recommended but not required, through there will be some reduced (non-essential) functionality without pandas
+- [cmocean](https://matplotlib.org/cmocean/) is also recommended for nicer plots, but not required
 
 ## version history
 
