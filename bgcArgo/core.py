@@ -40,7 +40,7 @@ def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
 
-class argo:
+class sprof:
 
     set_dirs = set_dirs
 
@@ -173,6 +173,100 @@ class argo:
 
         return g
 
+class profile:
+
+    set_dirs = set_dirs
+
+    def __init__(self, prof_file):
+        self.__profiledict__ = load_profile(prof_file)
+
+        # local path info
+        self.argo_path = ARGO_PATH
+        self.woa_path  = WOA_PATH
+        self.ncep_path = NCEP_PATH
+
+        # metadata and dimension variables
+        self.floatName = self.__floatdict__['floatName']
+        self.floatType = self.__floatdict__['floatType']
+        self.N_LEVELS = self.__floatdict__['N_LEVELS']
+        self.CYCLE = self.__floatdict__['CYCLE']
+
+        # time and location data
+        self.SDN = self.__floatdict__['SDN']
+        self.LATITUDE = self.__floatdict__['LATITUDE']
+        self.LONGITUDE = self.__floatdict__['LONGITUDE']
+
+        # bgc and core variables
+        self.PRES = self.__floatdict__['PRES']
+        self.TEMP = self.__floatdict__['TEMP']
+        self.PSAL = self.__floatdict__['PSAL']
+        self.DOXY = self.__floatdict__['DOXY']
+        # potential density
+        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+
+    def to_dict(self):
+        return self.__floatdict__
+    
+    def to_dataframe(self):
+        import pandas as pd
+
+        df = pd.DataFrame()
+        df['CYCLE'] = np.array(self.N_LEVEL*[self.CYCLE])
+        df['SDN'] = np.array(self.N_LEVEL*[self.SDN])
+        df['LATITUDE'] = np.array(self.N_LEVEL*[self.LATITUDE])
+        df['LONGITUDE'] = np.array(self.N_LEVEL*[self.LONGITUDE])
+        df['PRES'] = self.PRES
+        df['TEMP'] = self.TEMP
+        df['PSAL'] = self.PSAL
+        df['PDEN'] = self.PDEN
+        df['DOXY'] = self.DOXY
+
+        self.df = df
+
+        return df
+
+    def get_track(self):
+        self.track = track(self.__floatdict__)
+
+        return self.track
+
+    def get_ncep(self):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+
+        self.NCEP = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
+        
+        return self.NCEP
+
+    def get_woa(self):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+        
+        self.z_WOA, self.WOA = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
+
+        return self.WOA
+
+    def calc_gains(self, ref='NCEP'):
+
+        if not hasattr(self, 'track'):
+            self.get_track()
+
+        if ref == 'NCEP':
+            sys.stdout.write('Function not built yet, returning None\n')
+            self.gains = None
+
+        if ref == 'WOA':
+            # check if reference data is already calculated
+            if not hasattr(self, 'WOA'):
+                self.get_woa()
+
+            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False)
+            self.gains = self.__WOAgains__
+        
+        return self.gains
+
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
@@ -295,7 +389,6 @@ def load_argo(local_path, wmo, grid=False):
     floatData['LONGITUDE'] = lon
 
     if grid:
-
         ftype = ''
         for let in meta_nc.variables['PLATFORM_TYPE'][:].compressed():
             ftype = ftype + let.decode('UTF-8')
@@ -323,6 +416,54 @@ def load_argo(local_path, wmo, grid=False):
         floatData['inair'] = True
     else:
         floatData['inair'] = False
+
+    return floatData
+
+def load_profile(fn):
+
+    # try to load the profile as absolute path or relative path
+    try:
+        nc = Dataset(fn, 'r')
+    except:
+        try:
+            nc = Dataset(Path(ARGO_PATH) / fn, 'r')
+        except:
+            raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+
+    wmo = ''
+    for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
+        wmo = wmo + let.decode('UTF-8')
+
+    cycle = nc.variables['CYCLE_NUMBER'][:].compressed()[0]
+
+    # number of profile cycles
+    M = nc.dimensions['N_LEVELS'].size
+    # beginning of output dict with basic info, following variables in SAGEO2
+    floatData = dict(floatName=wmo, N_LEVELS=M, CYCLE=cycle)
+
+    ftype = ''
+    for let in nc.variables['PLATFORM_TYPE'][:].compressed():
+        ftype = ftype + let.decode('UTF-8')
+
+    floatData['floatType'] = ftype
+
+    pres = nc.variables['PRES'][:]
+
+    t = nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
+
+    lat = nc.variables['LATITUDE'][:].compressed()
+    lon = nc.variables['LONGITUDE'][:].compressed()
+
+    # use the pressure mask for all variables to ensure dimensions match
+    floatData['PRES'] = pres.compressed()
+    floatData['TEMP'] = np.ma.masked_array(nc.variables['TEMP'][:].data, mask=pres.mask).compressed()
+    floatData['PSAL'] = np.ma.masked_array(nc.variables['PSAL'][:].data, mask=pres.mask).compressed()
+    floatData['DOXY'] = np.ma.masked_array(nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
+
+    floatData['SDN'] = t
+
+    floatData['LATITUDE'] = lat
+    floatData['LONGITUDE'] = lon
 
     return floatData
 
