@@ -10,7 +10,7 @@ calculate oxygen gains
 
 ## bgcArgo dependencies
 
-- Must run on `python3`, not supported on `python2.x`
+- Must run on `python3`, not supported on `python2.x` (uses [pathlib](https://docs.python.org/3/library/pathlib.html), introduced in python version 3.4)
 - The [seawater](https://pypi.org/project/seawater/) package
 - [netCDF4](https://pypi.org/project/netCDF4/) module for `.nc` files
 - [pandas](https://pandas.pydata.org/) and [seaborn](https://seaborn.pydata.org/) are recommended but not required, through there will be some reduced (non-essential) functionality without pandas
