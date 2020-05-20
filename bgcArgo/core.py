@@ -109,7 +109,7 @@ class sprof:
         if not hasattr(self, 'track'):
             self.get_track()
 
-        self.NCEP = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
+        self.NCEP, self.__NCEPweights__ = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
         
         return self.NCEP
 
@@ -118,7 +118,7 @@ class sprof:
         if not hasattr(self, 'track'):
             self.get_track()
         
-        self.z_WOA, self.WOA = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
+        self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
 
         return self.WOA
 
@@ -515,7 +515,7 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     woa_interp, wt, yrday = interp.interp_woa_data(xtrack, woa_track, woa_data)
     z = woa_track[0]
 
-    return z, woa_interp
+    return z, woa_interp, wt
 
 def ncep_to_float_track(varname, track, local_path='./'):
     # -------------------------------------------------------------------------
@@ -546,9 +546,9 @@ def ncep_to_float_track(varname, track, local_path='./'):
     # -------------------------------------------------------------------------
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
-    ncep_interp = interp.interp_ncep_data(xtrack, ncep_track, data)
+    ncep_interp, wt = interp.interp_ncep_data(xtrack, ncep_track, data)
 
-    return ncep_interp
+    return ncep_interp, wt
 
 
 def calc_gain(data, ref, inair=True, zlim=25.):

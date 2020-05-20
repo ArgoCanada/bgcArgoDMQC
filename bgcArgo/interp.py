@@ -39,6 +39,8 @@ def interp_ncep_data(track, ncep_track, data):
     ilon = ilon[ix]
     time_sub = ncep_time[ix]
 
+    xwt = [[],[],[]]
+
     # loop through NCEP time and get data at each location
     ncep_data = np.nan*np.ones((time_sub.shape[0],))
     for i in range(time_sub.shape[0]):
@@ -50,15 +52,21 @@ def interp_ncep_data(track, ncep_track, data):
             wt = (ncep_time[time_pt] - time_sub[i]) / (ncep_time[time_pt] - ncep_time[time_pt-1])
             tmp = wt*data[time_pt-1,:,:] + (1-wt)*data[time_pt,:,:]
         
+        xwt[0].append(wt)
+
         # latitudinal weighted average
         lat_pt = np.where(lat_sub >= ilat[i])[0][-1]
         wt = (lat_sub[lat_pt] - ilat[i]) / (lat_sub[lat_pt] - lat_sub[lat_pt+1])
         tmp = wt*tmp[lat_pt+1,:] + (1-wt)*tmp[lat_pt,:]
 
+        xwt[1].append(wt)
+
         # longitudinal weighted average - final pt. 
         lon_pt = np.where(lon_sub >= ilon[i])[0][0]
         wt = (lon_sub[lon_pt] - ilon[i]) / (lon_sub[lon_pt] - lon_sub[lon_pt-1])
         tmp = wt*tmp[lon_pt-1] + (1-wt)*tmp[lon_pt]
+
+        xwt[2].append(wt)
 
         ncep_data[i] = tmp
 
@@ -66,7 +74,7 @@ def interp_ncep_data(track, ncep_track, data):
     f = interp1d(time_sub, ncep_data, bounds_error=False)
     ncep_interp = f(track[:,0])
 
-    return ncep_interp
+    return ncep_interp, xwt
 
 def interp_woa_data(track, woa_track, data):
     # -------------------------------------------------------------------------
