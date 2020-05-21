@@ -76,7 +76,7 @@ def interp_ncep_data(track, ncep_track, data):
 
     return ncep_interp, xwt
 
-def interp_woa_data(track, woa_track, data):
+def interp_woa_data(track, woa_track, data, verbose=False):
     # -------------------------------------------------------------------------
     # load_woa_data
     # -------------------------------------------------------------------------
@@ -167,8 +167,9 @@ def interp_woa_data(track, woa_track, data):
         # Interpolation part 2 - interp over lat + lon
         # ---------------------------------------------------------------------
         if np.isnan(D3.flatten()).any():
-            sys.stdout.write('Bounding climatological profile(s) missing data')
-            sys.stdout.write(' - taking simple average of available data.\n')
+            if verbose:
+                sys.stdout.write('Bounding climatological profile(s) missing data')
+                sys.stdout.write(' - taking simple average of available data.\n')
             woa_interp[:,i] = np.nanmean(np.nanmean(D3, axis=2), axis=1)
         else:
             D2 = lat_wt*D3[:,0,:] + (1 - lat_wt)*D3[:,1,:]

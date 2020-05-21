@@ -45,7 +45,12 @@ def decode_woa_var(varname):
 def get_lat_index(lat, lat_bounds):
         # function to pull appropriate WOA latitude values
         lat_ix = np.logical_and(lat >= lat_bounds[0], lat <= lat_bounds[1])
-        lat_ix = np.where(lat_ix)[0]
+
+        if not lat_ix.any():
+            lat_ix = np.where(np.abs(lat - np.mean(lat_bounds)) == np.min(np.abs(lat - np.mean(lat_bounds))))[0]
+        else:
+            lat_ix = np.where(lat_ix)[0]
+            
         if lat_ix[0] != 0:
             lat_ix = np.append(np.array([lat_ix[0]-1]), lat_ix)
 
@@ -65,7 +70,11 @@ def get_lon_index(lon, lon_bounds, cross180):
         lon_ix = np.append(half1_lon_ix, half2_lon_ix)
     else:
         lon_ix = np.logical_and(lon >= lon_bounds[0], lon <= lon_bounds[1])
-        lon_ix = np.where(lon_ix)[0]
+        if not lon_ix.any():
+            lon_ix = np.where(np.abs(lon - np.mean(lon_bounds)) == np.min(np.abs(lon - np.mean(lon_bounds))))[0]
+        else:
+            lon_ix = np.where(lon_ix)[0]
+            
         if lon_ix[0] != 0:
             lon_ix = np.append(np.array([lon_ix[0]-1]), lon_ix)
 

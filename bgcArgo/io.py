@@ -269,7 +269,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
 
     return ftp
 
-def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
+def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
     # -------------------------------------------------------------------------
     # load_woa_data
     # -------------------------------------------------------------------------
@@ -369,7 +369,8 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./'):
 
             data = np.nan*np.ones((12, len(z_sub), len(lat_sub), len(lon_sub)))
 
-        sys.stdout.write('Extracting WOA data for {}\n'.format(pl.num2date(pl.datestr2num('2020-{:02d}-01'.format(i+1))).strftime('%b')))
+        if verbose:
+            sys.stdout.write('Extracting WOA data for {}\n'.format(pl.num2date(pl.datestr2num('2020-{:02d}-01'.format(i+1))).strftime('%b')))
         data[i,:,:,:] = nc.variables[var_name][:].data[0,z_ix,:,:][:,lat_ix,:][:,:,lon_ix]
 
     data[data > 9e36] = np.nan
@@ -433,10 +434,14 @@ def load_ncep_data(track, varname, local_path='./'):
     sdn = track[:,0]
     yrs = (pl.num2date(np.min(sdn)).year, pl.num2date(np.max(sdn)).year)
     Nyear = yrs[1]-yrs[0]
+
+    if Nyear == 0:
+        Nyear = 1
     
     # counter index for going across years
     j = 0
-    for y in range(yrs[0], yrs[1]):
+    for n in range(Nyear+1):
+        y = yrs[0] + n
         ncep_file = local_path / varname / '{}.{}.nc'.format(base_file, y)
         nc = Dataset(ncep_file, 'r')
 
@@ -462,8 +467,8 @@ def load_ncep_data(track, varname, local_path='./'):
                 xlon[lix] = xlon[lix] + 360
             
             landmask = lnc.variables['land'][:][0,:,:][:,lon_ix][lat_ix,:].astype(bool)
-            ncep_time = np.nan*np.ones((len(time)*Nyear))
-            data = np.nan*np.ones((len(time)*Nyear, len(lat_sub), len(lon_sub)))
+            ncep_time = np.nan*np.ones((len(time)*(Nyear+1)))
+            data = np.nan*np.ones((len(time)*(Nyear+1), len(lat_sub), len(lon_sub)))
         
         vdata = nc.variables[varname][:]
         for i in range(len(time)):

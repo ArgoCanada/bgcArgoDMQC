@@ -122,7 +122,7 @@ class sprof:
 
         return self.WOA
 
-    def calc_gains(self, ref='NCEP'):
+    def calc_gains(self, ref='NCEP', zlim=25.):
 
         if not hasattr(self, 'track'):
             self.get_track()
@@ -132,7 +132,8 @@ class sprof:
             if not hasattr(self, 'NCEP'):
                 self.get_ncep()
 
-            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[:-1], unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__)))/100
+            ix = [c in np.unique(self.__floatdict__['TRAJ_CYCLE']) for c in self.CYCLES]
+            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[ix], unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__)))/100
             self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX)
             self.gains = self.__NCEPgains__
 
@@ -141,7 +142,7 @@ class sprof:
             if not hasattr(self, 'WOA'):
                 self.get_woa()
 
-            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False)
+            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim)
             self.gains = self.__WOAgains__
         
         return self.gains
@@ -151,11 +152,11 @@ class sprof:
         if kind == 'gain':
             ref = kwargs['ref']
             if ref == 'NCEP':
-                g = fplt.gainplot(self.SDN[:-1], self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
+                g = fplt.gainplot(self.SDN, self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
             elif ref == 'WOA':
                 g = fplt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
 
-        if kind == 'cscatter':
+        elif kind == 'cscatter':
             var = kwargs.pop('varname')
 
             if not hasattr(self, 'df'):
@@ -163,7 +164,7 @@ class sprof:
 
             g = fplt.var_cscatter(self.df, varname=var, **kwargs)
 
-        if kind == 'profiles':
+        elif kind == 'profiles':
             varlist = kwargs.pop('varlist')
 
             if not hasattr(self, 'df'):
@@ -275,7 +276,7 @@ def apply_qc_adjustment():
 
     return None
 
-def load_argo(local_path, wmo, grid=False):
+def load_argo(local_path, wmo, grid=False, verbose=False):
     # -------------------------------------------------------------------------
     # argo
     # -------------------------------------------------------------------------
@@ -345,12 +346,14 @@ def load_argo(local_path, wmo, grid=False):
     BRtraj_flag = True
     if not BRtraj.exists():
         BRtraj_flag = False
-        sys.stdout.write('Continuing without BRtraj file\n')
+        if verbose:
+            sys.stdout.write('Continuing without BRtraj file\n')
     elif BRtraj.exists():
         BRtraj_nc = Dataset(BRtraj, 'r')
         if 'PPOX_DOXY' not in BRtraj_nc.variables.keys():
             BRtraj_flag = False
-            sys.stdout.write('BRtraj file exists, but no in-air data exists, continuing without using BRtraj file\n')
+            if verbose:
+                sys.stdout.write('BRtraj file exists, but no in-air data exists, continuing without using BRtraj file\n')
     else:
         BRtraj_nc = None
 
@@ -368,14 +371,20 @@ def load_argo(local_path, wmo, grid=False):
     M = Sprof_nc.dimensions['N_LEVELS'].size
     N = Sprof_nc.dimensions['N_PROF'].size
     # beginning of output dict with basic info, following variables in SAGEO2
-    floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M, CYCLES=np.arange(1,N+1))
+    floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M)
+    if not 'CYCLE_NUMBER' in Sprof_nc.variables.keys():
+        floatData['CYCLES'] = np.arange(1,N+1)
+    else:
+        floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].compressed()
 
     pres = Sprof_nc.variables['PRES'][:]
 
+    mt = Sprof_nc.variables['JULD'][:].mask
+
     t = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
 
-    lat = Sprof_nc.variables['LATITUDE'][:].compressed()
-    lon = Sprof_nc.variables['LONGITUDE'][:].compressed()
+    lat = np.ma.masked_array(Sprof_nc.variables['LATITUDE'][:].data, mask=mt).compressed()
+    lon = np.ma.masked_array(Sprof_nc.variables['LONGITUDE'][:].data, mask=mt).compressed()
 
     # use the pressure mask for all variables to ensure dimensions match
     floatData['PRES'] = pres.compressed()
@@ -551,7 +560,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     return ncep_interp, wt
 
 
-def calc_gain(data, ref, inair=True, zlim=25.):
+def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
     # -------------------------------------------------------------------------
     # calc_gain
     # -------------------------------------------------------------------------
@@ -588,7 +597,8 @@ def calc_gain(data, ref, inair=True, zlim=25.):
         raise ValueError('Flag ''inair'' set to True but partial pressure data not available')
 
     if inair:
-        sys.stdout.write('\nCalculating gains using NCEP surface pressure and float in-air measurements...\n')
+        if verbose:
+            sys.stdout.write('\nCalculating gains using NCEP surface pressure and float in-air measurements...\n')
         g = np.nan*np.ones((ref.shape[0],))
 
         # float partial pressure measurements at each cycle
@@ -606,10 +616,13 @@ def calc_gain(data, ref, inair=True, zlim=25.):
 
             g[i] = ref[i]/mean_float_data[i,2]
 
+        g[g == 0] = np.nan
+
         return g, mean_float_data
 
     else:
-        sys.stdout.write('\nCalculating gains using WOA surface data and float O2 percent saturation...\n')
+        if verbose:
+            sys.stdout.write('\nCalculating gains using WOA surface data and float O2 percent saturation...\n')
         surf_ix = data['PRES'] <= zlim
         surf_o2sat = data['O2Sat'][surf_ix]
         cycle = data['CYCLE_GRID'][surf_ix]
@@ -633,6 +646,7 @@ def calc_gain(data, ref, inair=True, zlim=25.):
 
             g[i] = ref_o2sat/mean_float_data[i,2]
         
+        g[g == 0] = np.nan
 
         return g, mean_float_data, woa_surf
 
