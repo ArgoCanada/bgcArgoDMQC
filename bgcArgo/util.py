@@ -3,8 +3,8 @@
 import numpy as np
 
 def decode_woa_var(varname):
+    '''take WOA variable name input and output relevant info'''
 
-    # take WOA variable name input and output relevant info
     input_to_woa_param = dict(
         T='t',
         S='s',
@@ -43,7 +43,8 @@ def decode_woa_var(varname):
 
 
 def get_lat_index(lat, lat_bounds):
-        # function to pull appropriate WOA latitude values
+        '''function to pull appropriate WOA latitude values'''
+
         lat_ix = np.logical_and(lat >= lat_bounds[0], lat <= lat_bounds[1])
 
         if not lat_ix.any():
@@ -60,7 +61,8 @@ def get_lat_index(lat, lat_bounds):
         return lat_ix
 
 def get_lon_index(lon, lon_bounds, cross180):
-    # function to pull appropriate WOA longitude values, handles crossing 180
+    '''function to pull appropriate WOA longitude values, handles crossing 180'''
+    
     if cross180:
         lon_ix = np.logical_or(lon <= lon_bounds[0], lon >= lon_bounds[1])
         lon_ix = np.where(lon_ix)[0]

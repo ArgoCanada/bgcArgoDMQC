@@ -7,7 +7,30 @@ import pylab as pl
 from scipy.interpolate import interp1d
 
 def interp_ncep_data(track, ncep_track, data):
-
+    '''
+    Function to interpolate NCEP reanalysios data along the provided 
+    track (t, lat, lon).
+    
+    INPUT:
+              track: array with the columns (SDN, lat, lon)
+              ncep_track: tuple with NCEP time, lat, lon arrays
+              data: output array from load_ncep_data()
+    
+    OUTPUT:
+              ncep_interp: 2D array of requested WOA parameter (depth x time)
+        
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 23-04-2020
+    
+    CHANGE LOG:
+    '''
     # extract ncep variables
     ncep_time, lat_sub, lon_sub = ncep_track
 
@@ -77,34 +100,30 @@ def interp_ncep_data(track, ncep_track, data):
     return ncep_interp, xwt
 
 def interp_woa_data(track, woa_track, data, verbose=False):
-    # -------------------------------------------------------------------------
-    # load_woa_data
-    # -------------------------------------------------------------------------
-    #
-    # Function to interpolate WOA18 climatological data along the provided 
-    # track (t, lat, lon).
-    #
-    # INPUT:
-    #           track: array with the columns (SDN, lat, lon)
-    #           woa_track: tuple with WOA time, lat, lon arrays
-    #           data: output array from load_woa_data()
-    #
-    # OUTPUT:
-    #           woa_interp: 2D array of requested WOA parameter (depth x time)
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Tanya Maurer & Josh Plant
-    #
-    # LAST UPDATE: 23-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to interpolate WOA18 climatological data along the provided 
+    track (t, lat, lon).
+    
+    INPUT:
+              track: array with the columns (SDN, lat, lon)
+              woa_track: tuple with WOA time, lat, lon arrays
+              data: output array from load_woa_data()
+    
+    OUTPUT:
+              woa_interp: 2D array of requested WOA parameter (depth x time)
+        
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 23-04-2020
+    
+    CHANGE LOG:
+    '''
 
     # get relevant WOA information
     z, lat, lon = woa_track

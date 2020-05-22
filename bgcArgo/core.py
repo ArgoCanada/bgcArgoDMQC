@@ -277,58 +277,54 @@ def apply_qc_adjustment():
     return None
 
 def load_argo(local_path, wmo, grid=False, verbose=False):
-    # -------------------------------------------------------------------------
-    # argo
-    # -------------------------------------------------------------------------
-    #
-    # Function to load in all data from a single float, using BRtraj, meta,
-    # and Sprof files
-    #
-    # INPUT:
-    #           local_path: local path of float data
-    #           wmo: float ID number
-    #
-    # OUTPUT:
-    #           floatData: python dict() object with the following fields
-    #               floatName: WMO number, from input
-    #               floatType: Kind of float (APEX, ARVOR, etc.)
-    #               N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
-    #               N_CYCLES: Number of profiles, Argo dimension N_PROF
-    #               CYCLES: Array from 1 to N_CYCLES
-    #               LATITUDE: Latitude (-90, 90) for each profile
-    #               LONGITUDE: Longitude (-180, 180) for each profile
-    #               SDN: Serial Date Number for each profile
-    #               PRES: Pressure (dbar), compressed to vector (1D array)
-    #               TEMP: Temperature (deg C)
-    #               PSAL: Salinity (psu)
-    #               DOXY: Dissolved Oxygen (micromole/kg)
-    #               O2sat: Oxygen percent saturation (%)
-    #               PPOX_DOXY: Oxygen partial pressure (atm) [if avail.]
-    #               TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
-    #               inair: Boolean to indicate if in-air data exists
-    #
-    #               *** CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE ***
-    #               ***     ANALOGOUS <VAR>_GRID FIELDS THAT MATCH THE     ***
-    #               ***   DIMENSION OF PRES, TEMP, PSAL, DOXY, AND O2SAT   ***
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Tanya Maurer & Josh Plant
-    #
-    # LAST UPDATE: 29-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # 22-04-2020: updated so that pressure mask determines all variables - need
-    # to add all quality flags to output
-    #
-    # 29-04-2020: switched file/path handling from os module to pathlib
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to load in all data from a single float, using BRtraj, meta,
+    and Sprof files
+    
+    INPUT:
+            local_path: local path of float data
+            wmo: float ID number
+    
+    OUTPUT:
+            floatData: python dict() object with the following fields
+                floatName: WMO number, from input
+                floatType: Kind of float (APEX, ARVOR, etc.)
+                N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
+                N_CYCLES: Number of profiles, Argo dimension N_PROF
+                CYCLES: Array from 1 to N_CYCLES
+                LATITUDE: Latitude (-90, 90) for each profile
+                LONGITUDE: Longitude (-180, 180) for each profile
+                SDN: Serial Date Number for each profile
+                PRES: Pressure (dbar), compressed to vector (1D array)
+                TEMP: Temperature (deg C)
+                PSAL: Salinity (psu)
+                DOXY: Dissolved Oxygen (micromole/kg)
+                O2sat: Oxygen percent saturation (%)
+                PPOX_DOXY: Oxygen partial pressure (atm) [if avail.]
+                TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
+                inair: Boolean to indicate if in-air data exists
+    
+                *** CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE ***
+                ***     ANALOGOUS <VAR>_GRID FIELDS THAT MATCH THE     ***
+                ***   DIMENSION OF PRES, TEMP, PSAL, DOXY, AND O2SAT   ***
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 29-04-2020
+    
+    CHANGE LOG:
+    
+    22-04-2020: updated so that pressure mask determines all variables - need
+    to add all quality flags to output
+    
+    29-04-2020: switched file/path handling from os module to pathlib  
+    '''
 
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
@@ -483,42 +479,38 @@ def track(float_data):
     return track
 
 def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
-    # -------------------------------------------------------------------------
-    # woa_to_float_track
-    # -------------------------------------------------------------------------
-    #
-    # Function to load WOA18 climatological data for comparison with autonomous
-    # floats. Data to be interpolated along the provided track (t, lat, lon).
-    # Combines function load_woa_data() and interp_woa_data() for convenience,
-    # see documentation for those funcions for more detail.
-    #
-    # INPUT:
-    #           track: array with the columns (SDN, lat, lon)
-    #           param: requested variable, valid inputs are
-    #               T: temperature
-    #               S: salinity
-    #               O2: dissolved oxygen
-    #               O2sat: oxygen percent saturation
-    #               NO3: nitrate
-    #               Si: silicate
-    #               PO4: phosphate
-    #           zlim: depth bounds (upper, lower), default to (0, 1000)
-    #           local_path: local directory where WOA files are stored, assumes
-    #                       current directory if no input
-    #
-    # OUTPUT:
-    #           z: WOA depth array
-    #           woa_interp: 2D array of requested WOA parameter (depth x time)
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # LAST UPDATE: 23-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to load WOA18 climatological data for comparison with autonomous
+    floats. Data to be interpolated along the provided track (t, lat, lon).
+    Combines function load_woa_data() and interp_woa_data() for convenience,
+    see documentation for those funcions for more detail.
+    
+    INPUT:
+              track: array with the columns (SDN, lat, lon)
+              param: requested variable, valid inputs are
+                  T: temperature
+                  S: salinity
+                  O2: dissolved oxygen
+                  O2sat: oxygen percent saturation
+                  NO3: nitrate
+                  Si: silicate
+                  PO4: phosphate
+              zlim: depth bounds (upper, lower), default to (0, 1000)
+              local_path: local directory where WOA files are stored, assumes
+                          current directory if no input
+    
+    OUTPUT:
+              z: WOA depth array
+              woa_interp: 2D array of requested WOA parameter (depth x time)
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    LAST UPDATE: 23-04-2020
+    
+    CHANGE LOG:
+    '''
 
     xtrack, woa_track, woa_data = io.load_woa_data(track, param, zlim=zlim, local_path=local_path)
     woa_interp, wt, yrday = interp.interp_woa_data(xtrack, woa_track, woa_data)
@@ -527,32 +519,28 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     return z, woa_interp, wt
 
 def ncep_to_float_track(varname, track, local_path='./'):
-    # -------------------------------------------------------------------------
-    # ncep_to_float_track
-    # -------------------------------------------------------------------------
-    #
-    # Function to load NCEP reanalysis data for comparison with autonomous
-    # floats. Data to be interpolated along the provided track (t, lat, lon).
-    # Combines function load_ncep_data() and interp_ncep_data() for convenience,
-    # see documentation for those funcions for more detail.
-    #
-    # INPUT:
-    #           varname: either 'pres' (pressure) or 'rhum' (relative humidity)
-    #           track: array with the columns (SDN, lat, lon)
-    #
-    # OUTPUT:
-    #           z: WOA depth array
-    #           woa_interp: 2D array of requested WOA parameter (depth x time)
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # LAST UPDATE: 29-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to load NCEP reanalysis data for comparison with autonomous
+    floats. Data to be interpolated along the provided track (t, lat, lon).
+    Combines function load_ncep_data() and interp_ncep_data() for convenience,
+    see documentation for those funcions for more detail.
+    
+    INPUT:
+              varname: either 'pres' (pressure) or 'rhum' (relative humidity)
+              track: array with the columns (SDN, lat, lon)
+    
+    OUTPUT:
+              z: WOA depth array
+              woa_interp: 2D array of requested WOA parameter (depth x time)
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    LAST UPDATE: 29-04-2020
+    
+    CHANGE LOG:
+    '''
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
     ncep_interp, wt = interp.interp_ncep_data(xtrack, ncep_track, data)
@@ -561,36 +549,32 @@ def ncep_to_float_track(varname, track, local_path='./'):
 
 
 def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
-    # -------------------------------------------------------------------------
-    # calc_gain
-    # -------------------------------------------------------------------------
-    #
-    # Calculate the gain for each profile by comparing float oxygen data to a
-    # reference data set, either NCEP for in-air or WOA surface data if in-air
-    # comparison is not available.
-    #
-    # INPUT:
-    #           data: float data dict object, output from load_argo_data()
-    #           ref: reference data set, either NCEP pO2 or WOA O2sat
-    #           inair: boolean flag to indicate if comparison to NCEP in-air
-    #               data or WOA surface data should be done, default to
-    #               in-air, but function also performs check
-    #           zlim: lower limit to define as 'surface' and take mean within,
-    #                 default value 25 dbar, for use only when inair is False
-    #
-    # OUTPUT:
-    #           g: vector of gains
-    #           surf_data: array of float surface stats (cycle, N, mean, std)
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # LAST UPDATE: 23-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Calculate the gain for each profile by comparing float oxygen data to a
+    reference data set, either NCEP for in-air or WOA surface data if in-air
+    comparison is not available.
+    
+    INPUT:
+              data: float data dict object, output from load_argo_data()
+              ref: reference data set, either NCEP pO2 or WOA O2sat
+              inair: boolean flag to indicate if comparison to NCEP in-air
+                  data or WOA surface data should be done, default to
+                  in-air, but function also performs check
+              zlim: lower limit to define as 'surface' and take mean within,
+                    default value 25 dbar, for use only when inair is False
+    
+    OUTPUT:
+              g: vector of gains
+              surf_data: array of float surface stats (cycle, N, mean, std)
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    LAST UPDATE: 23-04-2020
+    
+    CHANGE LOG:
+    '''
 
     # check which reference data to use
     if inair and 'PPOX_DOXY' not in data.keys():
@@ -651,31 +635,27 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         return g, mean_float_data, woa_surf
 
 def aic(data,resid):
-    # -------------------------------------------------------------------------
-    # aic
-    # -------------------------------------------------------------------------
-    #
-    # function to calculate the Akiake Information Criteria (AIC) as a metric
-    # for assessing the appropriate number of breakpoints in the calculation of
-    # drifts in O2 gains.
-    #
-    # INPUT:
-    #
-    # OUTPUT:
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Tanya Maurer & Josh Plant
-    #
-    # LAST UPDATE: 20-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to calculate the Akiake Information Criteria (AIC) as a metric
+    for assessing the appropriate number of breakpoints in the calculation of
+    drifts in O2 gains.
+    
+    INPUT:
+    
+    OUTPUT:
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 20-04-2020
+    
+    CHANGE LOG:
+    '''
 
     # calculate AIC
     SSE = np.sum(resid**2) # sum square errors
@@ -696,31 +676,27 @@ def aic(data,resid):
 
 
 def bic(data,resid):
-    # -------------------------------------------------------------------------
-    # bic
-    # -------------------------------------------------------------------------
-    #
-    # function to calculate the Bayesian Information Criteria (BIC) as a metric
-    # for assessing the appropriate number of breakpoints in the calculation of
-    # drifts in O2 gains.
-    #
-    # INPUT:
-    #
-    # OUTPUT:
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Tanya Maurer & Josh Plant
-    #
-    # LAST UPDATE: 20-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to calculate the Bayesian Information Criteria (BIC) as a metric
+    for assessing the appropriate number of breakpoints in the calculation of
+    drifts in O2 gains.
+    
+    INPUT:
+    
+    OUTPUT:
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 20-04-2020
+    
+    CHANGE LOG:
+    '''
 
     # calculate BIC
     errorlim = 0 # cap on residuals, useful for noisy pH and nitrate data
@@ -740,35 +716,31 @@ def bic(data,resid):
     return bic_value
 
 def get_var_by(v1, v2, float_data):
-    # -------------------------------------------------------------------------
-    # get_var_by
-    # -------------------------------------------------------------------------
-    #
-    # function to calculate the mean of one variable (v1) indexed by a second
-    # variable (v2) in a float_data dictionary (output of sagepy.argo), though
-    # it would work with any python dict
-    #
-    # INPUT:
-    #           v1: string input of a key in float_data
-    #           v2: string input of a key in float_data
-    #           float_data: python dict() object
-    #
-    # OUTPUT:
-    #           out_array: 1D numpy array with mean values
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Tanya Maurer & Josh Plant
-    #
-    # LAST UPDATE: 20-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Function to calculate the mean of one variable (v1) indexed by a second
+    variable (v2) in a float_data dictionary (output of sagepy.argo), though
+    it would work with any python dict
+    
+    INPUT:
+              v1: string input of a key in float_data
+              v2: string input of a key in float_data
+              float_data: python dict() object
+    
+    OUTPUT:
+              out_array: 1D numpy array with mean values
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Tanya Maurer & Josh Plant
+    
+    LAST UPDATE: 20-04-2020
+    
+    CHANGE LOG:
+    '''
 
     
     index = np.unique(float_data[v2])

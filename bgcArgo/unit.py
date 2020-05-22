@@ -3,37 +3,33 @@
 import numpy as np
 
 def oxy_sol(S, T, unit='micromole/kg'):
-    # -------------------------------------------------------------------------
-    # oxy_sol
-    # -------------------------------------------------------------------------
-    #
-    # Calculate oxygen saturation concentration in seawater as a function of
-    # S & T, in equilibrium with standard coponsition moist air at 1atm total
-    # pressure. From Garcia & Gordon (1992) eq. 8 (p. 1310) using coefficients
-    # of Benson & Krause in table 1, as used in Sarmiento & Gruber's "Ocean
-    # Biogeochemical Dynamics" ch. 3, p. 81, table 3.2.4.
-    #
-    # INPUT:
-    #           S: salinity, psu
-    #           T: temperature, deg C
-    #           unit: micromole/kg or millimole/m3, default if micromole/kg
-    #
-    # OUTPUT:
-    #           O2sol: oxygen solubility, unit same as input unit
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    # code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    # written by Josh Plant
-    #
-    # LAST UPDATE: 21-04-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Calculate oxygen saturation concentration in seawater as a function of
+    S & T, in equilibrium with standard coponsition moist air at 1atm total
+    pressure. From Garcia & Gordon (1992) eq. 8 (p. 1310) using coefficients
+    of Benson & Krause in table 1, as used in Sarmiento & Gruber's "Ocean
+    Biogeochemical Dynamics" ch. 3, p. 81, table 3.2.4.
+    
+    INPUT:
+              S: salinity, psu
+              T: temperature, deg C
+              unit: micromole/kg or millimole/m3, default if micromole/kg
+    
+    OUTPUT:
+              O2sol: oxygen solubility, unit same as input unit
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+    written by Josh Plant
+    
+    LAST UPDATE: 21-04-2020
+    
+    CHANGE LOG:
+    '''
 
     # check for improper units
     if unit != 'micromole/kg' and unit != 'millimole/m3':
@@ -58,27 +54,23 @@ def oxy_sol(S, T, unit='micromole/kg'):
     return O2sol
 
 def pH2O(T):
-    # -------------------------------------------------------------------------
-    # pH2O
-    # -------------------------------------------------------------------------
-    #
-    # Calculate vapor pressure of water
-    #
-    # INPUT:
-    #           T: temperature, deg C
-    #
-    # OUTPUT:
-    #           vapor_pressure: vapor pressure of water, Pa
-    #
-    # AUTHOR:   Christopher Gordon
-    #           Fisheries and Oceans Canada
-    #           chris.gordon@dfo-mpo.gc.ca
-    #
-    # LAST UPDATE: 06-05-2020
-    #
-    # CHANGE LOG:
-    #
-    # -------------------------------------------------------------------------
+    '''
+    Calculate vapor pressure of water
+    
+    INPUT:
+              T: temperature, deg C
+    
+    OUTPUT:
+              vapor_pressure: vapor pressure of water, Pa
+    
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    LAST UPDATE: 06-05-2020
+    
+    CHANGE LOG:
+    '''
     
     # temperature in kelvin
     Tk = T + 273.15
@@ -117,8 +109,8 @@ def pO2(DOXY, S, T):
 
 def atmos_pO2(P, pH2O):
     # molar fraction of oxygen in air
-        XO2 = 0.20946
-        # reference partial pressure of oxygen in air
-        ppox = (P - pH2O) * XO2
+    XO2 = 0.20946
+    # reference partial pressure of oxygen in air
+    ppox = (P - pH2O) * XO2
 
-        return ppox
+    return ppox
