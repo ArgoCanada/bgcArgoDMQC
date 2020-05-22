@@ -79,7 +79,7 @@ class sprof:
         self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
     
     def to_dict(self):
-        return self.__floatdict__
+        return self.__floatdict__.copy()
     
     def to_dataframe(self):
         import pandas as pd
@@ -97,12 +97,12 @@ class sprof:
 
         self.df = df
 
-        return df
+        return df.copy()
 
     def get_track(self):
         self.track = track(self.__floatdict__)
 
-        return self.track
+        return self.track.copy()
 
     def get_ncep(self):
 
@@ -111,7 +111,7 @@ class sprof:
 
         self.NCEP, self.__NCEPweights__ = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
         
-        return self.NCEP
+        return self.NCEP.copy()
 
     def get_woa(self):
 
@@ -120,7 +120,7 @@ class sprof:
         
         self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
 
-        return self.WOA
+        return self.WOA.copy()
 
     def calc_gains(self, ref='NCEP', zlim=25.):
 
@@ -145,7 +145,7 @@ class sprof:
             self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim)
             self.gains = self.__WOAgains__
         
-        return self.gains
+        return self.gains.copy()
 
     def plot(self, kind, **kwargs):
 
