@@ -55,27 +55,36 @@ class sprof:
         # metadata and dimension variables
         self.floatName = self.__floatdict__['floatName']
         # self.floatType = self.__floatdict__['floatType']
-        self.N_CYCLES = self.__floatdict__['N_CYCLES']
-        self.N_LEVELS = self.__floatdict__['N_LEVELS']
-        self.CYCLES = self.__floatdict__['CYCLES']
+        self.N_CYCLES  = self.__floatdict__['N_CYCLES']
+        self.N_LEVELS  = self.__floatdict__['N_LEVELS']
+        self.CYCLES    = self.__floatdict__['CYCLES']
 
         # time and location data
-        self.SDN = self.__floatdict__['SDN']
-        self.LATITUDE = self.__floatdict__['LATITUDE']
+        self.SDN       = self.__floatdict__['SDN']
+        self.LATITUDE  = self.__floatdict__['LATITUDE']
         self.LONGITUDE = self.__floatdict__['LONGITUDE']
 
-        # bgc and core variables
+        # core variables
         self.PRES = self.__floatdict__['PRES']
         self.TEMP = self.__floatdict__['TEMP']
         self.PSAL = self.__floatdict__['PSAL']
-        self.DOXY = self.__floatdict__['DOXY']
         # potential density
         self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
+        # bgc variables - not necessarily all there so check if the fields exist
+        if 'DOXY' in self.__floatdict__.keys():
+            self.DOXY = self.__floatdict__['DOXY']
+        if 'CHLA' in self.__floatdict__.keys():
+            self.CHLA = self.__floatdict__['CHLA']
+        if 'BBP700' in self.__floatdict__.keys():
+            self.BBP700 = self.__floatdict__['BBP700']
+        if 'CDOM' in self.__floatdict__.keys():
+            self.CDOM = self.__floatdict__['CDOM']
+
         # not naturally gridded variables
-        self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']
-        self.SDN_GRID = self.__floatdict__['SDN_GRID']
-        self.LATITUDE_GRID = self.__floatdict__['LATITUDE_GRID']
+        self.CYCLE_GRID     = self.__floatdict__['CYCLE_GRID']
+        self.SDN_GRID       = self.__floatdict__['SDN_GRID']
+        self.LATITUDE_GRID  = self.__floatdict__['LATITUDE_GRID']
         self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
     
     def to_dict(self):
@@ -85,15 +94,22 @@ class sprof:
         import pandas as pd
 
         df = pd.DataFrame()
-        df['CYCLE'] = self.CYCLE_GRID
-        df['SDN'] = self.SDN_GRID
-        df['LATITUDE'] = self.LATITUDE_GRID
+        df['CYCLE']     = self.CYCLE_GRID
+        df['SDN']       = self.SDN_GRID
+        df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
-        df['PRES'] = self.PRES
-        df['TEMP'] = self.TEMP
-        df['PSAL'] = self.PSAL
-        df['PDEN'] = self.PDEN
-        df['DOXY'] = self.DOXY
+        df['PRES']      = self.PRES
+        df['TEMP']      = self.TEMP
+        df['PSAL']      = self.PSAL
+        df['PDEN']      = self.PDEN
+        if 'DOXY' in self.__floatdict__.keys():
+            df['DOXY']      = self.DOXY
+        if 'CHLA' in self.__floatdict__.keys():
+            df['CHLA']      = self.CHLA
+        if 'BBP700' in self.__floatdict__.keys():
+            df['BBP700']      = self.BBP700
+        if 'CDOM' in self.__floatdict__.keys():
+            df['CDOM']      = self.CDOM
 
         self.df = df
 
@@ -189,22 +205,31 @@ class profile:
         # metadata and dimension variables
         self.floatName = self.__floatdict__['floatName']
         self.floatType = self.__floatdict__['floatType']
-        self.N_LEVELS = self.__floatdict__['N_LEVELS']
-        self.CYCLE = self.__floatdict__['CYCLE']
+        self.N_LEVELS  = self.__floatdict__['N_LEVELS']
+        self.CYCLE     = self.__floatdict__['CYCLE']
 
         # time and location data
-        self.SDN = self.__floatdict__['SDN']
-        self.LATITUDE = self.__floatdict__['LATITUDE']
+        self.SDN       = self.__floatdict__['SDN']
+        self.LATITUDE  = self.__floatdict__['LATITUDE']
         self.LONGITUDE = self.__floatdict__['LONGITUDE']
 
-        # bgc and core variables
+        # core variables
         self.PRES = self.__floatdict__['PRES']
         self.TEMP = self.__floatdict__['TEMP']
         self.PSAL = self.__floatdict__['PSAL']
-        self.DOXY = self.__floatdict__['DOXY']
         # potential density
         self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
+        # bgc variables - not necessarily all there so check if the fields exist
+        if 'DOXY' in self.__floatdict__.keys():
+            self.DOXY = self.__floatdict__['DOXY']
+        if 'CHLA' in self.__floatdict__.keys():
+            self.CHLA = self.__floatdict__['CHLA']
+        if 'BBP700' in self.__floatdict__.keys():
+            self.BBP700 = self.__floatdict__['BBP700']
+        if 'CDOM' in self.__floatdict__.keys():
+            self.CDOM = self.__floatdict__['CDOM']
+             
     def to_dict(self):
         return self.__floatdict__
     
@@ -212,19 +237,22 @@ class profile:
         import pandas as pd
 
         df = pd.DataFrame()
-        df['CYCLE'] = np.array(self.N_LEVEL*[self.CYCLE])
-        df['SDN'] = np.array(self.N_LEVEL*[self.SDN])
-        df['LATITUDE'] = np.array(self.N_LEVEL*[self.LATITUDE])
-        df['LONGITUDE'] = np.array(self.N_LEVEL*[self.LONGITUDE])
-        df['PRES'] = self.PRES
-        df['TEMP'] = self.TEMP
-        df['PSAL'] = self.PSAL
-        df['PDEN'] = self.PDEN
-        df['DOXY'] = self.DOXY
-
-        self.df = df
-
-        return df
+        df['CYCLE']     = self.CYCLE_GRID
+        df['SDN']       = self.SDN_GRID
+        df['LATITUDE']  = self.LATITUDE_GRID
+        df['LONGITUDE'] = self.LONGITUDE_GRID
+        df['PRES']      = self.PRES
+        df['TEMP']      = self.TEMP
+        df['PSAL']      = self.PSAL
+        df['PDEN']      = self.PDEN
+        if 'DOXY' in self.__floatdict__.keys():
+            df['DOXY']      = self.DOXY
+        if 'CHLA' in self.__floatdict__.keys():
+            df['CHLA']      = self.CHLA
+        if 'BBP700' in self.__floatdict__.keys():
+            df['BBP700']      = self.BBP700
+        if 'CDOM' in self.__floatdict__.keys():
+            df['CDOM']      = self.CDOM
 
     def get_track(self):
         self.track = track(self.__floatdict__)
@@ -300,7 +328,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
                 PSAL: Salinity (psu)
                 DOXY: Dissolved Oxygen (micromole/kg)
                 O2sat: Oxygen percent saturation (%)
-                PPOX_DOXY: Oxygen partial pressure (atm) [if avail.]
+                PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
                 TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
                 inair: Boolean to indicate if in-air data exists
     
@@ -323,7 +351,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     22-04-2020: updated so that pressure mask determines all variables - need
     to add all quality flags to output
     
-    29-04-2020: switched file/path handling from os module to pathlib  
+    29-04-2020: switched file/path handling from os module to pathlib
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -374,10 +402,8 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
         floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].compressed()
 
     pres = Sprof_nc.variables['PRES'][:]
-
-    mt = Sprof_nc.variables['JULD'][:].mask
-
-    t = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
+    mt   = Sprof_nc.variables['JULD'][:].mask
+    t    = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
 
     lat = np.ma.masked_array(Sprof_nc.variables['LATITUDE'][:].data, mask=mt).compressed()
     lon = np.ma.masked_array(Sprof_nc.variables['LONGITUDE'][:].data, mask=mt).compressed()
@@ -386,11 +412,17 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     floatData['PRES'] = pres.compressed()
     floatData['TEMP'] = np.ma.masked_array(Sprof_nc.variables['TEMP'][:].data, mask=pres.mask).compressed()
     floatData['PSAL'] = np.ma.masked_array(Sprof_nc.variables['PSAL'][:].data, mask=pres.mask).compressed()
-    floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
+    if 'DOXY' in Sprof_nc.variables.keys():
+        floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
+    if 'CHLA' in Sprof_nc.variables.keys():
+        floatData['CHLA'] = np.ma.masked_array(Sprof_nc.variables['CHLA'][:].data, mask=pres.mask).compressed()
+    if 'BBP700' in Sprof_nc.variables.keys():
+        floatData['BBP700'] = np.ma.masked_array(Sprof_nc.variables['BBP700'][:].data, mask=pres.mask).compressed()
+    if 'CDOM' in Sprof_nc.variables.keys():
+        floatData['CDOM'] = np.ma.masked_array(Sprof_nc.variables['CDOM'][:].data, mask=pres.mask).compressed()
 
-    floatData['SDN'] = t
-
-    floatData['LATITUDE'] = lat
+    floatData['SDN']       = t
+    floatData['LATITUDE']  = lat
     floatData['LONGITUDE'] = lon
 
     if grid:
@@ -465,9 +497,9 @@ def load_profile(fn):
     floatData['PSAL'] = np.ma.masked_array(nc.variables['PSAL'][:].data, mask=pres.mask).compressed()
     floatData['DOXY'] = np.ma.masked_array(nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
 
-    floatData['SDN'] = t
+    floatData['SDN']  = t
 
-    floatData['LATITUDE'] = lat
+    floatData['LATITUDE']  = lat
     floatData['LONGITUDE'] = lon
 
     return floatData
