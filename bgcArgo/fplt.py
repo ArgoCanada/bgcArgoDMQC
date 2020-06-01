@@ -3,6 +3,7 @@
 import os, sys
 
 import numpy as np
+import pylab as pl
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -260,7 +261,11 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
 
+    subset_df = df.loc[df.CYCLE == Ncycle]
+    date = pl.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
+
     axes[0].set_ylabel(ylabel)
+    axes[0].set_title('Cycle #{:d}, {}'.format(Ncycle, date))
 
     w, h = fig.get_figwidth(), fig.get_figheight()
     fig.set_size_inches(w*len(varlist)/3, h)
