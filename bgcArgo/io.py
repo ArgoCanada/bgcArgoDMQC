@@ -218,10 +218,8 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
             # if its a float
             else:
                 ftp_wmo_path = a
-                print(ftp_wmo_path.split('/'))
                 wmo = ftp_wmo_path.split('/')[-1]
                 dac = ftp_wmo_path.split('/')[-2]
-                print(wmo)
                 ftp.cwd(ftp_wmo_path)
 
                 files = ftp.nlst('*.nc')
