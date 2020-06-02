@@ -245,8 +245,8 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
             BBP700_ADJUSTED='$\mathsf{b_{bp}}$ (m$^{-1}$)',
             CDOM='CDOM (mg m$^{-3}$)',
             CDOM_ADJUSTED='CDOM (mg m$^{-3}$)',
-            DOXY='Dissolved Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
-            DOXY_ADJUSTED='Dissolved Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOXY='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
             DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
         )
         xlabels = [var_units[v] for v in varlist]
