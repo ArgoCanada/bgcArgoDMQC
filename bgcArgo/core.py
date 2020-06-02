@@ -80,6 +80,14 @@ class sprof:
             self.BBP700 = self.__floatdict__['BBP700']
         if 'CDOM' in self.__floatdict__.keys():
             self.CDOM = self.__floatdict__['CDOM']
+        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
+            self.DOXY_ADJUSTED = self.__floatdict__['DOXY_ADJUSTED']
+        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
+            self.CHLA_ADJUSTED = self.__floatdict__['CHLA_ADJUSTED']
+        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
+            self.BBP700_ADJUSTED = self.__floatdict__['BBP700_ADJUSTED']
+        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
+            self.CDOM_ADJUSTED = self.__floatdict__['CDOM_ADJUSTED']
 
         # not naturally gridded variables
         self.CYCLE_GRID     = self.__floatdict__['CYCLE_GRID']
@@ -107,9 +115,17 @@ class sprof:
         if 'CHLA' in self.__floatdict__.keys():
             df['CHLA']      = self.CHLA
         if 'BBP700' in self.__floatdict__.keys():
-            df['BBP700']      = self.BBP700
+            df['BBP700']    = self.BBP700
         if 'CDOM' in self.__floatdict__.keys():
             df['CDOM']      = self.CDOM
+        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
+            df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
+        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
+            df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
+        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
+            df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
+        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
+            df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
 
         self.df = df
 
@@ -229,6 +245,14 @@ class profile:
             self.BBP700 = self.__floatdict__['BBP700']
         if 'CDOM' in self.__floatdict__.keys():
             self.CDOM = self.__floatdict__['CDOM']
+        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
+            self.DOXY_ADJUSTED = self.__floatdict__['DOXY_ADJUSTED']
+        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
+            self.CHLA_ADJUSTED = self.__floatdict__['CHLA_ADJUSTED']
+        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
+            self.BBP700_ADJUSTED = self.__floatdict__['BBP700_ADJUSTED']
+        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
+            self.CDOM_ADJUSTED = self.__floatdict__['CDOM_ADJUSTED']
              
     def to_dict(self):
         return self.__floatdict__
@@ -250,9 +274,21 @@ class profile:
         if 'CHLA' in self.__floatdict__.keys():
             df['CHLA']      = self.CHLA
         if 'BBP700' in self.__floatdict__.keys():
-            df['BBP700']      = self.BBP700
+            df['BBP700']    = self.BBP700
         if 'CDOM' in self.__floatdict__.keys():
             df['CDOM']      = self.CDOM
+        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
+            df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
+        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
+            df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
+        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
+            df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
+        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
+            df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
+
+        self.df = df
+
+        return self.df
 
     def get_track(self):
         self.track = track(self.__floatdict__)
@@ -401,25 +437,41 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     else:
         floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].compressed()
 
-    pres = Sprof_nc.variables['PRES'][:]
-    mt   = Sprof_nc.variables['JULD'][:].mask
-    t    = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
+    mask = Sprof_nc.variables['PRES'][:].mask
+    mask_vars = ['TEMP','PSAL']
+    if 'DOXY' in Sprof_nc.variables.keys():
+        mask_vars = mask_vars + ['DOXY']
+    if 'DOXY_ADJUSTED' in Sprof_nc.variables.keys():
+        mask_vars = mask_vars + ['DOXY_ADJUSTED']
 
+    for v in mask_vars:
+        mask = np.logical_or(mask, Sprof_nc.variables[v][:].mask)
+
+    mt  = Sprof_nc.variables['JULD'][:].mask
+    t   = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
     lat = np.ma.masked_array(Sprof_nc.variables['LATITUDE'][:].data, mask=mt).compressed()
     lon = np.ma.masked_array(Sprof_nc.variables['LONGITUDE'][:].data, mask=mt).compressed()
 
     # use the pressure mask for all variables to ensure dimensions match
-    floatData['PRES'] = pres.compressed()
-    floatData['TEMP'] = np.ma.masked_array(Sprof_nc.variables['TEMP'][:].data, mask=pres.mask).compressed()
-    floatData['PSAL'] = np.ma.masked_array(Sprof_nc.variables['PSAL'][:].data, mask=pres.mask).compressed()
+    floatData['PRES'] = np.ma.masked_array(Sprof_nc.variables['PRES'][:].data, mask=mask).compressed()
+    floatData['TEMP'] = np.ma.masked_array(Sprof_nc.variables['TEMP'][:].data, mask=mask).compressed()
+    floatData['PSAL'] = np.ma.masked_array(Sprof_nc.variables['PSAL'][:].data, mask=mask).compressed()
     if 'DOXY' in Sprof_nc.variables.keys():
-        floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
+        floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=mask).compressed()
     if 'CHLA' in Sprof_nc.variables.keys():
-        floatData['CHLA'] = np.ma.masked_array(Sprof_nc.variables['CHLA'][:].data, mask=pres.mask).compressed()
+        floatData['CHLA'] = np.ma.masked_array(Sprof_nc.variables['CHLA'][:].data, mask=mask).compressed()
     if 'BBP700' in Sprof_nc.variables.keys():
-        floatData['BBP700'] = np.ma.masked_array(Sprof_nc.variables['BBP700'][:].data, mask=pres.mask).compressed()
+        floatData['BBP700'] = np.ma.masked_array(Sprof_nc.variables['BBP700'][:].data, mask=mask).compressed()
     if 'CDOM' in Sprof_nc.variables.keys():
-        floatData['CDOM'] = np.ma.masked_array(Sprof_nc.variables['CDOM'][:].data, mask=pres.mask).compressed()
+        floatData['CDOM'] = np.ma.masked_array(Sprof_nc.variables['CDOM'][:].data, mask=mask).compressed()
+    if 'DOXY_ADJUSTED' in Sprof_nc.variables.keys():
+        floatData['DOXY_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['DOXY_ADJUSTED'][:].data, mask=mask).compressed()
+    if 'CHLA_ADJUSTED' in Sprof_nc.variables.keys():
+        floatData['CHLA_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['CHLA_ADJUSTED'][:].data, mask=mask).compressed()
+    if 'BBP700_ADJUSTED' in Sprof_nc.variables.keys():
+        floatData['BBP700_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['BBP700_ADJUSTED'][:].data, mask=mask).compressed()
+    if 'CDOM_ADJUSTED' in Sprof_nc.variables.keys():
+        floatData['CDOM_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['CDOM_ADJUSTED'][:].data, mask=mask).compressed()
 
     floatData['SDN']       = t
     floatData['LATITUDE']  = lat
@@ -432,11 +484,11 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
 
         floatData['floatType'] = ftype
 
-        lat_grid = np.ma.masked_array(np.tile(lat,(M,1)).T, mask=pres.mask).compressed()
-        lon_grid = np.ma.masked_array(np.tile(lon,(M,1)).T, mask=pres.mask).compressed()
+        lat_grid = np.ma.masked_array(np.tile(lat,(M,1)).T, mask=mask).compressed()
+        lon_grid = np.ma.masked_array(np.tile(lon,(M,1)).T, mask=mask).compressed()
     
-        t_grid = np.ma.masked_array(np.tile(t,(M,1)).T, mask=pres.mask)
-        cycle_grid = np.ma.masked_array(np.tile(floatData['CYCLES'],(M,1)).T, mask=pres.mask)
+        t_grid = np.ma.masked_array(np.tile(t,(M,1)).T, mask=mask)
+        cycle_grid = np.ma.masked_array(np.tile(floatData['CYCLES'],(M,1)).T, mask=mask)
     
         floatData['SDN_GRID']  = t_grid.compressed()
         floatData['CYCLE_GRID'] = cycle_grid.compressed()
