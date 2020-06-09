@@ -275,18 +275,21 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
 
     for i,v in enumerate(varlist):
         for n in range(Nprof):
-            subset_df = df.loc[df.CYCLE == Ncycle + n]
+            subset_df = df.loc[df.CYCLE == df.cycle.iloc[Ncycle + n - 1]]
 
             axes[i].plot(subset_df[v], subset_df[zvar], **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
 
-    subset_df = df.loc[df.CYCLE == Ncycle]
+    subset_df = df.loc[df.CYCLE == df.cycle.iloc[Ncycle-1]]
     date = pl.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
 
     axes[0].set_ylabel(ylabel)
-    axes[0].set_title('Cycle #{:d}, {}'.format(Ncycle, date))
+    if Nprof != 1:
+        axes[0].set_title('Cyc. {:d}-{:d}, {}'.format(df.CYCLE.iloc[Ncycle-1], df.CYCLE.iloc[Ncycle-1+Nprof-1], date))
+    else:
+        axes[0].set_title('Cyc. {:d}, {}'.format(df.CYCLE.iloc[Ncycle-1], date))
 
     w, h = fig.get_figwidth(), fig.get_figheight()
     fig.set_size_inches(w*len(varlist)/3, h)
