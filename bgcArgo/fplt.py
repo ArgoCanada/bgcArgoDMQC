@@ -271,25 +271,27 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
             if ylabel is None:
                 ylabel = 'Density (kg m$^{-3}$)'
 
-    df = df.loc[df[zvar] < ylim[1]*1.1]
+    df.loc[df[zvar] > ylim[1]*1.1] = np.nan
+
+    CYCNUM = df.CYCLE.unique()
 
     for i,v in enumerate(varlist):
         for n in range(Nprof):
-            subset_df = df.loc[df.CYCLE == df.cycle.iloc[Ncycle + n - 1]]
+            subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1 + n-1]]
 
             axes[i].plot(subset_df[v], subset_df[zvar], **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
 
-    subset_df = df.loc[df.CYCLE == df.cycle.iloc[Ncycle-1]]
+    subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1]]
     date = pl.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
 
     axes[0].set_ylabel(ylabel)
     if Nprof != 1:
-        axes[0].set_title('Cyc. {:d}-{:d}, {}'.format(df.CYCLE.iloc[Ncycle-1], df.CYCLE.iloc[Ncycle-1+Nprof-1], date))
+        axes[0].set_title('Cyc. {:d}-{:d}, {}'.format(int(CYCNUM[Ncycle-1]), int(CYCNUM[Ncycle-1+Nprof-1]), date))
     else:
-        axes[0].set_title('Cyc. {:d}, {}'.format(df.CYCLE.iloc[Ncycle-1], date))
+        axes[0].set_title('Cyc. {:d}, {}'.format(int(CYCNUM[Ncycle-1]), date))
 
     w, h = fig.get_figwidth(), fig.get_figheight()
     fig.set_size_inches(w*len(varlist)/3, h)
