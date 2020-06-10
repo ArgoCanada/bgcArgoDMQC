@@ -432,11 +432,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     N = Sprof_nc.dimensions['N_PROF'].size
     # beginning of output dict with basic info, following variables in SAGEO2
     floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M)
-    if not 'CYCLE_NUMBER' in Sprof_nc.variables.keys():
-        floatData['CYCLES'] = np.arange(1,N+1)
-    else:
-        floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].compressed()
-
+    
     mask = Sprof_nc.variables['PRES'][:].mask
     mask_vars = ['TEMP','PSAL']
     if 'DOXY' in Sprof_nc.variables.keys():
@@ -451,6 +447,11 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     t   = Sprof_nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
     lat = np.ma.masked_array(Sprof_nc.variables['LATITUDE'][:].data, mask=mt).compressed()
     lon = np.ma.masked_array(Sprof_nc.variables['LONGITUDE'][:].data, mask=mt).compressed()
+    if not 'CYCLE_NUMBER' in Sprof_nc.variables.keys():
+        floatData['CYCLES'] = np.arange(1,N+1)
+    else:
+        floatData['CYCLES'] = np.ma.masked_array(Sprof_nc.variables['CYCLE_NUMBER'][:].data, mask=mt).compressed()
+
 
     # use the pressure mask for all variables to ensure dimensions match
     floatData['PRES'] = np.ma.masked_array(Sprof_nc.variables['PRES'][:].data, mask=mask).compressed()
