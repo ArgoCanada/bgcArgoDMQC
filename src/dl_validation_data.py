@@ -13,5 +13,4 @@ dacpath = '/ifremer/argo/dac'
 fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, wmo)]
 
 local_path = '/Users/gordonc/Documents/data/Argo'
-
 bgcArgo.io.get_argo(fltpath, local_path=local_path)
