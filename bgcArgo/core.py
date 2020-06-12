@@ -238,13 +238,13 @@ class profile:
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in self.__floatdict__.keys():
-            self.DOXY = self.__floatdict__['DOXY']
+            self.DOXY   = self.__floatdict__['DOXY']
         if 'CHLA' in self.__floatdict__.keys():
-            self.CHLA = self.__floatdict__['CHLA']
+            self.CHLA   = self.__floatdict__['CHLA']
         if 'BBP700' in self.__floatdict__.keys():
             self.BBP700 = self.__floatdict__['BBP700']
         if 'CDOM' in self.__floatdict__.keys():
-            self.CDOM = self.__floatdict__['CDOM']
+            self.CDOM   = self.__floatdict__['CDOM']
         if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
             self.DOXY_ADJUSTED = self.__floatdict__['DOXY_ADJUSTED']
         if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
@@ -458,21 +458,21 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     floatData['TEMP'] = np.ma.masked_array(Sprof_nc.variables['TEMP'][:].data, mask=mask).compressed()
     floatData['PSAL'] = np.ma.masked_array(Sprof_nc.variables['PSAL'][:].data, mask=mask).compressed()
     if 'DOXY' in Sprof_nc.variables.keys():
-        floatData['DOXY'] = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=mask).compressed()
+        floatData['DOXY']            = np.ma.masked_array(Sprof_nc.variables['DOXY'][:].data, mask=mask).compressed()
     if 'CHLA' in Sprof_nc.variables.keys():
-        floatData['CHLA'] = np.ma.masked_array(Sprof_nc.variables['CHLA'][:].data, mask=mask).compressed()
+        floatData['CHLA']            = np.ma.masked_array(Sprof_nc.variables['CHLA'][:].data, mask=mask).compressed()
     if 'BBP700' in Sprof_nc.variables.keys():
-        floatData['BBP700'] = np.ma.masked_array(Sprof_nc.variables['BBP700'][:].data, mask=mask).compressed()
+        floatData['BBP700']          = np.ma.masked_array(Sprof_nc.variables['BBP700'][:].data, mask=mask).compressed()
     if 'CDOM' in Sprof_nc.variables.keys():
-        floatData['CDOM'] = np.ma.masked_array(Sprof_nc.variables['CDOM'][:].data, mask=mask).compressed()
+        floatData['CDOM']            = np.ma.masked_array(Sprof_nc.variables['CDOM'][:].data, mask=mask).compressed()
     if 'DOXY_ADJUSTED' in Sprof_nc.variables.keys():
-        floatData['DOXY_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['DOXY_ADJUSTED'][:].data, mask=mask).compressed()
+        floatData['DOXY_ADJUSTED']   = np.ma.masked_array(Sprof_nc.variables['DOXY_ADJUSTED'][:].data, mask=mask).compressed()
     if 'CHLA_ADJUSTED' in Sprof_nc.variables.keys():
-        floatData['CHLA_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['CHLA_ADJUSTED'][:].data, mask=mask).compressed()
+        floatData['CHLA_ADJUSTED']   = np.ma.masked_array(Sprof_nc.variables['CHLA_ADJUSTED'][:].data, mask=mask).compressed()
     if 'BBP700_ADJUSTED' in Sprof_nc.variables.keys():
         floatData['BBP700_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['BBP700_ADJUSTED'][:].data, mask=mask).compressed()
     if 'CDOM_ADJUSTED' in Sprof_nc.variables.keys():
-        floatData['CDOM_ADJUSTED'] = np.ma.masked_array(Sprof_nc.variables['CDOM_ADJUSTED'][:].data, mask=mask).compressed()
+        floatData['CDOM_ADJUSTED']   = np.ma.masked_array(Sprof_nc.variables['CDOM_ADJUSTED'][:].data, mask=mask).compressed()
 
     floatData['SDN']       = t
     floatData['LATITUDE']  = lat
@@ -491,21 +491,21 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
         t_grid = np.ma.masked_array(np.tile(t,(M,1)).T, mask=mask)
         cycle_grid = np.ma.masked_array(np.tile(floatData['CYCLES'],(M,1)).T, mask=mask)
     
-        floatData['SDN_GRID']  = t_grid.compressed()
-        floatData['CYCLE_GRID'] = cycle_grid.compressed()
-        floatData['LATITUDE_GRID'] = lat_grid
+        floatData['SDN_GRID']       = t_grid.compressed()
+        floatData['CYCLE_GRID']     = cycle_grid.compressed()
+        floatData['LATITUDE_GRID']  = lat_grid
         floatData['LONGITUDE_GRID'] = lon_grid
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
 
     if BRtraj_flag:
-        ppox_doxy = BRtraj_nc.variables['PPOX_DOXY'][:]
-        floatData['PPOX_DOXY'] = ppox_doxy.compressed()
-        floatData['TEMP_DOXY'] = np.ma.masked_array(BRtraj_nc.variables['TEMP_DOXY'][:].data, mask=ppox_doxy.mask).compressed()
+        ppox_doxy               = BRtraj_nc.variables['PPOX_DOXY'][:]
+        floatData['PPOX_DOXY']  = ppox_doxy.compressed()
+        floatData['TEMP_DOXY']  = np.ma.masked_array(BRtraj_nc.variables['TEMP_DOXY'][:].data, mask=ppox_doxy.mask).compressed()
         floatData['TRAJ_CYCLE'] = np.ma.masked_array(BRtraj_nc.variables['CYCLE_NUMBER'][:].data, mask=ppox_doxy.mask).compressed()
-        floatData['inair'] = True
+        floatData['inair']      = True
     else:
-        floatData['inair'] = False
+        floatData['inair']      = False
 
     return floatData
 
@@ -538,18 +538,15 @@ def load_profile(fn):
     floatData['floatType'] = ftype
 
     pres = nc.variables['PRES'][:]
-
-    t = nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
-
-    lat = nc.variables['LATITUDE'][:].compressed()
-    lon = nc.variables['LONGITUDE'][:].compressed()
+    t    = nc.variables['JULD'][:].compressed() + pl.datestr2num('1950-01-01')
+    lat  = nc.variables['LATITUDE'][:].compressed()
+    lon  = nc.variables['LONGITUDE'][:].compressed()
 
     # use the pressure mask for all variables to ensure dimensions match
     floatData['PRES'] = pres.compressed()
     floatData['TEMP'] = np.ma.masked_array(nc.variables['TEMP'][:].data, mask=pres.mask).compressed()
     floatData['PSAL'] = np.ma.masked_array(nc.variables['PSAL'][:].data, mask=pres.mask).compressed()
     floatData['DOXY'] = np.ma.masked_array(nc.variables['DOXY'][:].data, mask=pres.mask).compressed()
-
     floatData['SDN']  = t
 
     floatData['LATITUDE']  = lat
