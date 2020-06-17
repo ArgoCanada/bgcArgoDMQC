@@ -18,6 +18,7 @@ from . import interp
 from . import unit
 from . import util
 from . import fplt
+from . import diagnostic
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
