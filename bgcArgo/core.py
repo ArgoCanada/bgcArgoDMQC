@@ -208,12 +208,16 @@ class sprof:
 
         return g
 
-class profile:
+class profiles:
 
     set_dirs = set_dirs
 
-    def __init__(self, prof_file):
-        self.__profiledict__ = load_profile(prof_file)
+    def __init__(self, floats, cycles=None, mission='B', mode='RD'):
+        self.__files__       = get_files(floats, cycles)
+
+        for fn in self.__files__:
+            fn_dict = load_profile(fn)
+
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -232,32 +236,45 @@ class profile:
         self.LONGITUDE = self.__floatdict__['LONGITUDE']
 
         # core variables
-        self.PRES = self.__floatdict__['PRES']
-        self.TEMP = self.__floatdict__['TEMP']
-        self.PSAL = self.__floatdict__['PSAL']
+        self.PRES    = self.__floatdict__['PRES']
+        self.PRES_QC = self.__floatdict__['PRES_QC']
+        self.TEMP    = self.__floatdict__['TEMP']
+        self.TEMP_QC = self.__floatdict__['TEMP_QC']
+        self.PSAL    = self.__floatdict__['PSAL']
+        self.PSAL_QC = self.__floatdict__['PSAL_QC']
         # potential density
         self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in self.__floatdict__.keys():
-            self.DOXY   = self.__floatdict__['DOXY']
+            self.DOXY      = self.__floatdict__['DOXY']
+            self.DOXY_QC   = self.__floatdict__['DOXY_QC']
         if 'CHLA' in self.__floatdict__.keys():
-            self.CHLA   = self.__floatdict__['CHLA']
+            self.CHLA      = self.__floatdict__['CHLA']
+            self.CHLA_QC   = self.__floatdict__['CHLA_QC']
         if 'BBP700' in self.__floatdict__.keys():
-            self.BBP700 = self.__floatdict__['BBP700']
+            self.BBP700    = self.__floatdict__['BBP700']
+            self.BBP700_QC = self.__floatdict__['BBP700_QC']
         if 'CDOM' in self.__floatdict__.keys():
-            self.CDOM   = self.__floatdict__['CDOM']
+            self.CDOM      = self.__floatdict__['CDOM']
+            self.CDOM_QC   = self.__floatdict__['CDOM_QC']
+        
+        # adjusted variables
         if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            self.DOXY_ADJUSTED = self.__floatdict__['DOXY_ADJUSTED']
+            self.DOXY_ADJUSTED      = self.__floatdict__['DOXY_ADJUSTED']
+            self.DOXY_ADJUSTED_QC   = self.__floatdict__['DOXY_ADJUSTED_QC']
         if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            self.CHLA_ADJUSTED = self.__floatdict__['CHLA_ADJUSTED']
+            self.CHLA_ADJUSTED      = self.__floatdict__['CHLA_ADJUSTED']
+            self.CHLA_ADJUSTED_QC   = self.__floatdict__['CHLA_ADJUSTED_QC']
         if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            self.BBP700_ADJUSTED = self.__floatdict__['BBP700_ADJUSTED']
+            self.BBP700_ADJUSTED    = self.__floatdict__['BBP700_ADJUSTED']
+            self.BBP700_ADJUSTED_QC = self.__floatdict__['BBP700_ADJUSTED_QC']
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            self.CDOM_ADJUSTED = self.__floatdict__['CDOM_ADJUSTED']
+            self.CDOM_ADJUSTED      = self.__floatdict__['CDOM_ADJUSTED']
+            self.CDOM_ADJUSTED_QC   = self.__floatdict__['CDOM_ADJUSTED_QC']
              
     def to_dict(self):
-        return self.__floatdict__
+        return self.__floatdict__.copy()
     
     def to_dataframe(self):
         import pandas as pd
@@ -273,35 +290,41 @@ class profile:
         df['PDEN']      = self.PDEN
         if 'DOXY' in self.__floatdict__.keys():
             df['DOXY']      = self.DOXY
+            df['DOXY_QC']   = self.DOXY_QC
         if 'CHLA' in self.__floatdict__.keys():
             df['CHLA']      = self.CHLA
+            df['CHLA_QC']   = self.CHLA_QC
         if 'BBP700' in self.__floatdict__.keys():
             df['BBP700']    = self.BBP700
+            df['BBP700_QC'] = self.BBP700_QC
         if 'CDOM' in self.__floatdict__.keys():
             df['CDOM']      = self.CDOM
+            df['CDOM_QC']   = self.CDOM_QC
         if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
             df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
+            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
         if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
             df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
+            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
         if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
             df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
+            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
             df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
+            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
 
         self.df = df
 
-        return self.df
+        return self.df.copy()
 
     def get_track(self):
         self.track = track(self.__floatdict__)
-
         return self.track
 
     def get_ncep(self):
 
         if not hasattr(self, 'track'):
             self.get_track()
-
         self.NCEP = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
         
         return self.NCEP
@@ -338,7 +361,17 @@ class profile:
 # FUNCTIONS
 # ----------------------------------------------------------------------------
 
+def update_index():
+
+    return None
+
 def apply_qc_adjustment():
+
+    return None
+
+def get_files(local_path, wmo_numbers, cycles=None):
+
+    lpath = Path(local_path)
 
     return None
 
