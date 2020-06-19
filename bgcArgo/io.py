@@ -14,6 +14,39 @@ from netCDF4 import Dataset
 
 from . import util
 
+def update_index():
+
+    ftp = ftplib.FTP('ftp.ifremer.fr')
+    ftp.login()
+    ftp.cwd('/ifremer/argo/')
+
+    meta  = 'ar_index_global_meta.txt.gz'
+    index = 'ar_index_global_prof.txt.gz'
+
+    module_path = Path('fake_directory_name')
+    i = 0
+    while not module_path.exists():
+        module_path = Path(sys.path[i]) / 'bgcArgo/ref'
+        i += 1
+    
+    print(module_path)
+
+    local_meta = module_path / meta
+    lf = open(local_meta, 'wb')
+    ftp.retrbinary('RETR ' + meta, lf.write)
+
+    local_index = module_path / index
+    lf = open(local_index, 'wb')
+    ftp.retrbinary('RETR ' + index, lf.write)
+
+    return ftp
+
+def read_index():
+
+
+
+    return None
+
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     '''
     Function to download WOA data for a given variable
