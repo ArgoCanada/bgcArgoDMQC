@@ -31,3 +31,6 @@ __all__ = ['fplt', 'unit', 'io', 'interp', 'diagnostic']
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
 __version__ = '0.2'
+
+# check age of index file, or if it exists
+io.check_index()

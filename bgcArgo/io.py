@@ -3,6 +3,7 @@
 import sys
 import warnings
 
+from time import time
 from pathlib import Path
 import ftplib
 import gzip
@@ -14,7 +15,18 @@ from netCDF4 import Dataset
 
 from . import util
 
+global module_path
+module_path = Path('fake_directory_name')
+i = 0
+while not module_path.exists():
+    module_path = Path(sys.path[i]) / 'bgcArgo/ref'
+    i += 1
+
 def update_index():
+    '''
+    Function to access FTP server to download Argo metadata and profile global 
+    index files 
+    '''
 
     ftp = ftplib.FTP('ftp.ifremer.fr')
     ftp.login()
@@ -22,15 +34,7 @@ def update_index():
 
     meta  = 'ar_index_global_meta.txt.gz'
     index = 'ar_index_global_prof.txt.gz'
-
-    module_path = Path('fake_directory_name')
-    i = 0
-    while not module_path.exists():
-        module_path = Path(sys.path[i]) / 'bgcArgo/ref'
-        i += 1
     
-    print(module_path)
-
     local_meta = module_path / meta
     lf = open(local_meta, 'wb')
     ftp.retrbinary('RETR ' + meta, lf.write)
@@ -42,8 +46,46 @@ def update_index():
     return ftp
 
 def read_index():
+    '''
+    Function to read and extract information from Argo global index
+    '''
 
+    # needs update, just trying out gzip reading for the first time
+    with gzip.open(module_path / 'ar_index_global_prof.txt.gz') as argo_index:
+        i = 0
+        for line in argo_index:
+            print(line.decode('utf-8').replace('\n','').split(','))
+            if i > 100: break
+            i += 1
 
+    return None
+
+def check_index():
+    ''' 
+    Function to check age of Argo metadata and profile global index files, 
+    warn if they have not been updated in more than 1 week. Runs on import.
+    '''
+
+    meta  = 'ar_index_global_meta.txt.gz'
+    index = 'ar_index_global_prof.txt.gz'
+    local_meta = module_path / meta
+    local_index = module_path / index
+
+    meta_mtime  = local_meta.stat().st_mtime
+    index_mtime = local_index.stat().st_mtime
+
+    # get time since last update
+    curr_time   = time()
+    meta_delta  = curr_time - meta_mtime
+    index_delta = curr_time - index_mtime
+
+    if meta_delta / 60 / 60 / 24 > 7:
+        d = meta_delta / 60 / 60 / 24
+        warnings.warn('Argo global metadata index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+    
+    if index_delta / 60 / 60 / 24 > 7:
+        d = index_delta / 60 / 60 / 24
+        warnings.warn('Argo global profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
 
     return None
 
