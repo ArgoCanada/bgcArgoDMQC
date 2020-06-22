@@ -16,7 +16,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/ArgoCanada/BGC-QC',
     packages=setuptools.find_packages(),
-    package_dir={'argopy': 'argopy'},
+    package_dir={'bgcArgo': 'bgcArgo'},
     install_requires=requirements,
     data_files=[('global_argo_index', ['ref/ar_index_global_meta.txt.gz','ref/ar_index_global_prof.txt.gz']),
                 ('T_lL_tau_LUT',['ref/T_lL_tau_3830_4330.dat'])],
