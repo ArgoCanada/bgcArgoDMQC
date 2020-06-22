@@ -215,11 +215,10 @@ class profiles:
     set_dirs = set_dirs
 
     def __init__(self, floats, cycles=None, mission='B', mode='RD'):
-        self.__files__       = get_files(floats, cycles)
+        self.__files__ = get_files(floats, cycles)
 
         for fn in self.__files__:
             fn_dict = load_profile(fn)
-
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -580,6 +579,19 @@ def load_profile(fn):
             floatData[v_adj + '_QC'] = nc.variabes[v_adj + '_QC'][:].data
 
     return floatData
+
+def clean(float_data):
+
+    clean_float_data = float_data.copy()
+
+    for qc_key in any('_QC' for key in clean_float_data.keys()):
+        data_key   = qc_key.replace('_QC','')
+        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 3 | clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+        bad_index  = np.invert(good_index)
+
+        clean_float_data[data_key][bad_index] = np.nan
+
+    return clean_float_data
 
 def track(float_data):
     # make 'track' array with columns (time, lat, lon) to be used in interpolation
