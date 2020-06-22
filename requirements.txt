@@ -1,0 +1,9 @@
+numpy
+scipy
+pylab
+matplotlib
+seawater
+netCDF4
+pandas
+seaborn
+cmocean

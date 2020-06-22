@@ -1,6 +1,5 @@
 # exclude data from source control by default
 /data/
-*.txt
 .vscode
 meds_doxy_floats.csv
 sagepy/__pycache__/
