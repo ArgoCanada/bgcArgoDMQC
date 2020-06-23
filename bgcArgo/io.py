@@ -6,7 +6,7 @@ import warnings
 from time import time
 from pathlib import Path
 import ftplib
-import gzip
+import pandas as pd
 
 import numpy as np
 import pylab as pl
@@ -21,6 +21,17 @@ i = 0
 while not module_path.exists():
     module_path = Path(sys.path[i]) / 'bgcArgo/ref'
     i += 1
+
+def read_index():
+    '''
+    Function to read and extract information from Argo global index, 
+    then save it to a dataframe for faster access
+    '''
+
+    filename = module_path / 'ar_index_global_prof.txt.gz'
+    df =  pd.read_csv(filename, compression='gzip', header=8)
+
+    return df
 
 def update_index(ftype=None):
     '''
@@ -46,21 +57,6 @@ def update_index(ftype=None):
         ftp.retrbinary('RETR ' + index, lf.write)
 
     return ftp
-
-def read_index():
-    '''
-    Function to read and extract information from Argo global index
-    '''
-
-    # needs update, just trying out gzip reading for the first time
-    with gzip.open(module_path / 'ar_index_global_prof.txt.gz') as argo_index:
-        i = 0
-        for line in argo_index:
-            print(line.decode('utf-8').replace('\n','').split(','))
-            if i > 100: break
-            i += 1
-
-    return None
 
 def check_index(mode='default'):
     ''' 
