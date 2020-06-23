@@ -13,7 +13,8 @@ calculate oxygen gains
 - Must run on `python3`, not supported on `python2.x` (uses [pathlib](https://docs.python.org/3/library/pathlib.html), introduced in python version 3.4)
 - The [seawater](https://pypi.org/project/seawater/) package
 - [netCDF4](https://pypi.org/project/netCDF4/) module for `.nc` files
-- [pandas](https://pandas.pydata.org/) and [seaborn](https://seaborn.pydata.org/) are recommended but not required, through there will be some reduced (non-essential) functionality without pandas
+- [pandas](https://pandas.pydata.org/) is required (and highly recommended for all your data science needs)
+- [seaborn](https://seaborn.pydata.org/) is recommended but not required, through there will be some reduced (non-essential) functionality
 - [cmocean](https://matplotlib.org/cmocean/) is also recommended for nicer plots, but not required
 
 ## version history
@@ -21,3 +22,5 @@ calculate oxygen gains
 0.1: April 20, 2020 - Initial creation
 
 0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class
+
+0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient

@@ -16,6 +16,8 @@ version history
 0.1: April 20, 2020 - Initial creation
 
 0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class
+
+0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient
 """
 
 from __future__ import absolute_import
@@ -30,7 +32,7 @@ __all__ = ['fplt', 'unit', 'io', 'interp', 'diagnostic']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 # check age of index file, or if it exists
 io.check_index()
