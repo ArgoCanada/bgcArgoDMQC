@@ -376,9 +376,11 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
     wcs = [w.replace('C','') for w in wcs]
 
-    matches = [fnmatch.filter(subset_index.file, w) for w in wcs]
+    matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
+    subset_index = subset_index[subset_index.file.isin(matches)]
+    local_files = [local_path / dac / fn.split('/')[-1] for dac, fn in zip(subset_index.dac, subset_index.file)]
 
-    return wcs, matches
+    return local_files
 
 def load_argo(local_path, wmo, grid=False, verbose=False):
     '''
