@@ -79,25 +79,33 @@ def update_index(ftype=None):
 
     return ftp
 
-def check_index(mode='default'):
+def check_index(mode=None):
     ''' 
     Function to check age of Argo metadata and profile global index files, 
     warn if they have not been updated in more than 1 week. Runs on import.
     '''
 
-    if mode == 'default':
+    if mode is None:
         meta  = 'ar_index_global_meta.txt.gz'
         index = 'ar_index_global_prof.txt.gz'
-        local_meta = module_path / meta
+        bgc   = 'argo_bio-profile_index.txt.gz'
+        synth = 'argo_synthetic-profile_index.txt.gz'
+        local_meta  = module_path / meta
         local_index = module_path / index
+        local_bgc   = module_path / bgc
+        local_synth = module_path / synth
 
         meta_mtime  = local_meta.stat().st_mtime
         index_mtime = local_index.stat().st_mtime
+        bgc_mtime   = local_bgc.stat().st_mtime
+        synth_mtime = local_index.stat().st_mtime
 
         # get time since last update
         curr_time   = time()
         meta_delta  = curr_time - meta_mtime
         index_delta = curr_time - index_mtime
+        bgc_delta   = curr_time - bgc_mtime
+        synth_delta = curr_time - synth_mtime
 
         if meta_delta / 60 / 60 / 24 > 7:
             d = meta_delta / 60 / 60 / 24
@@ -106,19 +114,33 @@ def check_index(mode='default'):
         if index_delta / 60 / 60 / 24 > 7:
             d = index_delta / 60 / 60 / 24
             warnings.warn('Argo global profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+        
+        if bgc_delta / 60 / 60 / 24 > 7:
+            d = bgc_delta / 60 / 60 / 24
+            warnings.warn('Argo global BGC index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+
+        if synth_delta / 60 / 60 / 24 > 7:
+            d = synth_delta / 60 / 60 / 24
+            warnings.warn('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
     
     elif mode == 'install':
         meta  = 'ar_index_global_meta.txt.gz'
         index = 'ar_index_global_prof.txt.gz'
-        local_meta = module_path / meta
+        bgc   = 'argo_bio-profile_index.txt.gz'
+        synth = 'argo_synthetic-profile_index.txt.gz'
+        local_meta  = module_path / meta
         local_index = module_path / index
+        local_bgc   = module_path / bgc
+        local_synth = module_path / synth
 
-        if not (local_meta.exists() and local_index.exists()):
+        if not ((local_meta.exists() and local_index.exists()) and (local_bgc.exists() and local_synth.exists())):
             sys.stdout.write('At least one index file does not exist - downloading now - this may take some time depending on your internet connection\n')
             update_index()
         else:
             meta_mtime  = local_meta.stat().st_mtime
             index_mtime = local_index.stat().st_mtime
+            bgc_mtime   = local_bgc.stat().st_mtime
+            synth_mtime = local_synth.stat().st_mtime
 
             # get time since last update
             curr_time   = time()
@@ -134,6 +156,16 @@ def check_index(mode='default'):
                 d = index_delta / 60 / 60 / 24
                 sys.stdout.write('Argo global profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
                 update_index(ftype='profile')
+
+            if bgc_delta / 60 / 60 / 24 > 7:
+                d = bgc_delta / 60 / 60 / 24
+                sys.stdout.write('Argo global BGC index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                update_index(ftype='bgc')
+
+            if synth_delta / 60 / 60 / 24 > 7:
+                d = synth_delta / 60 / 60 / 24
+                sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                update_index(ftype='synthetic')
 
     return None
 
