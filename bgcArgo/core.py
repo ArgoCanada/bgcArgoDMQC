@@ -32,6 +32,8 @@ ARGO_PATH = './'
 WOA_PATH  = None
 NCEP_PATH = None
 
+__bgcindex__ = io.read_index()
+
 def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
 
     global ARGO_PATH
@@ -366,10 +368,9 @@ def apply_qc_adjustment():
     return None
 
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
-
     local_path = Path(local_path)
 
-    subset_index = index[index.wmo.isin(wmo_numbers)]
+    subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
     if cycles is not None:
         subset_index = subset_index[subset_index.cycle.isin(cycles)]
     wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
