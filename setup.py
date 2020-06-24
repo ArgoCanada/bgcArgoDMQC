@@ -18,7 +18,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_dir={'bgcArgo': 'bgcArgo'},
     install_requires=requirements,
-    data_files=[('global_argo_index', ['ref/ar_index_global_meta.txt.gz','ref/ar_index_global_prof.txt.gz']),
+    data_files=[('global_argo_index', ['bgcArgo/ref/ar_index_global_meta.txt.gz','bgcArgo/ref/ar_index_global_prof.txt.gz', 'bgcArgo/ref/argo_bio-profile_index.txt.gz', 'bgcArgo/ref/argo_synthetic-profile_index.tzt.gz']),
                 ('T_lL_tau_LUT',['ref/T_lL_tau_3830_4330.dat'])],
     classifiers=[
         'Programming Language :: Python :: 3.4',
