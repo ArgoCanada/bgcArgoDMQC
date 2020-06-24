@@ -36,3 +36,6 @@ __version__ = '0.2.1'
 
 # check age of index file, or if it exists
 io.check_index()
+
+global __bgcindex__
+__bgcindex__ = io.read_index()
