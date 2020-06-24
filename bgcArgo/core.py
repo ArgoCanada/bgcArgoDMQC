@@ -378,7 +378,7 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
 
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
-    local_files = [local_path / dac / fn.split('/')[-1] for dac, fn in zip(subset_index.dac, subset_index.file)]
+    local_files = [(local_path / dac / fn.split('/')[-1]).as_posix() for dac, fn in zip(subset_index.dac, subset_index.file)]
 
     return local_files
 
