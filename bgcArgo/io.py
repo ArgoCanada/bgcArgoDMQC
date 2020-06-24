@@ -22,14 +22,23 @@ while not module_path.exists():
     module_path = Path(sys.path[i]) / 'bgcArgo/ref'
     i += 1
 
-def read_index():
+def read_index(mission='B'):
     '''
     Function to read and extract information from Argo global index, 
     then save it to a dataframe for faster access
     '''
 
-    filename = module_path / 'ar_index_global_prof.txt.gz'
+    if mission == 'B':
+        filename = module_path / 'argo_bio-profile_index.txt.gz'
+    elif mission == 'C':
+        filename = module_path / 'ar_index_global_prof.txt.gz'
+    elif mission == 'S':
+        filename = module_path / 'argo_synthetic-profile_index.txt.gz'
     df =  pd.read_csv(filename, compression='gzip', header=8)
+
+    df['dac'] = np.array([f.split('/')[0] for f in df.file])
+    df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
+    df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
 
     return df
 
@@ -45,6 +54,8 @@ def update_index(ftype=None):
 
     meta  = 'ar_index_global_meta.txt.gz'
     index = 'ar_index_global_prof.txt.gz'
+    bgc   = 'argo_bio-profile_index.txt.gz'
+    synth = 'argo_synthetic-profile_index.txt.gz'
     
     local_meta = module_path / meta
     lf = open(local_meta, 'wb')
@@ -55,6 +66,16 @@ def update_index(ftype=None):
     lf = open(local_index, 'wb')
     if ftype is None or ftype =='profile':
         ftp.retrbinary('RETR ' + index, lf.write)
+
+    local_bgc = module_path / bgc
+    lf = open(local_bgc, 'wb')
+    if ftype is None or ftype =='bgc':
+        ftp.retrbinary('RETR ' + bgc, lf.write)
+
+    local_synth = module_path / synth
+    lf = open(local_synth, 'wb')
+    if ftype is None or ftype =='synthetic':
+        ftp.retrbinary('RETR ' + synth, lf.write)
 
     return ftp
 
