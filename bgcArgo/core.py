@@ -3,6 +3,7 @@
 import sys
 import warnings
 from pathlib import Path
+import fnmatch
 
 import numpy as np
 import pylab as pl
@@ -215,10 +216,8 @@ class profiles:
     set_dirs = set_dirs
 
     def __init__(self, floats, cycles=None, mission='B', mode='RD'):
-        self.__files__ = get_files(floats, cycles)
-
-        for fn in self.__files__:
-            fn_dict = load_profile(fn)
+        self.__argofiles__ = get_files(floats, cycles)
+        self.__floatdict__ = load_profiles(self.__argofiles__)
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -366,11 +365,19 @@ def apply_qc_adjustment():
 
     return None
 
-def get_files(local_path, wmo_numbers, cycles=None):
+def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
 
-    lpath = Path(local_path)
+    local_path = Path(local_path)
 
-    return None
+    subset_index = index[index.wmo.isin(wmo_numbers)]
+    if cycles is not None:
+        subset_index = subset_index[subset_index.cycle.isin(cycles)]
+    wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
+    wcs = [w.replace('C','') for w in wcs]
+
+    matches = [fnmatch.filter(subset_index.file, w) for w in wcs]
+
+    return wcs, matches
 
 def load_argo(local_path, wmo, grid=False, verbose=False):
     '''
@@ -528,6 +535,26 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     return floatData
 
 def load_profile(fn):
+    '''
+    Function to load a singe Argo profile file into a dict() object
+    NOTE: Deprecated, use load_profiles instead, which can handle multiple
+    profile files at once, but produces the same result for just one. 
+
+    AUTHOR:   Christopher Gordon
+              Fisheries and Oceans Canada
+              chris.gordon@dfo-mpo.gc.ca
+    
+    LAST UPDATE: 29-04-2020
+    
+    CHANGE LOG:
+    
+    22-04-2020: updated so that pressure mask determines all variables - need
+    to add all quality flags to output
+    
+    29-04-2020: switched file/path handling from os module to pathlib
+
+    24-06-2020: deprecated, re-wrote as load_profiles()
+    '''
 
     # try to load the profile as absolute path or relative path
     try:
@@ -579,6 +606,10 @@ def load_profile(fn):
             floatData[v_adj + '_QC'] = nc.variabes[v_adj + '_QC'][:].data
 
     return floatData
+
+def load_profiles(files):
+
+    return None
 
 def clean(float_data):
 
