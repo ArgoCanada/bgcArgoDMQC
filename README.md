@@ -37,7 +37,7 @@ syn = sprof(4902480)
 fig, ax = syn.plot('cscatter', 'DOXY', ylim=(0,500))
 # plot the first 10 profiles for temperature, practical salinity,
 # and adjusted oxygen
-fig, axes = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY_ADJUSTED'], Nprof=20)
+fig, axes = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY_ADJUSTED'], Nprof=10)
 ```
 
 ## version history
