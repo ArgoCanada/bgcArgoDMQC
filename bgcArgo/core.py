@@ -247,6 +247,8 @@ class profiles:
         self.LONGITUDE = self.__floatdict__['LONGITUDE']
         self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
 
+        self.WMO = self.__floatdict__['WMO']
+
         # core variables
         self.PRES    = self.__floatdict__['PRES']
         # self.PRES_QC = self.__floatdict__['PRES_QC']
@@ -294,6 +296,7 @@ class profiles:
         df = pd.DataFrame()
         df['CYCLE']     = self.CYCLE_GRID
         df['SDN']       = self.SDN_GRID
+        df['WMO']       = self.WMO
         df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
         df['PRES']      = self.PRES
@@ -688,15 +691,19 @@ def load_profiles(files):
             except:
                 raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
 
-        wmo = ''
-        for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
-            wmo = wmo + let.decode('UTF-8')
-
-        cycle = nc.variables['CYCLE_NUMBER'][:].data.flatten()
-
         # number of profile cycles
         M = nc.dimensions['N_LEVELS'].size
         N = nc.dimensions['N_PROF'].size
+
+        wmo = ''
+        if N > 1:
+            for let in nc.variables['PLATFORM_NUMBER'][:][0,:].compressed():
+                wmo = wmo + let.decode('UTF-8')
+        else:
+            for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
+                wmo = wmo + let.decode('UTF-8')
+
+        cycle = nc.variables['CYCLE_NUMBER'][:].data.flatten()
 
         ftype = ''
         for let in nc.variables['PLATFORM_TYPE'][:].compressed():
@@ -708,7 +715,7 @@ def load_profiles(files):
         floatData['CYCLE']      = np.append(floatData['CYCLE'], cycle)
         floatData['CYCLE_GRID'] = np.append(floatData['CYCLE_GRID'], np.array(N*M*[cycle[0]]))
         floatData['floatType']  = floatData['floatType'] + [ftype]
-        floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[int(wmo)]))
+        floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[wmo]))
 
         # load in variables that will be in every file
         floatData['PRES'] = np.append(floatData['PRES'], nc.variables['PRES'][:].data.flatten())
