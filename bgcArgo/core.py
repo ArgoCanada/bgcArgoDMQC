@@ -22,8 +22,6 @@ from . import util
 from . import fplt
 from . import diagnostic
 
-from .io import update_index
-
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
@@ -46,6 +44,14 @@ def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
 # ----------------------------------------------------------------------------
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
+
+def get_index(index='bgc'):
+    if index == 'bgc':
+        return __bgcindex__
+    elif index == 'global':
+        return io.read_index(mission='C')
+    elif index == 'synthetic':
+        return io.read_index(mission='S')
 
 class sprof:
 
@@ -218,7 +224,7 @@ class profiles:
     set_dirs = set_dirs
 
     def __init__(self, floats, cycles=None, mission='B', mode='RD'):
-        self.__argofiles__ = get_files(floats, cycles)
+        self.__argofiles__ = get_files(ARGO_PATH, floats, cycles=cycles)
         self.__floatdict__ = load_profiles(self.__argofiles__)
 
         # local path info
@@ -227,25 +233,29 @@ class profiles:
         self.ncep_path = NCEP_PATH
 
         # metadata and dimension variables
-        self.floatName = self.__floatdict__['floatName']
-        self.floatType = self.__floatdict__['floatType']
-        self.N_LEVELS  = self.__floatdict__['N_LEVELS']
-        self.CYCLE     = self.__floatdict__['CYCLE']
+        self.floatName  = self.__floatdict__['floatName']
+        self.floatType  = self.__floatdict__['floatType']
+        self.N_LEVELS   = self.__floatdict__['N_LEVELS']
+        self.CYCLE      = self.__floatdict__['CYCLE']
+        self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']
 
         # time and location data
         self.SDN       = self.__floatdict__['SDN']
+        self.SDN_GRID       = self.__floatdict__['SDN_GRID']
         self.LATITUDE  = self.__floatdict__['LATITUDE']
+        self.LATITUDE_GRID  = self.__floatdict__['LATITUDE_GRID']
         self.LONGITUDE = self.__floatdict__['LONGITUDE']
+        self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
 
         # core variables
         self.PRES    = self.__floatdict__['PRES']
-        self.PRES_QC = self.__floatdict__['PRES_QC']
-        self.TEMP    = self.__floatdict__['TEMP']
-        self.TEMP_QC = self.__floatdict__['TEMP_QC']
-        self.PSAL    = self.__floatdict__['PSAL']
-        self.PSAL_QC = self.__floatdict__['PSAL_QC']
+        # self.PRES_QC = self.__floatdict__['PRES_QC']
+        # self.TEMP    = self.__floatdict__['TEMP']
+        # self.TEMP_QC = self.__floatdict__['TEMP_QC']
+        # self.PSAL    = self.__floatdict__['PSAL']
+        # self.PSAL_QC = self.__floatdict__['PSAL_QC']
         # potential density
-        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+        # self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in self.__floatdict__.keys():
@@ -287,9 +297,9 @@ class profiles:
         df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
         df['PRES']      = self.PRES
-        df['TEMP']      = self.TEMP
-        df['PSAL']      = self.PSAL
-        df['PDEN']      = self.PDEN
+        # df['TEMP']      = self.TEMP
+        # df['PSAL']      = self.PSAL
+        # df['PDEN']      = self.PDEN
         if 'DOXY' in self.__floatdict__.keys():
             df['DOXY']      = self.DOXY
             df['DOXY_QC']   = self.DOXY_QC
@@ -378,9 +388,33 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
 
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
-    local_files = [(local_path / dac / fn.split('/')[-1]).as_posix() for dac, fn in zip(subset_index.dac, subset_index.file)]
+    local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]).as_posix() for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
 
     return local_files
+
+def get_vars(files):
+
+    nc = Dataset(Path(files[0]), 'r')
+    varnames = set(nc.variables.keys())
+    nc.close()
+
+    for fn in files:
+        nc = Dataset(Path(fn), 'r')
+        varnames = varnames.intersection(nc.variables.keys())
+        nc.close()
+
+    varnames = list(varnames)
+
+    return varnames
+
+def read_qc(flags):
+
+    decode_flags = np.array([f.decode('utf-8') for f in flags])
+    decode_flags[decode_flags == ' '] = '4'
+
+    out_flags = np.array([int(f) for f in decode_flags])
+
+    return out_flags
 
 def load_argo(local_path, wmo, grid=False, verbose=False):
     '''
@@ -404,11 +438,17 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
                 PRES: Pressure (dbar), compressed to vector (1D array)
                 TEMP: Temperature (deg C)
                 PSAL: Salinity (psu)
+
+            if the variables are available, it will also contain:
                 DOXY: Dissolved Oxygen (micromole/kg)
                 O2sat: Oxygen percent saturation (%)
                 PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
                 TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
                 inair: Boolean to indicate if in-air data exists
+            
+            for all the variables listen above, there will also exist
+                <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
+                fields if they exist
     
                 *** CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE ***
                 ***     ANALOGOUS <VAR>_GRID FIELDS THAT MATCH THE     ***
@@ -559,60 +599,145 @@ def load_profile(fn):
     24-06-2020: deprecated, re-wrote as load_profiles()
     '''
 
-    # try to load the profile as absolute path or relative path
-    try:
-        nc = Dataset(fn, 'r')
-    except:
-        try:
-            nc = Dataset(Path(ARGO_PATH) / fn, 'r')
-        except:
-            raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+    # # try to load the profile as absolute path or relative path
+    # try:
+    #     nc = Dataset(fn, 'r')
+    # except:
+    #     try:
+    #         nc = Dataset(Path(ARGO_PATH) / fn, 'r')
+    #     except:
+    #         raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
 
-    wmo = ''
-    for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
-        wmo = wmo + let.decode('UTF-8')
+    # wmo = ''
+    # for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
+    #     wmo = wmo + let.decode('UTF-8')
 
-    cycle = nc.variables['CYCLE_NUMBER'][:].compressed()[0]
+    # cycle = nc.variables['CYCLE_NUMBER'][:].compressed()[0]
 
-    # number of profile cycles
-    M = nc.dimensions['N_LEVELS'].size
-    # beginning of output dict with basic info, following variables in SAGEO2
-    floatData = dict(floatName=wmo, N_LEVELS=M, CYCLE=cycle)
+    # # number of profile cycles
+    # M = nc.dimensions['N_LEVELS'].size
+    # # beginning of output dict with basic info, following variables in SAGEO2
+    # floatData = dict(floatName=wmo, N_LEVELS=M, CYCLE=cycle)
 
-    ftype = ''
-    for let in nc.variables['PLATFORM_TYPE'][:].compressed():
-        ftype = ftype + let.decode('UTF-8')
+    # ftype = ''
+    # for let in nc.variables['PLATFORM_TYPE'][:].compressed():
+    #     ftype = ftype + let.decode('UTF-8')
 
-    floatData['floatType'] = ftype
+    # floatData['floatType'] = ftype
 
-    # load in variables that will be in every file
-    floatData['PRES'] = nc.variables['PRES'][:].data
-    floatData['TEMP'] = nc.variables['TEMP'][:].data
-    floatData['PSAL'] = nc.variables['PSAL'][:].data
-    floatData['SDN']  = nc.variables['JULD'][:].data + pl.datestr2num('1950-01-01')
-    floatData['LATITUDE']  = nc.variables['LATITUDE'][:].data
-    floatData['LONGITUDE'] = nc.variables['LONGITUDE'][:].data
+    # # load in variables that will be in every file
+    # floatData['PRES'] = nc.variables['PRES'][:].data
+    # floatData['TEMP'] = nc.variables['TEMP'][:].data
+    # floatData['PSAL'] = nc.variables['PSAL'][:].data
+    # floatData['SDN']  = nc.variables['JULD'][:].data + pl.datestr2num('1950-01-01')
+    # floatData['LATITUDE']  = nc.variables['LATITUDE'][:].data
+    # floatData['LONGITUDE'] = nc.variables['LONGITUDE'][:].data
 
-    # loop through other possible BGC variables
-    bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
-    for v in bgc_vars:
-        if v in nc.variables.keys():
-            floatData[v] = nc.variables[v][:].data
+    # # loop through other possible BGC variables
+    # bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
+    # for v in bgc_vars:
+    #     if v in nc.variables.keys():
+    #         floatData[v] = nc.variables[v][:].data
 
-    for v in floatData.keys():
-        v_qc = v + '_QC'
-        if v_qc in nc.variables.keys():
-            floatData[v_qc] = nc.variables[v_qc][:].data
-        v_adj = v + '_ADJUSTED'
-        if v_adj in nc.variables.keys():
-            floatData[v_adj] = nc.variables[v_adj][:].data
-            floatData[v_adj + '_QC'] = nc.variabes[v_adj + '_QC'][:].data
+    # for v in floatData.keys():
+    #     v_qc = v + '_QC'
+    #     if v_qc in nc.variables.keys():
+    #         floatData[v_qc] = nc.variables[v_qc][:].data
+    #     v_adj = v + '_ADJUSTED'
+    #     if v_adj in nc.variables.keys():
+    #         floatData[v_adj] = nc.variables[v_adj][:].data
+    #         floatData[v_adj + '_QC'] = nc.variabes[v_adj + '_QC'][:].data
 
-    return floatData
+    # return floatData
 
 def load_profiles(files):
 
-    return None
+    common_variables = get_vars(files)
+
+    floatData = dict(
+        floatName=[], N_LEVELS=[], N_PROF=[], CYCLE=np.array([]), floatType=[]
+    )
+
+    for v in ['PRES', 'TEMP', 'PSAL', 'SDN']:
+        floatData[v] = np.array([])
+        floatData[v + '_QC'] = np.array([])
+    
+    floatData.pop('TEMP')
+    floatData.pop('TEMP_QC')
+    floatData.pop('PSAL')
+    floatData.pop('PSAL_QC')
+    
+    for v in ['WMO', 'LATITUDE', 'LONGITUDE', 'POSITION_QC', 'SDN_GRID', 'LATITUDE_GRID', 'LONGITUDE_GRID', 'CYCLE_GRID']:
+        floatData[v] = np.array([])
+
+    for v in ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']:
+        if v in common_variables:
+            floatData[v] = np.array([])
+            floatData[v + '_QC'] = np.array([])
+            if v + '_ADJUSTED' in common_variables:
+                floatData[v + '_ADJUSTED'] = np.array([])
+                floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
+
+    for fn in files:
+        # try to load the profile as absolute path or relative path
+        try:
+            nc = Dataset(fn, 'r')
+        except:
+            try:
+                nc = Dataset(Path(ARGO_PATH) / fn, 'r')
+            except:
+                raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+
+        wmo = ''
+        for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
+            wmo = wmo + let.decode('UTF-8')
+
+        cycle = nc.variables['CYCLE_NUMBER'][:].data.flatten()
+
+        # number of profile cycles
+        M = nc.dimensions['N_LEVELS'].size
+        N = nc.dimensions['N_PROF'].size
+
+        ftype = ''
+        for let in nc.variables['PLATFORM_TYPE'][:].compressed():
+            ftype = ftype + let.decode('UTF-8')
+
+        floatData['floatName']  = floatData['floatName'] + [int(wmo)]
+        floatData['N_LEVELS']   = floatData['N_LEVELS']  + [M]
+        floatData['N_PROF']     = floatData['N_PROF']    + [N]
+        floatData['CYCLE']      = np.append(floatData['CYCLE'], cycle)
+        floatData['CYCLE_GRID'] = np.append(floatData['CYCLE_GRID'], np.array(N*M*[cycle[0]]))
+        floatData['floatType']  = floatData['floatType'] + [ftype]
+        floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[int(wmo)]))
+
+        # load in variables that will be in every file
+        floatData['PRES'] = np.append(floatData['PRES'], nc.variables['PRES'][:].data.flatten())
+        # floatData['TEMP'] = np.append(floatData['TEMP'], nc.variables['TEMP'][:].data.flatten())
+        # floatData['PSAL'] = np.append(floatData['PSAL'], nc.variables['PSAL'][:].data.flatten())
+        floatData['SDN']  = np.append(floatData['SDN'], nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
+        floatData['SDN_QC'] = np.append(floatData['SDN_QC'], read_qc(nc.variables['JULD_QC'][:].data.flatten()))
+        floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))]))
+        floatData['LATITUDE'] = np.append(floatData['LATITUDE'], nc.variables['LATITUDE'][:].data.flatten())
+        floatData['LATITUDE_GRID'] = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(nc.variables['LATITUDE'][:].data.flatten())]))
+        floatData['LONGITUDE'] = np.append(floatData['LONGITUDE'], nc.variables['LONGITUDE'][:].data.flatten())
+        floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(nc.variables['LONGITUDE'][:].data.flatten())]))
+        floatData['POSITION_QC'] = np.append(floatData['POSITION_QC'], read_qc(nc.variables['POSITION_QC'][:].data.flatten()))
+
+        # loop through other possible BGC variables
+        bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
+        for v in bgc_vars:
+            if v in common_variables:
+                floatData[v] = np.append(floatData[v], nc.variables[v][:].data)
+            v_adj = v + '_ADJUSTED'
+            if v_adj in common_variables:
+                floatData[v_adj] = np.append(floatData[v_adj], nc.variables[v_adj][:].data.flatten())
+
+        for v in floatData.keys():
+            v_qc = v + '_QC'
+            if v_qc in common_variables:
+                floatData[v_qc] = np.append(floatData[v_qc], read_qc(nc.variables[v_qc][:].data.flatten()))
+
+    return floatData
 
 def clean(float_data):
 

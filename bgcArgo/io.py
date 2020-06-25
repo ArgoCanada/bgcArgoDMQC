@@ -167,8 +167,6 @@ def check_index(mode=None):
                 sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
                 update_index(ftype='synthetic')
 
-    return None
-
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     '''
     Function to download WOA data for a given variable
