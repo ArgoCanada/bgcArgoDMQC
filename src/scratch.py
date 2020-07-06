@@ -16,4 +16,5 @@ argo_path = '/Users/gordonc/Documents/data/Argo'
 bgc.set_dirs(argo_path=argo_path, woa_path=woa_path, ncep_path=ncep_path)
 
 flts = bgc.profiles([4902481, 6902905])
+flts = flts.clean()
 df = flts.to_dataframe()

@@ -65,48 +65,68 @@ class sprof:
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
+        assign(self, self.__floatdict__)
+
+    def assign(self, floatdict):
+
         # metadata and dimension variables
-        self.floatName = self.__floatdict__['floatName']
-        # self.floatType = self.__floatdict__['floatType']
-        self.N_CYCLES  = self.__floatdict__['N_CYCLES']
-        self.N_LEVELS  = self.__floatdict__['N_LEVELS']
-        self.CYCLES    = self.__floatdict__['CYCLES']
+        self.floatName  = floatdict['floatName']
+        self.floatType  = floatdict['floatType']
+        self.N_LEVELS   = floatdict['N_LEVELS']
+        self.CYCLE      = floatdict['CYCLE']
+        self.CYCLE_GRID = floatdict['CYCLE_GRID']
 
         # time and location data
-        self.SDN       = self.__floatdict__['SDN']
-        self.LATITUDE  = self.__floatdict__['LATITUDE']
-        self.LONGITUDE = self.__floatdict__['LONGITUDE']
+        self.SDN       = floatdict['SDN']
+        self.SDN_GRID       = floatdict['SDN_GRID']
+        self.LATITUDE  = floatdict['LATITUDE']
+        self.LATITUDE_GRID  = floatdict['LATITUDE_GRID']
+        self.LONGITUDE = floatdict['LONGITUDE']
+        self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
+
+        self.WMO = floatdict['WMO']
 
         # core variables
-        self.PRES = self.__floatdict__['PRES']
-        self.TEMP = self.__floatdict__['TEMP']
-        self.PSAL = self.__floatdict__['PSAL']
+        self.PRES    = floatdict['PRES']
+        # self.PRES_QC = floatdict['PRES_QC']
+        # self.TEMP    = floatdict['TEMP']
+        # self.TEMP_QC = floatdict['TEMP_QC']
+        # self.PSAL    = floatdict['PSAL']
+        # self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
-        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+        # self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
-        if 'DOXY' in self.__floatdict__.keys():
-            self.DOXY = self.__floatdict__['DOXY']
-        if 'CHLA' in self.__floatdict__.keys():
-            self.CHLA = self.__floatdict__['CHLA']
-        if 'BBP700' in self.__floatdict__.keys():
-            self.BBP700 = self.__floatdict__['BBP700']
-        if 'CDOM' in self.__floatdict__.keys():
-            self.CDOM = self.__floatdict__['CDOM']
-        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            self.DOXY_ADJUSTED = self.__floatdict__['DOXY_ADJUSTED']
-        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            self.CHLA_ADJUSTED = self.__floatdict__['CHLA_ADJUSTED']
-        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            self.BBP700_ADJUSTED = self.__floatdict__['BBP700_ADJUSTED']
-        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            self.CDOM_ADJUSTED = self.__floatdict__['CDOM_ADJUSTED']
+        if 'DOXY' in floatdict.keys():
+            self.DOXY      = floatdict['DOXY']
+            self.DOXY_QC   = floatdict['DOXY_QC']
+        if 'CHLA' in floatdict.keys():
+            self.CHLA      = floatdict['CHLA']
+            self.CHLA_QC   = floatdict['CHLA_QC']
+        if 'BBP700' in floatdict.keys():
+            self.BBP700    = floatdict['BBP700']
+            self.BBP700_QC = floatdict['BBP700_QC']
+        if 'CDOM' in floatdict.keys():
+            self.CDOM      = floatdict['CDOM']
+            self.CDOM_QC   = floatdict['CDOM_QC']
+        
+        # adjusted variables
+        if 'DOXY_ADJUSTED' in floatdict.keys():
+            self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
+            self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
+        if 'CHLA_ADJUSTED' in floatdict.keys():
+            self.CHLA_ADJUSTED      = floatdict['CHLA_ADJUSTED']
+            self.CHLA_ADJUSTED_QC   = floatdict['CHLA_ADJUSTED_QC']
+        if 'BBP700_ADJUSTED' in floatdict.keys():
+            self.BBP700_ADJUSTED    = floatdict['BBP700_ADJUSTED']
+            self.BBP700_ADJUSTED_QC = floatdict['BBP700_ADJUSTED_QC']
+        if 'CDOM_ADJUSTED' in floatdict.keys():
+            self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
+            self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
 
-        # not naturally gridded variables
-        self.CYCLE_GRID     = self.__floatdict__['CYCLE_GRID']
-        self.SDN_GRID       = self.__floatdict__['SDN_GRID']
-        self.LATITUDE_GRID  = self.__floatdict__['LATITUDE_GRID']
-        self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
+    def clean(self):
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
+        assign(self, self.__cleanfloatdict__)
     
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -232,60 +252,68 @@ class profiles:
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
+        assign(self, self.__floatdict__)
+
+    def assign(self, floatdict):
+
         # metadata and dimension variables
-        self.floatName  = self.__floatdict__['floatName']
-        self.floatType  = self.__floatdict__['floatType']
-        self.N_LEVELS   = self.__floatdict__['N_LEVELS']
-        self.CYCLE      = self.__floatdict__['CYCLE']
-        self.CYCLE_GRID = self.__floatdict__['CYCLE_GRID']
+        self.floatName  = floatdict['floatName']
+        self.floatType  = floatdict['floatType']
+        self.N_LEVELS   = floatdict['N_LEVELS']
+        self.CYCLE      = floatdict['CYCLE']
+        self.CYCLE_GRID = floatdict['CYCLE_GRID']
 
         # time and location data
-        self.SDN       = self.__floatdict__['SDN']
-        self.SDN_GRID       = self.__floatdict__['SDN_GRID']
-        self.LATITUDE  = self.__floatdict__['LATITUDE']
-        self.LATITUDE_GRID  = self.__floatdict__['LATITUDE_GRID']
-        self.LONGITUDE = self.__floatdict__['LONGITUDE']
-        self.LONGITUDE_GRID = self.__floatdict__['LONGITUDE_GRID']
+        self.SDN       = floatdict['SDN']
+        self.SDN_GRID       = floatdict['SDN_GRID']
+        self.LATITUDE  = floatdict['LATITUDE']
+        self.LATITUDE_GRID  = floatdict['LATITUDE_GRID']
+        self.LONGITUDE = floatdict['LONGITUDE']
+        self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
 
-        self.WMO = self.__floatdict__['WMO']
+        self.WMO = floatdict['WMO']
 
         # core variables
-        self.PRES    = self.__floatdict__['PRES']
-        # self.PRES_QC = self.__floatdict__['PRES_QC']
-        # self.TEMP    = self.__floatdict__['TEMP']
-        # self.TEMP_QC = self.__floatdict__['TEMP_QC']
-        # self.PSAL    = self.__floatdict__['PSAL']
-        # self.PSAL_QC = self.__floatdict__['PSAL_QC']
+        self.PRES    = floatdict['PRES']
+        # self.PRES_QC = floatdict['PRES_QC']
+        # self.TEMP    = floatdict['TEMP']
+        # self.TEMP_QC = floatdict['TEMP_QC']
+        # self.PSAL    = floatdict['PSAL']
+        # self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
         # self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
-        if 'DOXY' in self.__floatdict__.keys():
-            self.DOXY      = self.__floatdict__['DOXY']
-            self.DOXY_QC   = self.__floatdict__['DOXY_QC']
-        if 'CHLA' in self.__floatdict__.keys():
-            self.CHLA      = self.__floatdict__['CHLA']
-            self.CHLA_QC   = self.__floatdict__['CHLA_QC']
-        if 'BBP700' in self.__floatdict__.keys():
-            self.BBP700    = self.__floatdict__['BBP700']
-            self.BBP700_QC = self.__floatdict__['BBP700_QC']
-        if 'CDOM' in self.__floatdict__.keys():
-            self.CDOM      = self.__floatdict__['CDOM']
-            self.CDOM_QC   = self.__floatdict__['CDOM_QC']
+        if 'DOXY' in floatdict.keys():
+            self.DOXY      = floatdict['DOXY']
+            self.DOXY_QC   = floatdict['DOXY_QC']
+        if 'CHLA' in floatdict.keys():
+            self.CHLA      = floatdict['CHLA']
+            self.CHLA_QC   = floatdict['CHLA_QC']
+        if 'BBP700' in floatdict.keys():
+            self.BBP700    = floatdict['BBP700']
+            self.BBP700_QC = floatdict['BBP700_QC']
+        if 'CDOM' in floatdict.keys():
+            self.CDOM      = floatdict['CDOM']
+            self.CDOM_QC   = floatdict['CDOM_QC']
         
         # adjusted variables
-        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            self.DOXY_ADJUSTED      = self.__floatdict__['DOXY_ADJUSTED']
-            self.DOXY_ADJUSTED_QC   = self.__floatdict__['DOXY_ADJUSTED_QC']
-        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            self.CHLA_ADJUSTED      = self.__floatdict__['CHLA_ADJUSTED']
-            self.CHLA_ADJUSTED_QC   = self.__floatdict__['CHLA_ADJUSTED_QC']
-        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            self.BBP700_ADJUSTED    = self.__floatdict__['BBP700_ADJUSTED']
-            self.BBP700_ADJUSTED_QC = self.__floatdict__['BBP700_ADJUSTED_QC']
-        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            self.CDOM_ADJUSTED      = self.__floatdict__['CDOM_ADJUSTED']
-            self.CDOM_ADJUSTED_QC   = self.__floatdict__['CDOM_ADJUSTED_QC']
+        if 'DOXY_ADJUSTED' in floatdict.keys():
+            self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
+            self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
+        if 'CHLA_ADJUSTED' in floatdict.keys():
+            self.CHLA_ADJUSTED      = floatdict['CHLA_ADJUSTED']
+            self.CHLA_ADJUSTED_QC   = floatdict['CHLA_ADJUSTED_QC']
+        if 'BBP700_ADJUSTED' in floatdict.keys():
+            self.BBP700_ADJUSTED    = floatdict['BBP700_ADJUSTED']
+            self.BBP700_ADJUSTED_QC = floatdict['BBP700_ADJUSTED_QC']
+        if 'CDOM_ADJUSTED' in floatdict.keys():
+            self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
+            self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
+
+    def clean(self):
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
+        assign(self, self.__cleanfloatdict__)
              
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -746,7 +774,7 @@ def load_profiles(files):
 
     return floatData
 
-def clean(float_data):
+def dict_clean(float_data):
 
     clean_float_data = float_data.copy()
 
