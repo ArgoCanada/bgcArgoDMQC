@@ -24,7 +24,7 @@ while not module_path.exists():
 
 def read_index(mission='B'):
     '''
-    Function to read and extract information from Argo global index, 
+    Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access
     '''
 
@@ -44,8 +44,8 @@ def read_index(mission='B'):
 
 def update_index(ftype=None):
     '''
-    Function to access FTP server to download Argo metadata and profile global 
-    index files 
+    Function to access FTP server to download Argo metadata and profile global
+    index files
     '''
 
     ftp = ftplib.FTP('ftp.ifremer.fr')
@@ -56,7 +56,7 @@ def update_index(ftype=None):
     index = 'ar_index_global_prof.txt.gz'
     bgc   = 'argo_bio-profile_index.txt.gz'
     synth = 'argo_synthetic-profile_index.txt.gz'
-    
+
     local_meta = module_path / meta
     lf = open(local_meta, 'wb')
     if ftype is None or ftype == 'meta':
@@ -80,8 +80,8 @@ def update_index(ftype=None):
     return ftp
 
 def check_index(mode=None):
-    ''' 
-    Function to check age of Argo metadata and profile global index files, 
+    '''
+    Function to check age of Argo metadata and profile global index files,
     warn if they have not been updated in more than 1 week. Runs on import.
     '''
 
@@ -110,11 +110,11 @@ def check_index(mode=None):
         if meta_delta / 60 / 60 / 24 > 7:
             d = meta_delta / 60 / 60 / 24
             warnings.warn('Argo global metadata index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
-        
+
         if index_delta / 60 / 60 / 24 > 7:
             d = index_delta / 60 / 60 / 24
             warnings.warn('Argo global profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
-        
+
         if bgc_delta / 60 / 60 / 24 > 7:
             d = bgc_delta / 60 / 60 / 24
             warnings.warn('Argo global BGC index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
@@ -122,7 +122,7 @@ def check_index(mode=None):
         if synth_delta / 60 / 60 / 24 > 7:
             d = synth_delta / 60 / 60 / 24
             warnings.warn('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
-    
+
     elif mode == 'install':
         meta  = 'ar_index_global_meta.txt.gz'
         index = 'ar_index_global_prof.txt.gz'
@@ -170,7 +170,7 @@ def check_index(mode=None):
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     '''
     Function to download WOA data for a given variable
-    
+
     INPUT:
               varname: woa18 variable to download data for - one of:
                   T: temperature
@@ -189,18 +189,18 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
                   csv: .csv
                   netcdf: .nc
               overwrite: boolean flag, if False, does not re-download
-                  existing files, if true, will download no matter what, 
+                  existing files, if true, will download no matter what,
                   defaults to False
-    
+
     OUTPUT:
               ftp: the ftplib server object
-    
+
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
-    
+
     LAST UPDATE: 29-04-2020
-    
+
     CHANGE LOG:
     '''
 
@@ -230,27 +230,27 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
 
 def get_ncep(varname, local_path='./', overwrite=False):
     '''
-    Function to download NCEP reanalysis gaussian gridded surface air 
-    pressure data 
-    
+    Function to download NCEP reanalysis gaussian gridded surface air
+    pressure data
+
     INPUT:
               varname: 'pres' (pressure) or 'rhum' (relative humidity)
                   or 'land' (to get land mask)
               local_path: path to save files to, defaults
                   to current directory
               overwrite: boolean flag, if False, does not re-download
-                  existing files, if true, will download no matter what, 
+                  existing files, if true, will download no matter what,
                   defaults to False
-    
+
     OUTPUT:
               ftp: the ftplib server object
-    
+
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
-    
+
     LAST UPDATE: 29-04-2020
-    
+
     CHANGE LOG:
     '''
 
@@ -276,7 +276,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
-    
+
     elif varname == 'rhum':
 
         ftp.cwd('Datasets/ncep.reanalysis/surface/')
@@ -314,7 +314,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         if not local_file.exists() | overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
-    
+
     else:
         raise ValueError('Invalid varname input')
 
@@ -322,28 +322,28 @@ def get_ncep(varname, local_path='./', overwrite=False):
 
 def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
     '''
-    Function to download all data from a single float, or individual 
+    Function to download all data from a single float, or individual
     profiles
-    
+
     INPUT:
               Inputs may vary depending on desired performance. Multiple
               arguments may be provided to download all files from a certain
-              float or argo defined geographical area. A single path to a 
-              file may be provided to download that file. A list of files 
+              float or argo defined geographical area. A single path to a
+              file may be provided to download that file. A list of files
               may be provided as well.
-    
+
               overwrite: boolean flag, if False, does not re-download
-                  existing files, if true, will download no matter what, 
+                  existing files, if true, will download no matter what,
                   defaults to False
-    
+
     OUTPUT:
-    
+
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
-    
+
     LAST UPDATE: 29-04-2020
-    
+
     CHANGE LOG:
     '''
 
@@ -377,12 +377,15 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
 
                 files = ftp.nlst('*.nc')
                 # define local location to save file
+                dac_path = local_path / dac
                 wmo_path = local_path / dac / wmo
 
                 # make the directory if it doesn't exist
+                if not dac_path.is_dir():
+                    dac_path.mkdir()
                 if not wmo_path.is_dir():
                     wmo_path.mkdir()
-                
+
                 # download the files
                 for fn in files:
                     # define the local file to have the same name as on the FTP server
@@ -438,7 +441,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
             # make the directory if it doesn't exist
             if not wmo_path.is_dir():
                 wmo_path.mkdir()
-            
+
             # download the files
             for fn in files:
                 # define the local file to have the same name as on the FTP server
@@ -480,7 +483,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
     '''
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
-    
+
     INPUT:
               track: array with the columns (SDN, lat, lon)
               param: requested variable, valid inputs are
@@ -494,25 +497,25 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
               zlim: depth bounds (upper, lower), default to (0, 1000)
               local_path: local directory where WOA files are stored, assumes
                           current directory if no input
-    
+
     OUTPUT:
               xtrack: same as track input, but adjusted lon if the track
                       crosses the 180/-180 meridian
               woa_track: list with z, lat, and lon arrays of WOA data
               data: gridded array of the input variable (month, z, lat, lon)
-    
+
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
-    
+
     ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
     code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
     written by Tanya Maurer & Josh Plant
-    
+
     LAST UPDATE: 29-04-2020
-    
+
     CHANGE LOG:
-    
+
     23-04-2020: changed zlim to optional input argument
     29-04-2020: switched file/path handling from os module to pathlib
     '''
@@ -586,22 +589,22 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
 def load_ncep_data(track, varname, local_path='./'):
     '''
     Function to load NCEP reanalysis data for comparison with autonomous
-    float in-air data. Data to be interpolated along the provided 
+    float in-air data. Data to be interpolated along the provided
     track (t, lat, lon).
-    
+
     INPUT:
               track: array with the columns (SDN, lat, lon)
               local_path: local directory where NCEP files are stored, assumes
                           current directory if no input
-    
+
     OUTPUT:
 
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
-    
+
     LAST UPDATE: 04-05-2020
-    
+
     CHANGE LOG:
     '''
 
@@ -635,7 +638,7 @@ def load_ncep_data(track, varname, local_path='./'):
 
     if Nyear == 0:
         Nyear = 1
-    
+
     # counter index for going across years
     j = 0
     for n in range(Nyear+1):
@@ -652,7 +655,7 @@ def load_ncep_data(track, varname, local_path='./'):
             lon[lon > 180] = lon[lon > 180] - 360
             lat_ix = util.get_lat_index(lat, lat_bounds)
             lon_ix = util.get_lon_index(lon, lon_bounds, cross180)
-            
+
             # extract lat/lon values
             lat_sub = lat[lat_ix]
             lon_sub = lon[lon_ix]
@@ -663,11 +666,11 @@ def load_ncep_data(track, varname, local_path='./'):
                 negative_lon = lon_sub < 0
                 lon_sub[negative_lon] = lon_sub[negative_lon] + 360
                 xlon[lix] = xlon[lix] + 360
-            
+
             landmask = lnc.variables['land'][:][0,:,:][:,lon_ix][lat_ix,:].astype(bool)
             ncep_time = np.nan*np.ones((len(time)*(Nyear+1)))
             data = np.nan*np.ones((len(time)*(Nyear+1), len(lat_sub), len(lon_sub)))
-        
+
         vdata = nc.variables[varname][:]
         for i in range(len(time)):
             data_2d =  vdata[i,:,:][:,lon_ix][lat_ix,:]
