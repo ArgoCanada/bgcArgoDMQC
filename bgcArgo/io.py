@@ -109,19 +109,19 @@ def check_index(mode=None):
 
         if meta_delta / 60 / 60 / 24 > 7:
             d = meta_delta / 60 / 60 / 24
-            warnings.warn('Argo global metadata index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+            warnings.warn('Argo global metadata index is more than 7 days old - has not been updated in {:d} days - consider running update_index()'.format(int(d)), Warning)
 
         if index_delta / 60 / 60 / 24 > 7:
             d = index_delta / 60 / 60 / 24
-            warnings.warn('Argo global profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+            warnings.warn('Argo global profile index is more than 7 days old - has not been updated in {:d} days - consider running update_index()'.format(int(d)), Warning)
 
         if bgc_delta / 60 / 60 / 24 > 7:
             d = bgc_delta / 60 / 60 / 24
-            warnings.warn('Argo global BGC index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+            warnings.warn('Argo global BGC index is more than 7 days old - has not been updated in {:d} days - consider running update_index()'.format(int(d)), Warning)
 
         if synth_delta / 60 / 60 / 24 > 7:
             d = synth_delta / 60 / 60 / 24
-            warnings.warn('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days - consider running update_index()'.format(d), Warning)
+            warnings.warn('Argo global synthetic profile index is more than 7 days old - has not been updated in {:d} days - consider running update_index()'.format(int(d)), Warning)
 
     elif mode == 'install':
         meta  = 'ar_index_global_meta.txt.gz'
@@ -149,22 +149,22 @@ def check_index(mode=None):
 
             if meta_delta / 60 / 60 / 24 > 7:
                 d = meta_delta / 60 / 60 / 24
-                sys.stdout.write('Argo global metadata index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                sys.stdout.write('Argo global metadata index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
                 update_index(ftype='meta')
 
             if index_delta / 60 / 60 / 24 > 7:
                 d = index_delta / 60 / 60 / 24
-                sys.stdout.write('Argo global profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                sys.stdout.write('Argo global profile index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
                 update_index(ftype='profile')
 
             if bgc_delta / 60 / 60 / 24 > 7:
                 d = bgc_delta / 60 / 60 / 24
-                sys.stdout.write('Argo global BGC index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                sys.stdout.write('Argo global BGC index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
                 update_index(ftype='bgc')
 
             if synth_delta / 60 / 60 / 24 > 7:
                 d = synth_delta / 60 / 60 / 24
-                sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(d))
+                sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
                 update_index(ftype='synthetic')
 
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):

@@ -252,7 +252,7 @@ class profiles:
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
-        assign(self, self.__floatdict__)
+        self.assign(self.__floatdict__)
 
     def assign(self, floatdict):
 
@@ -313,7 +313,7 @@ class profiles:
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
-        assign(self, self.__cleanfloatdict__)
+        self.assign(self.__cleanfloatdict__)
              
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -778,12 +778,18 @@ def dict_clean(float_data):
 
     clean_float_data = float_data.copy()
 
-    for qc_key in any('_QC' for key in clean_float_data.keys()):
+    qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
+
+    for qc_key in qc_flags:
         data_key   = qc_key.replace('_QC','')
-        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4 | clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
         bad_index  = np.invert(good_index)
 
-        clean_float_data[data_key][bad_index] = np.nan
+        if data_key == 'POSITION':
+            for dk in ['LATITUDE', 'LONGITUDE']:
+                clean_float_data[dk][bad_index] = np.nan
+        else:
+            clean_float_data[data_key][bad_index] = np.nan
 
     return clean_float_data
 
