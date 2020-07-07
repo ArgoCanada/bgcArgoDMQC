@@ -749,7 +749,7 @@ def load_profiles(files):
         floatData['PRES'] = np.append(floatData['PRES'], nc.variables['PRES'][:].data.flatten())
         # floatData['TEMP'] = np.append(floatData['TEMP'], nc.variables['TEMP'][:].data.flatten())
         # floatData['PSAL'] = np.append(floatData['PSAL'], nc.variables['PSAL'][:].data.flatten())
-        floatData['SDN']  = np.append(floatData['SDN'], nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
+        floatData['SDN'] = np.append(floatData['SDN'], nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
         floatData['SDN_QC'] = np.append(floatData['SDN_QC'], read_qc(nc.variables['JULD_QC'][:].data.flatten()))
         floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))]))
         floatData['LATITUDE'] = np.append(floatData['LATITUDE'], nc.variables['LATITUDE'][:].data.flatten())
@@ -780,7 +780,7 @@ def dict_clean(float_data):
 
     for qc_key in any('_QC' for key in clean_float_data.keys()):
         data_key   = qc_key.replace('_QC','')
-        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 3 | clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4 | clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
         bad_index  = np.invert(good_index)
 
         clean_float_data[data_key][bad_index] = np.nan
