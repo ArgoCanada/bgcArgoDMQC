@@ -16,6 +16,7 @@ gui_files = list(Path(matlab_file_path).glob('gui*.mat'))
 for ffn, gfn in zip(float_files, gui_files):
     # load data
     data = loadmat(ffn)
+    fltID = str(ffn).split('\\')[-1].split('.')[0].split('_')[-1]
 
     # extract data from matlab dict
     flttype = data['floatTYPE'][0]
@@ -39,10 +40,13 @@ for ffn, gfn in zip(float_files, gui_files):
     df = pd.DataFrame(df_dict)
 
     # save dataframe
-    ### do save steps ###
+    store = pd.HDFStore(Path('/Users/gordonc/Documents/data/Argo/sage/df_floatdata_{}.h5'.format(fltID)))
+    store.put('df', df, data_columns=df.columns)
+    store.close()
 
     # load data
     data = loadmat(gfn)
+    fltID = str(gfn).split('\\')[-1].split('.')[0].split('_')[-1]
 
     # extract relevant data
     track = data['track']
@@ -50,6 +54,10 @@ for ffn, gfn in zip(float_files, gui_files):
     gains = np.squeeze(data['GAINS'])
     surf_sat = data['SURF_SAT'][:,1]
     woa_sat  = data['refdata'][:,3]
+
+    if gains.shape[0] != surf_sat.shape[0]:
+        print('gain shape ({}) does not match data shape ({}) for float {}, calculating independently using data'.format(gains.shape[0], surf_sat.shape[0], fltID))
+        gains = woa_sat/surf_sat
 
     # specific variables
     time = track[:,0]
@@ -60,3 +68,8 @@ for ffn, gfn in zip(float_files, gui_files):
     df_dict = dict(SDN=time, CYCLE=cycle, LAT=lat, LON=lon, SURF_SAT=surf_sat, REF_SAT=woa_sat, GAINS=gains)
     # dataframe 
     df = pd.DataFrame(df_dict)
+
+    # save dataframe
+    store = pd.HDFStore(Path('/Users/gordonc/Documents/data/Argo/sage/df_guidata_{}.h5'.format(fltID)))
+    store.put('df', df, data_columns=df.columns)
+    store.close()
