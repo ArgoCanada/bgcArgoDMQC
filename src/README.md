@@ -1,3 +1,3 @@
 # src
 
-Directory for code relating to BGC-QC, running sagepy, etc.
+Directory for code relating to BGC-QC, running bgcArgo, etc.
