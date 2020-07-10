@@ -1,5 +1,11 @@
 # Argo Canada BGC Quality Control
 
+## disclaimer
+
+This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
+
+## general description
+
 A `python` library of functions for quality controlling dissolved oxygen data.
 Heavily based on the [SOCCOM BGC Argo QC methods](https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING)
 program in `matlab`, uses either
