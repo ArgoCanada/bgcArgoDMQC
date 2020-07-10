@@ -127,6 +127,9 @@ class sprof:
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
         assign(self, self.__cleanfloatdict__)
+
+    def reset(self):
+        assign(self, self.__floatdict__)
     
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -314,6 +317,9 @@ class profiles:
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
         self.assign(self.__cleanfloatdict__)
+
+    def reset(self):
+        self.assign(self.__floatdict__)
              
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -400,13 +406,21 @@ class profiles:
         
         return self.gains
 
+    def adjust_oxygen(self, G):
+
+        self.I_DOXY_ADJUSTED = apply_gain(self.DOXY, G)
+
+        return self.I_DOXY_ADJUSTED
+
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
 
-def apply_qc_adjustment():
+def apply_gain(DOXY, G):
 
-    return None
+    DOXY_ADJUSTED = G*DOXY
+
+    return DOXY_ADJUSTED
 
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     local_path = Path(local_path)
