@@ -54,19 +54,25 @@ def get_index(index='bgc'):
     elif index == 'synthetic':
         return io.read_index(mission='S')
 
+def get_dac(wmo):
+    
+    dac = __bgcindex__[__bgcindex__.wmo == wmo].dac.iloc[0]
+
+    return dac
+
 class sprof:
 
     set_dirs = set_dirs
 
     def __init__(self, wmo):
-        self.__floatdict__ = load_argo(ARGO_PATH, wmo, grid=True)
+        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
 
         # local path info
         self.argo_path = ARGO_PATH
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
-        assign(self, self.__floatdict__)
+        self.assign(self.__floatdict__)
 
     def assign(self, floatdict):
 
@@ -74,14 +80,14 @@ class sprof:
         self.floatName  = floatdict['floatName']
         self.floatType  = floatdict['floatType']
         self.N_LEVELS   = floatdict['N_LEVELS']
-        self.CYCLE      = floatdict['CYCLE']
+        self.CYCLE      = floatdict['CYCLES']
         self.CYCLE_GRID = floatdict['CYCLE_GRID']
 
         # time and location data
         self.SDN       = floatdict['SDN']
-        self.SDN_GRID       = floatdict['SDN_GRID']
+        self.SDN_GRID  = floatdict['SDN_GRID']
         self.LATITUDE  = floatdict['LATITUDE']
-        self.LATITUDE_GRID  = floatdict['LATITUDE_GRID']
+        self.LATITUDE_GRID = floatdict['LATITUDE_GRID']
         self.LONGITUDE = floatdict['LONGITUDE']
         self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
 
@@ -127,10 +133,10 @@ class sprof:
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
-        assign(self, self.__cleanfloatdict__)
+        self.assign(self.__cleanfloatdict__)
 
     def reset(self):
-        assign(self, self.__floatdict__)
+        self.assign(self.__floatdict__)
     
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -248,6 +254,9 @@ class profiles:
     set_dirs = set_dirs
 
     def __init__(self, floats, cycles=None, mission='B', mode='RD'):
+        if type(floats) is int:
+            floats = [floats]
+
         self.__argofiles__ = get_files(ARGO_PATH, floats, cycles=cycles)
         self.__floatdict__ = load_profiles(self.__argofiles__)
 
@@ -384,17 +393,17 @@ class profiles:
         if not hasattr(self, 'track'):
             self.get_track()
         
-        self.z_WOA, self.WOA = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
+        self.z_WOA, self.WOA, self.__WOAweights__  = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
 
         return self.WOA
 
-    def calc_gains(self, ref='NCEP'):
+    def calc_gains(self, ref='WOA'):
 
         if not hasattr(self, 'track'):
             self.get_track()
 
         if ref == 'NCEP':
-            sys.stdout.write('Function not built yet, returning None\n')
+            sys.stdout.write('In-air data contained in BRtraj file, NCEP not a valid reference for individual profile files, returning None\n')
             self.gains = None
 
         if ref == 'WOA':
@@ -540,15 +549,16 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
 
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
+    dac = get_dac(wmo)
 
     if type(wmo) is not str:
         wmo = str(wmo)
 
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
-    BRtraj = local_path / wmo / '{}_BRtraj.nc'.format(wmo)
-    Sprof  = local_path / wmo / '{}_Sprof.nc'.format(wmo)
-    meta   = local_path / wmo / '{}_meta.nc'.format(wmo)
+    BRtraj = local_path / dac / wmo / '{}_BRtraj.nc'.format(wmo)
+    Sprof  = local_path / dac / wmo / '{}_Sprof.nc'.format(wmo)
+    meta   = local_path / dac /wmo / '{}_meta.nc'.format(wmo)
 
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
@@ -579,7 +589,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     M = Sprof_nc.dimensions['N_LEVELS'].size
     N = Sprof_nc.dimensions['N_PROF'].size
     # beginning of output dict with basic info, following variables in SAGEO2
-    floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M)
+    floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M, WMO=int(wmo))
     
     mask = Sprof_nc.variables['PRES'][:].mask
     mask_vars = ['TEMP','PSAL']
@@ -606,18 +616,21 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
 
     # loop through other possible BGC variables
     bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
+    core_vars = ['PRES', 'TEMP', 'PSAL', 'POSITION']
     for v in bgc_vars:
         if v in Sprof_nc.variables.keys():
             floatData[v] = Sprof_nc.variables[v][:].data
 
-    for v in floatData.keys():
+    for v in bgc_vars + core_vars:
         v_qc = v + '_QC'
         if v_qc in Sprof_nc.variables.keys():
             floatData[v_qc] = Sprof_nc.variables[v_qc][:].data
         v_adj = v + '_ADJUSTED'
         if v_adj in Sprof_nc.variables.keys():
             floatData[v_adj] = Sprof_nc.variables[v_adj][:].data
-            floatData[v_adj + '_QC'] = Sprof_nc.variabes[v_adj + '_QC'][:].data
+            v_adj_qc = v_adj + '_QC'
+            if v_adj_qc in Sprof_nc.variables.keys():
+                floatData[v_adj_qc] = Sprof_nc.variables[v_adj_qc][:].data
 
     if grid:
         ftype = ''
@@ -641,7 +654,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     else:
         floatData['inair']      = False
 
-    return floatData
+    return floatData, Sprof, BRtraj, meta
 
 def load_profile(fn):
     '''
@@ -801,6 +814,10 @@ def load_profiles(files):
             v_adj = v + '_ADJUSTED'
             if v_adj in common_variables:
                 floatData[v_adj] = np.append(floatData[v_adj], nc.variables[v_adj][:].data.flatten())
+
+        # can't calculate without S, T, need to figure that out
+        # if 'DOXY' in floatData.keys():
+            # floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
 
         for v in floatData.keys():
             v_qc = v + '_QC'
