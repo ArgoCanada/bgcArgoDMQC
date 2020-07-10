@@ -14,5 +14,5 @@ fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, wmo)]
 
 local_path = '/Users/gordonc/Documents/data/Argo'
 # for imac
-local_path = '/Users/ChrisGordon/Desktop/argo/'
+# local_path = '/Users/ChrisGordon/Desktop/argo/'
 bgcArgo.io.get_argo(fltpath, local_path=local_path)
