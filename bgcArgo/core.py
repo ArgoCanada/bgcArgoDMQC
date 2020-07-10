@@ -4,6 +4,7 @@ import sys
 import warnings
 from pathlib import Path
 import fnmatch
+import time
 
 import numpy as np
 import pylab as pl
@@ -406,11 +407,27 @@ class profiles:
         
         return self.gains
 
-    def adjust_oxygen(self, G):
+    def adjust_oxygen(self, G, eG):
 
         self.I_DOXY_ADJUSTED = apply_gain(self.DOXY, G)
+        self.I_DOXY_ADJUSTED_QC = self.DOXY_QC
+        self.I_DOXY_ADJUSTED_ERROR = calc_doxy_error(self.DOXY, G, eG)
+
+        # metadata that needs to be recorded but I don't know where to put it yet
+        SCIENTIFIC_CALIB_DATE = time.strftime('%d %b %Y')
+        SCIENTIFIC_CALIB_COMMENT = 'No additional comment'
+        SCIENTIFIC_CALIB_EQUATION = 'No additional equation'
+        SCIENTIFIC_CALIB_COEFFICIENT = 'No additional coefficient'
 
         return self.I_DOXY_ADJUSTED
+
+    def reassign_flags(self):
+
+        return
+
+    def assess_profile_flags(self):
+
+        return
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS
@@ -421,6 +438,10 @@ def apply_gain(DOXY, G):
     DOXY_ADJUSTED = G*DOXY
 
     return DOXY_ADJUSTED
+
+def calc_doxy_error(DOXY, G, eG):
+
+    return 1
 
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     local_path = Path(local_path)
