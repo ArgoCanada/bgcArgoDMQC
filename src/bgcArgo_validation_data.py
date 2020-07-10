@@ -39,8 +39,8 @@ df['woa_lon_wt']  = flt.__WOAweights__[2]
 # NCEP weights
 nf = pd.DataFrame()
 nf['ncep_time_wt'] = flt.__NCEPweights__[0]
-nf['ncep_lat_wt']  =  flt.__NCEPweights__[1]
-nf['ncep_lon_wt']  =  flt.__NCEPweights__[2]
+nf['ncep_lat_wt']  = flt.__NCEPweights__[1]
+nf['ncep_lon_wt']  = flt.__NCEPweights__[2]
 
 # save files to hdf
 store = pd.HDFStore('../data/4902481_trackdata.h5')
