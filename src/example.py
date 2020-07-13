@@ -11,6 +11,10 @@ import bgcArgo as bgc
 # example.py - script to demonstrate functionality of bgc module
 # ----------------------------------------------------------------------------
 #
+# NOTE: This script is old and probably won't work anymore because of how much
+# bgcArgo has changed! Keeping it around for reference but it is not a good
+# representation of how the package is meant to be used anymore
+#
 # Example script for demonstrating functionality that should run on most
 # machines once provided with some path designations by the user. The script 
 # is broken up into the following sections: 
