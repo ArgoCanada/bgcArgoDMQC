@@ -320,7 +320,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, mode=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -399,7 +399,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
                         ftp.retrbinary('RETR ' + fn, lf.write)
 
                 # repeat as above
-                if 'profiles' in ftp.nlst():
+                if 'profiles' in ftp.nlst() and mode != 'summary':
                     ftp.cwd('profiles')
                     files = ftp.nlst('*.nc')
 
@@ -456,7 +456,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False):
 
             # ------------------------ INDIVIDUAL PROFILE FILES -------------------
             # repeat as above
-            if 'profiles' in ftp.nlst():
+            if 'profiles' in ftp.nlst() and mode != 'summary':
                 ftp.cwd('profiles')
                 files = ftp.nlst('*.nc')
 
