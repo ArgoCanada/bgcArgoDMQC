@@ -95,13 +95,13 @@ class sprof:
 
         # core variables
         self.PRES    = floatdict['PRES']
-        # self.PRES_QC = floatdict['PRES_QC']
-        # self.TEMP    = floatdict['TEMP']
-        # self.TEMP_QC = floatdict['TEMP_QC']
-        # self.PSAL    = floatdict['PSAL']
-        # self.PSAL_QC = floatdict['PSAL_QC']
+        self.PRES_QC = floatdict['PRES_QC']
+        self.TEMP    = floatdict['TEMP']
+        self.TEMP_QC = floatdict['TEMP_QC']
+        self.PSAL    = floatdict['PSAL']
+        self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
-        # self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -176,6 +176,16 @@ class sprof:
 
     def get_track(self):
         self.track = track(self.__floatdict__)
+
+        # if any(np.isnan(self.track[:,1])):
+        #     ix = np.isnan(self.track[:,1])
+        #     f = interp1d(self.track[~ix,0], self.track[~ix,1], bounds_error=False)
+        #     self.track[:,1] = f(self.track[:,0])
+
+        # if any(np.isnan(self.track[:,2])):
+        #     ix = np.isnan(self.track[:,2])
+        #     f = interp1d(self.track[~ix,0], self.track[~ix,2], bounds_error=False)
+        #     self.track[:,2] = f(self.track[:,0])
 
         return self.track.copy()
 
@@ -604,33 +614,33 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     if not 'CYCLE_NUMBER' in Sprof_nc.variables.keys():
         floatData['CYCLES'] = np.arange(1,N+1)
     else:
-        floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].data
+        floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].data.flatten()
 
     # load in variables that will be in every file
-    floatData['PRES'] = Sprof_nc.variables['PRES'][:].data
-    floatData['TEMP'] = Sprof_nc.variables['TEMP'][:].data
-    floatData['PSAL'] = Sprof_nc.variables['PSAL'][:].data
-    floatData['SDN']  = Sprof_nc.variables['JULD'][:].data + pl.datestr2num('1950-01-01')
-    floatData['LATITUDE']  = Sprof_nc.variables['LATITUDE'][:].data
-    floatData['LONGITUDE'] = Sprof_nc.variables['LONGITUDE'][:].data
+    floatData['PRES'] = Sprof_nc.variables['PRES'][:].data.flatten()
+    floatData['TEMP'] = Sprof_nc.variables['TEMP'][:].data.flatten()
+    floatData['PSAL'] = Sprof_nc.variables['PSAL'][:].data.flatten()
+    floatData['SDN']  = Sprof_nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01')
+    floatData['LATITUDE']  = Sprof_nc.variables['LATITUDE'][:].data.flatten()
+    floatData['LONGITUDE'] = Sprof_nc.variables['LONGITUDE'][:].data.flatten()
 
     # loop through other possible BGC variables
     bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
     core_vars = ['PRES', 'TEMP', 'PSAL', 'POSITION']
     for v in bgc_vars:
         if v in Sprof_nc.variables.keys():
-            floatData[v] = Sprof_nc.variables[v][:].data
+            floatData[v] = Sprof_nc.variables[v][:].data.flatten()
 
     for v in bgc_vars + core_vars:
         v_qc = v + '_QC'
         if v_qc in Sprof_nc.variables.keys():
-            floatData[v_qc] = Sprof_nc.variables[v_qc][:].data
+            floatData[v_qc] = read_qc(Sprof_nc.variables[v_qc][:].data.flatten())
         v_adj = v + '_ADJUSTED'
         if v_adj in Sprof_nc.variables.keys():
-            floatData[v_adj] = Sprof_nc.variables[v_adj][:].data
+            floatData[v_adj] = Sprof_nc.variables[v_adj][:].data.flatten()
             v_adj_qc = v_adj + '_QC'
             if v_adj_qc in Sprof_nc.variables.keys():
-                floatData[v_adj_qc] = Sprof_nc.variables[v_adj_qc][:].data
+                floatData[v_adj_qc] = read_qc(Sprof_nc.variables[v_adj_qc][:].data.flatten())
 
     if grid:
         ftype = ''
@@ -638,18 +648,17 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
             ftype = ftype + let.decode('UTF-8')
         floatData['floatType'] = ftype
 
-        floatData['SDN_GRID']       = np.tile(floatData['SDN'],(M,1)).T
-        floatData['CYCLE_GRID']     = np.tile(floatData['CYCLES'],(M,1)).T
-        floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T
-        floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T
+        floatData['SDN_GRID']       = np.tile(floatData['SDN'],(M,1)).T.flatten()
+        floatData['CYCLE_GRID']     = np.tile(floatData['CYCLES'],(M,1)).T.flatten()
+        floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T.flatten()
+        floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
 
     if BRtraj_flag:
-        ppox_doxy               = BRtraj_nc.variables['PPOX_DOXY'][:]
-        floatData['PPOX_DOXY']  = ppox_doxy.compressed()
-        floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data
-        floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data
+        floatData['PPOX_DOXY']  = BRtraj_nc.variables['PPOX_DOXY'][:].data.flatten()
+        floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
+        floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
         floatData['inair']      = True
     else:
         floatData['inair']      = False
@@ -829,10 +838,10 @@ def load_profiles(files):
 def dict_clean(float_data):
 
     clean_float_data = float_data.copy()
-
     qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
 
     for qc_key in qc_flags:
+        print(qc_key)
         data_key   = qc_key.replace('_QC','')
         good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
         bad_index  = np.invert(good_index)
