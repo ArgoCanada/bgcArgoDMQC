@@ -528,10 +528,10 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
     if np.max(np.abs(np.diff(track[:,2]))) > 340:
         cross180 = True
         lix = track[:,2] < 0
-        lon_bounds = (np.max(track[lix,2]), np.min(track[~lix,2]))
+        lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
     else:
-        lon_bounds = (np.min(track[:,2]), np.max(track[:,2]))
-    lat_bounds = (np.min(track[:,1]), np.max(track[:,1]))
+        lon_bounds = (np.nanmin(track[:,2]), np.nanmax(track[:,2]))
+    lat_bounds = (np.nanmin(track[:,1]), np.nanmax(track[:,1]))
 
     # set up extraction files, variables
     woa_param, woa_ftype, woa_dir = util.decode_woa_var(param)
