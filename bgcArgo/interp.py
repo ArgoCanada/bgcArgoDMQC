@@ -140,6 +140,10 @@ def interp_woa_data(track, woa_track, data, verbose=False):
     xwt = [[],[],[]]
 
     for i in range(N):
+        # leave values as nan if lat/lon/time are nan:
+        if any(np.isnan(track[i,:])):
+            continue
+
         # ---------------------------------------------------------------------
         # Get bounding indices, interp weights, and subset before interpolation
         # ---------------------------------------------------------------------
@@ -171,9 +175,16 @@ def interp_woa_data(track, woa_track, data, verbose=False):
 
         lon_ix1 = np.where(lon < track[i,2])[0][-1]
         lon_ix2 = lon_ix1 + 1
-        dx1 = lon[lon_ix2] - lon[lon_ix1]
-        dx2 = track[i,2] - lon[lon_ix1]
-        lon_wt = (dx1 - dx2) / dx1
+
+        if lon_ix2 == lon.shape[0]:
+            print('NOTE: longitude is unbounded, giving all averaging weight to nearest observation')
+            lon_ix1 = lon_ix1 - 1
+            lon_ix2 = lon_ix2 - 1
+            lon_wt = 0
+        else:
+            dx1 = lon[lon_ix2] - lon[lon_ix1]
+            dx2 = track[i,2] - lon[lon_ix1]
+            lon_wt = (dx1 - dx2) / dx1
 
         xwt[2].append(lon_wt)
 
