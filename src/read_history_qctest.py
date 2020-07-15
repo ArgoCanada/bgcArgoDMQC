@@ -5,8 +5,6 @@ def decode_qctest(hex_code):
     tests = []
     for i in range(20,0,-1):
         qc_binary_id = 2**i
-        if i == 20:
-            qc_binary_id -= 4000
         if qc_binary_id <= num:
             num -= qc_binary_id
             tests.append(i)
