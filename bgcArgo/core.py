@@ -66,6 +66,7 @@ class sprof:
 
     def __init__(self, wmo):
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
+        self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -133,10 +134,12 @@ class sprof:
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
+        self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
-        self.assign(self.__floatdict__)
+        self.__floatdict__ = self.__rawfloatdict__
+        self.assign(self.__rawfloatdict__)
     
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -267,8 +270,9 @@ class profiles:
         if type(floats) is int:
             floats = [floats]
 
-        self.__argofiles__ = get_files(ARGO_PATH, floats, cycles=cycles)
+        self.__argofiles__ = get_files(ARGO_PATH, floats, cycles=cycles, mission=mission, mode=mode)
         self.__floatdict__ = load_profiles(self.__argofiles__)
+        self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -288,7 +292,7 @@ class profiles:
 
         # time and location data
         self.SDN       = floatdict['SDN']
-        self.SDN_GRID       = floatdict['SDN_GRID']
+        self.SDN_GRID  = floatdict['SDN_GRID']
         self.LATITUDE  = floatdict['LATITUDE']
         self.LATITUDE_GRID  = floatdict['LATITUDE_GRID']
         self.LONGITUDE = floatdict['LONGITUDE']
@@ -299,12 +303,13 @@ class profiles:
         # core variables
         self.PRES    = floatdict['PRES']
         # self.PRES_QC = floatdict['PRES_QC']
-        # self.TEMP    = floatdict['TEMP']
-        # self.TEMP_QC = floatdict['TEMP_QC']
-        # self.PSAL    = floatdict['PSAL']
-        # self.PSAL_QC = floatdict['PSAL_QC']
-        # potential density
-        # self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+        if 'TEMP' in floatdict.keys():
+            self.TEMP    = floatdict['TEMP']
+            self.TEMP_QC = floatdict['TEMP_QC']
+            self.PSAL    = floatdict['PSAL']
+            self.PSAL_QC = floatdict['PSAL_QC']
+            # potential density
+            self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -336,10 +341,12 @@ class profiles:
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
+        self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
-        self.assign(self.__floatdict__)
+        self.__floatdict__ = self.__rawfloatdict__
+        self.assign(self.__rawfloatdict__)
              
     def to_dict(self):
         return self.__floatdict__.copy()
@@ -465,11 +472,17 @@ def calc_doxy_error(DOXY, G, eG):
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     local_path = Path(local_path)
 
-    subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
+    if mission == 'B':
+        subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
+    if mission == 'C':
+        __coreindex__ = io.read_index(mission='C')
+        subset_index = __coreindex__[__coreindex__.wmo.isin(wmo_numbers)]
+    print(subset_index)
     if cycles is not None:
         subset_index = subset_index[subset_index.cycle.isin(cycles)]
     wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
     wcs = [w.replace('C','') for w in wcs]
+    print(wcs)
 
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
@@ -791,8 +804,9 @@ def load_profiles(files):
         cycle = nc.variables['CYCLE_NUMBER'][:].data.flatten()
 
         ftype = ''
-        for let in nc.variables['PLATFORM_TYPE'][:].compressed():
-            ftype = ftype + let.decode('UTF-8')
+        if 'PLATFORM_TYPE' in nc.variables.keys():
+            for let in nc.variables['PLATFORM_TYPE'][:].compressed():
+                ftype = ftype + let.decode('UTF-8')
 
         floatData['floatName']  = floatData['floatName'] + [int(wmo)]
         floatData['N_LEVELS']   = floatData['N_LEVELS']  + [M]
