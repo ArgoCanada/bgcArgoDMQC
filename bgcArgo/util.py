@@ -66,10 +66,12 @@ def get_lon_index(lon, lon_bounds, cross180):
     if cross180:
         lon_ix = np.logical_or(lon <= lon_bounds[0], lon >= lon_bounds[1])
         lon_ix = np.where(lon_ix)[0]
-        diff_index = np.where(np.diff(lon_ix) != 1)[0][0]
-        half1_lon_ix = np.append(lon_ix[:diff_index], np.array([lon_ix[diff_index]+1]))
-        half2_lon_ix = np.append(np.array([lon_ix[diff_index+1] - 1]), lon_ix[diff_index+1:])
-        lon_ix = np.append(half1_lon_ix, half2_lon_ix)
+        diff_index = np.where(np.diff(lon_ix) != 1)[0]
+        if diff_index.shape[0] != 0:
+            diff_index = diff_index[0]
+            half1_lon_ix = np.append(lon_ix[:diff_index], np.array([lon_ix[diff_index]+1]))
+            half2_lon_ix = np.append(np.array([lon_ix[diff_index+1] - 1]), lon_ix[diff_index+1:])
+            lon_ix = np.append(half1_lon_ix, half2_lon_ix)
 
         if lon_ix[0] != 0:
             lon_ix = np.append(np.array([lon_ix[0]-1]), lon_ix)
