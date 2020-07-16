@@ -514,6 +514,30 @@ def read_qc(flags):
 
     return out_flags
 
+def get_worst_flag(*args):
+    out_flags = np.ones(args[0].shape)
+
+    ### block of code to find the worst flags
+    if len(args) == 1:
+        out_flags = args[0]
+    else:
+        # make an array where all data marked as good
+        out_flags = np.ones(args[0].shape)
+        # loop through input flags
+        for flags in args:
+            # loop through each datapoint flag
+            for i,f in enumerate(flags):
+                if f > out_flags[i] and f <= 4:
+                    out_flags[i] = f
+                if f in [5,8] and out_flags[i] == 1:
+                    out_flags[i] = f
+                if f == 4 and out_flags[i] in [5,8]:
+                    out_flags[i] = f
+                if f == 9:
+                    out_flags[i] = 9
+        
+    return out_flags
+
 def load_argo(local_path, wmo, grid=False, verbose=False):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
