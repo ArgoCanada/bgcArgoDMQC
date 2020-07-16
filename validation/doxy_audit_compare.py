@@ -30,5 +30,5 @@ with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison.csv'),'w') as fid:
         for i in range(sub.shape[0]):
             cycle = sub.cycle.iloc[i]
             ix = syn.CYCLE == cycle
-            print('gain from python bgcArgo: {:2f}, gain from matlab SAGE-O2: {:2f}'.format(syn.gains[ix][0], sub.G_raw.iloc[i]))
+            print('(pyGain, matlabGain) = ({:.2f}, {:.2f})'.format(syn.gains[ix][0], sub.G_raw.iloc[i]))
             fid.write('\n{:d},{:d},{:s},{:s},{:.2f},{:.2f}'.format(wmo,cycle,sub.DAC.iloc[i],sub['profile date'].iloc[i],syn.gains[ix][0],sub.G_raw.iloc[i]))
