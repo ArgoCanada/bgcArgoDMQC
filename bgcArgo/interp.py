@@ -173,7 +173,11 @@ def interp_woa_data(track, woa_track, data, verbose=False):
 
         xwt[1].append(lat_wt)
 
-        lon_ix1 = np.where(lon < track[i,2])[0][-1]
+        lon_ix1 = np.where(lon < track[i,2])[0]
+        if lon_ix1.shape[0] == 0:
+            lon_ix1 = 0
+        else:
+            lon_ix1 = lon_ix1[0]
         lon_ix2 = lon_ix1 + 1
 
         if lon_ix2 == lon.shape[0]:
