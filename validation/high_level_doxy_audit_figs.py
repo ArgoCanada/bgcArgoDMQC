@@ -18,8 +18,9 @@ counts = dict(total=df.shape[0],
 counts = pd.DataFrame(dict(N=np.array([df.shape[0],
                             np.sum(np.isnan(df.pyGAIN)), 
                             df[df.diffGAIN < 0.01].shape[0],
-                            df[np.logical_and(df.diffGAIN >= 0.01, df.diffGAIN < 0.2)].shape[0],
+                            df[np.logical_and(df.diffGAIN >= 0.01, df.diffGAIN < 0.05)].shape[0],
+                            df[np.logical_and(df.diffGAIN >= 0.05, df.diffGAIN < 0.2)].shape[0],
                             df[np.logical_and(df.diffGAIN >= 0.2, df.diffGAIN < 0.5)].shape[0],
                             df[df.diffGAIN >= 0.5].shape[0]]),
-                        name=np.array(['Total', 'NaN valued', 'AD < 0.01', '0.01 <= AD < 0.2',
-                                        '0.2 <= AD < 0.5', 'AD >= 0.5'])))
+                        name=np.array(['Total', 'NaN valued', 'AD < 0.01', '0.01 <= AD < 0.05',
+                                        '0.05 <= AD < 0.5', '0.2 <= AD < 0.5', 'AD >= 0.5'])))
