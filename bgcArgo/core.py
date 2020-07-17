@@ -681,8 +681,9 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
 
     if grid:
         ftype = ''
-        for let in meta_nc.variables['PLATFORM_TYPE'][:].compressed():
-            ftype = ftype + let.decode('UTF-8')
+        if 'PLATFORM_TYPE' in meta_nc.variables.keys():
+            for let in meta_nc.variables['PLATFORM_TYPE'][:].compressed():
+                ftype = ftype + let.decode('UTF-8')
         floatData['floatType'] = ftype
 
         floatData['SDN_GRID']       = np.tile(floatData['SDN'],(M,1)).T.flatten()
