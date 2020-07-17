@@ -3,13 +3,13 @@ def decode_qctest(hex_code):
     num = int(hex_code, 16)
     # list to save test number in
     tests = []
-    for i in range(22,0,-1):
+    for i in range(26,0,-1):
         qc_binary_id = 2**i
         if qc_binary_id <= num:
             num -= qc_binary_id
             tests.append(i)
     
-    return tests, num
+    return tests[::-1], num
 
 def print_result(tests, remainder):
     print('Tests performed: ', end='')
