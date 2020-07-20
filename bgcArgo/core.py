@@ -50,9 +50,15 @@ def get_index(index='bgc'):
     if index == 'bgc':
         return __bgcindex__
     elif index == 'global':
-        return io.read_index(mission='C')
+        if '__globalindex__' not in locals():
+            global __globalindex__
+            __globalindex__ = io.read_index(mission='C')
+        return __globalindex__
     elif index == 'synthetic':
-        return io.read_index(mission='S')
+        if '__synthindex__' not in locals():
+            global __synthindex__
+            __synthindex__ = io.read_index(mission='S')
+        return __synthindex__
 
 def get_dac(wmo):
     
