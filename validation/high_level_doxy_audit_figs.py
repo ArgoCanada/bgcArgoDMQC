@@ -46,6 +46,6 @@ plt.close()
 
 waf = plt.figure(FigureClass=Waffle, rows=5, values=counts[' '].round().values, labels=list(counts.name), colors=tuple(palette), 
     icons=['check-circle', 'check-circle', 'exclamation-triangle', 'times-circle', 'question-circle', 'infinity'], icon_legend=True, icon_size=10,
-    title={'label': 'Absolute deviation between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, legend={'loc': 3, 'bbox_to_anchor': (-0.02, -0.5), 'ncol': 3, 'fontsize': 10})
+    title={'label': 'Absolute Deviation (AD) between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, legend={'loc': 3, 'bbox_to_anchor': (-0.02, -0.5), 'ncol': 3, 'fontsize': 10})
 plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle.png', bbox_inches='tight', dpi=250)
 plt.close()
