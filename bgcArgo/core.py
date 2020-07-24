@@ -138,6 +138,10 @@ class sprof:
             self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
             self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
 
+        if 'O2Sat' in floatdict.keys():
+            self.O2Sat = floatdict['O2Sat']
+            self.O2Sat_QC = floatdict['O2Sat_QC']
+
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
         self.__floatdict__ = self.__cleanfloatdict__
@@ -344,6 +348,10 @@ class profiles:
         if 'CDOM_ADJUSTED' in floatdict.keys():
             self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
             self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
+
+        if 'O2Sat' in floatdict.keys():
+            self.O2Sat = floatdict['O2Sat']
+            self.O2Sat_QC = floatdict['O2Sat_QC']
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
