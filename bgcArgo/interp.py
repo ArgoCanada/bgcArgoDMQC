@@ -174,7 +174,6 @@ def interp_woa_data(track, woa_track, data, verbose=False):
         xwt[1].append(lat_wt)
 
         lon_ix1 = np.where(lon < track[i,2])[0]
-        print(lon[lon_ix1])
         if lon_ix1.shape[0] == 0:
             lon_ix1 = 0
         else:
@@ -191,8 +190,6 @@ def interp_woa_data(track, woa_track, data, verbose=False):
             dx1 = lon[lon_ix2] - lon[lon_ix1]
             dx2 = track[i,2] - lon[lon_ix1]
             lon_wt = (dx1 - dx2) / dx1
-
-            print([lon_wt, dx1, dx2, lon[lon_ix1], lon[lon_ix2], track[i,2]])
 
         xwt[2].append(lon_wt)
 

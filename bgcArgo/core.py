@@ -496,12 +496,10 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     if mission == 'C':
         __coreindex__ = io.read_index(mission='C')
         subset_index = __coreindex__[__coreindex__.wmo.isin(wmo_numbers)]
-    print(subset_index)
     if cycles is not None:
         subset_index = subset_index[subset_index.cycle.isin(cycles)]
     wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
     wcs = [w.replace('C','') for w in wcs]
-    print(wcs)
 
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
@@ -1064,7 +1062,6 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         for i,c in enumerate(cycle):
             ref_o2sat = woa_surf[i]
             subset_o2sat = surf_o2sat[grid_cycle == c]
-            print(subset_o2sat)
             mean_float_data[i,0] = c
             mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
             mean_float_data[i,2] = np.nanmean(subset_o2sat)
