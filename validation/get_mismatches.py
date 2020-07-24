@@ -32,15 +32,20 @@ for dac in nan.DAC.unique():
 
 # looks like disproportionate amount of coriolis are nan or big - look into it
 # sub = df[np.logical_or(df.diffGAIN.isnull(), df.diffGAIN >= 0.2)]
-sub = df[df.pyGAIN.isnull()]
+# sub = df[df.pyGAIN.isnull()]
+sub = df[df.diffGAIN >= 1]
 sub = sub[sub.DAC == 'coriolis']
 
 sprof.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo', woa_path='/Users/gordonc/Documents/data/WOA18')
 for wmo in sub.WMO.unique():
+    dac = sub.DAC.iloc[0]
     syn = sprof(wmo)
     syn.clean()
     wf = sub[sub.WMO == wmo]
     ff = syn.to_dataframe()
     ff = ff[ff.CYCLE.isin(wf.CYCLE)]
-    # ff = ff[~ff.DOXY.isnull()]
-    break # for now just to see if things are working
+
+    if not ff.DOXY_ADJUSTED.isnull().all():
+        print('{} {:d}: There are some adjusted oxygen values'.format(dac, wmo))
+    else:
+        print('{} {:d}: No adjusted oxygen levels'.format(dac, wmo))
