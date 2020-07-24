@@ -1049,7 +1049,8 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
             sys.stdout.write('\nCalculating gains using WOA surface data and float O2 percent saturation...\n')
         surf_ix = data['PRES'] <= zlim
         surf_o2sat = data['O2Sat'][surf_ix]
-        cycle = data['CYCLE_GRID'][surf_ix]
+        grid_cycle = data['CYCLE_GRID'][surf_ix]
+        cycle = data['CYCLES']
 
         z_woa = ref['z']
         woa_data = ref['WOA']
@@ -1060,9 +1061,10 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
 
         mean_float_data = np.nan*np.ones((woa_surf.shape[0],4))
         g = np.nan*np.ones((woa_surf.shape[0],))
-        for i,c in enumerate(np.unique(cycle)):
+        for i,c in enumerate(cycle):
             ref_o2sat = woa_surf[i]
-            subset_o2sat = surf_o2sat[cycle == c]
+            subset_o2sat = surf_o2sat[grid_cycle == c]
+            print(subset_o2sat)
             mean_float_data[i,0] = c
             mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
             mean_float_data[i,2] = np.nanmean(subset_o2sat)
