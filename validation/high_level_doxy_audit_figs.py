@@ -16,13 +16,12 @@ df = pd.read_csv(fn)
 df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
 
 # make new dataframe with categories depending on absolute deviation
-counts = pd.DataFrame(dict(N=np.array([df.shape[0],
-                            np.sum(df.pyGAIN.isnull()), 
+counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.diffGAIN < 0.01].shape[0],
                             df[np.logical_and(df.diffGAIN >= 0.01, df.diffGAIN < 0.05)].shape[0],
                             df[np.logical_and(df.diffGAIN >= 0.05, df.diffGAIN < 0.2)].shape[0],
                             df[df.diffGAIN >= 0.2].shape[0],
-                            np.sum(np.logical_and(np.isinf(df.pyGAIN), np.isinf(df.sageGAIN))),
-                            df[df.diffGAIN < 0.01].shape[0],]),
+                            np.sum(df.pyGAIN.isna()),
+                            np.sum(np.logical_and(np.isinf(df.pyGAIN), np.isinf(df.sageGAIN)))]),
                         name=np.array(['Total', 'AD < 0.01', '0.01 <= AD < 0.05',
                                         '0.05 <= AD < 0.2', 'AD >= 0.2',
                                         'NaN valued', 'Both inf valued',])))
