@@ -182,6 +182,8 @@ class sprof:
             df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
             df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
+        if 'O2Sat' in self.__floatdict__.keys():
+            df['O2Sat']      = self.O2Sat
 
         self.df = df
 
@@ -402,6 +404,9 @@ class profiles:
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
             df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
             df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
+        if 'O2Sat' in self.__floatdict__.keys():
+            df['O2Sat']      = self.O2Sat
+            df['O2Sat_QC']   = self.O2Sat_QC
 
         self.df = df
 
