@@ -20,7 +20,7 @@ local_path = '/Users/gordonc/Documents/data/Argo'
 # bgc.io.get_argo(fltpath, local_path=local_path, mode='summary')
 bgc.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo', woa_path='/Users/gordonc/Documents/data/WOA18')
 
-with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison.csv'),'w') as fid:
+with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200725.csv'),'w') as fid:
     fid.write('WMO,CYCLE,DAC,DATE,pyGAIN,sageGAIN')
     for wmo in df.WMO.unique():
         sub = df[df.WMO == wmo]

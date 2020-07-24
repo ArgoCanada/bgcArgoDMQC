@@ -12,11 +12,12 @@ import seaborn as sns
 import bgcArgo as bgc
 from bgcArgo import sprof
 
-flt_wmo = 5900245
+flt_wmo = 7900559
 
 fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison.csv')
 df = pd.read_csv(fn)
 df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
+rf = df[df.WMO == flt_wmo]
 
 audit_file = Path('../data/DOXY_audit_070720.TXT')
 xf = pd.read_csv(audit_file, sep='\t', header=25)
@@ -33,3 +34,5 @@ ff = ff[ff.CYCLE.isin(af.cycle)]
 gf = pd.DataFrame(dict(cycle = syn.CYCLE, gains = syn.gains))
 
 xtrack, woa_track, woa_data = bgc.io.load_woa_data(syn.track, 'O2sat', zlim=(0,1000), local_path=syn.woa_path)
+
+pf = ff[ff.CYCLE == 88]
