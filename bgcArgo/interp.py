@@ -209,4 +209,6 @@ def interp_woa_data(track, woa_track, data, verbose=False):
             D2 = lat_wt*D3[:,0,:] + (1 - lat_wt)*D3[:,1,:]
             woa_interp[:,i] = lon_wt*D2[:,0] + (1 - lon_wt)*D2[:,1]
 
+    xwt = np.array(xwt)
+
     return woa_interp, xwt, yrday
