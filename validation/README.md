@@ -8,7 +8,7 @@ Storage of code relating to validation of the `bgcArgo` module
 
 ## Comparison to DOXY audit distributed by Josh Plant
 
-Comparisons to the DOXY audit were performed using `syn(wmo)` and matching
+Comparisons to the DOXY audit were performed using `sprof(wmo)` and matching
 the cycle to the distributed audit gain calculated presumably using SAGE-O2
 code, if not exactly the GUI distributed by SOCCOM, using analogous code.
 
