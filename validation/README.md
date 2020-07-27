@@ -22,12 +22,17 @@ infinite valued by both the python package and in the DOXY audit.
 
 This figure summarizes all the 5000+ comparisons made:
 
-![All comparisons](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/doxy_audit/DOXY_audit_comparison_waffle.png)
+![All comparisons](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/doxy_audit/DOXY_audit_comparison_waffle_20200725.png)
 
 And this shows the success of comparisons as a percent of total comparisons:
 
-![Percent of comparison](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/doxy_audit/DOXY_audit_comparison_breakdown.png)
+![Percent of comparison](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/doxy_audit/DOXY_audit_comparison_breakdown_20200725.png)
 
 Plan moving forward is to look into the NaN-valued and high (> 0.2) difference
 gains to see if there is anything consistent about those data or metadata
 that are causing the mismatch.
+
+As of July 24, 2020 the comparison was greatly improved (for more information
+see [issue #10](https://github.com/ArgoCanada/BGC-QC/issues/10)). Figures have
+been updated to reflect this, and plan still stands to investigate large and
+NaN valued ones until we have full agreement.
