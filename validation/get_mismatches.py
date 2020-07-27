@@ -12,7 +12,7 @@ import seaborn as sns
 from bgcArgo import sprof
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison.csv')
+fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200725.csv')
 df = pd.read_csv(fn)
 df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
 
@@ -24,7 +24,7 @@ big = df[df.diffGAIN >= 0.2]
 
 # by dac
 sys.stdout.write('%nan (N)\t%big (N)\t%audit (N)\t dac\n')
-for dac in nan.DAC.unique():
+for dac in xf.DAC.unique():
     sub_nan = nan[nan.DAC == dac]
     sub_big = big[big.DAC == dac]
     sub_audit = xf[xf.DAC == dac]
