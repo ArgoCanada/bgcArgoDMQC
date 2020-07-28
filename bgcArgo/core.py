@@ -50,12 +50,12 @@ def get_index(index='bgc'):
     if index == 'bgc':
         return __bgcindex__
     elif index == 'global':
-        if '__globalindex__' not in locals():
+        if '__globalindex__' not in globals():
             global __globalindex__
             __globalindex__ = io.read_index(mission='C')
         return __globalindex__
     elif index == 'synthetic':
-        if '__synthindex__' not in locals():
+        if '__synthindex__' not in globals():
             global __synthindex__
             __synthindex__ = io.read_index(mission='S')
         return __synthindex__
