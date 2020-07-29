@@ -18,18 +18,18 @@ bp = bp[bp.parameters.notna()]
 index = ['DOXY' in parameter_list for parameter_list in bp.parameters]
 doxy = bp[index]
 
-bin_size = 10
+bin_size = 5
 
 if bin_size < 5:
     vmax = 1000
 else:
-    vmax = 4000
+    vmax = 3000
 
 lat_bins = np.arange(-90, 90+bin_size, bin_size)
 lon_bins = np.arange(-180, 180+bin_size, bin_size)
 
 fig = plt.figure(figsize=(10, 5))
-ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson())
+ax = fig.add_subplot(1, 1, 1, projection=ccrs.Robinson(central_longitude=180))
 
 h = ax.hist2d(doxy.longitude, doxy.latitude, bins=[lon_bins, lat_bins], cmap=cmo.amp, transform=ccrs.PlateCarree(), vmax=vmax)
 
