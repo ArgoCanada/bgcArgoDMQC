@@ -42,10 +42,6 @@ def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
     global NCEP_PATH
     NCEP_PATH = ncep_path
 
-# ----------------------------------------------------------------------------
-# FLOAT CLASS
-# ----------------------------------------------------------------------------
-
 def get_index(index='bgc'):
     if index == 'bgc':
         return __bgcindex__
@@ -65,6 +61,10 @@ def get_dac(wmo):
     dac = __bgcindex__[__bgcindex__.wmo == wmo].dac.iloc[0]
 
     return dac
+
+# ----------------------------------------------------------------------------
+# FLOAT CLASS
+# ----------------------------------------------------------------------------
 
 class sprof:
 
@@ -504,6 +504,16 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
     local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]).as_posix() for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
+
+    remove_ix = []
+    for i,fn in enumerate(local_files):
+        if not Path(fn).exists():
+            sys.stdout.write('File {} does not exists locally - removing from returned list, suggest the user downloads using bgcArgo.io.get_argo(...)\n'.format(fn))
+            remove_ix.append(i)
+    
+    if len(remove_ix) > 0:
+        for ix in remove_ix[::-1]:
+            local_files.pop(ix)
 
     return local_files
 
