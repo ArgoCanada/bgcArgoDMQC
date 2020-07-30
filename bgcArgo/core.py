@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import copy
 import warnings
 from pathlib import Path
 import fnmatch
@@ -145,17 +146,17 @@ class sprof:
             self.O2Sat_QC = floatdict['O2Sat_QC']
 
     def rm_fillvalue(self):
-        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__floatdict__)
-        self.__floatdict__ = self.__nofillvaluefloatdict__
+        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
+        self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
-        self.__floatdict__ = self.__cleanfloatdict__
+        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
+        self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
-        self.__floatdict__ = self.__rawfloatdict__
+        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
     
     def to_dict(self):
@@ -365,12 +366,12 @@ class profiles:
             self.O2Sat_QC = floatdict['O2Sat_QC']
 
     def rm_fillvalue(self):
-        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__floatdict__)
+        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = self.__nofillvaluefloatdict__
         self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
+        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
@@ -733,6 +734,11 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
+    # match the fill values
+    ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] > 99999.)
+    floatData['O2Sat'][ix] = 99999.
+    print(sum(ix))
+    # get the worst QC flag from each quantity that goes into the calculation
     floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     if BRtraj_flag:
@@ -918,7 +924,7 @@ def load_profiles(files):
 
 def dict_clean(float_data):
 
-    clean_float_data = float_data.copy()
+    clean_float_data = copy.deepcopy(float_data)
     qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
 
     for qc_key in qc_flags:
@@ -936,13 +942,18 @@ def dict_clean(float_data):
 
 def dict_fillvalue_clean(float_data):
 
-    clean_float_data = float_data.copy()
-    data_keys = [k for k in clean_float_data.keys() if '_QC' not in k]
+    clean_float_data = copy.deepcopy(float_data)
+    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k]
 
-    for k in data_keys:
-        fillvalue_index = clean_float_data[k] >= 99999. # use greater than because date fillval is 999999
-
-        clean_float_data[k][bad_index] = np.nan
+    for k in qc_keys:
+        data_key   = k.replace('_QC','')
+        if data_key == 'POSITION':
+            for dk in ['LATITUDE', 'LONGITUDE']:
+                fillvalue_index = clean_float_data[dk] >= 99999. # use greater than because date fillval is 999999
+            clean_float_data[dk][fillvalue_index] = np.nan
+        else:
+            fillvalue_index = clean_float_data[data_key] >= 99999. # use greater than because date fillval is 999999
+            clean_float_data[data_key][fillvalue_index] = np.nan
 
     return clean_float_data
 
