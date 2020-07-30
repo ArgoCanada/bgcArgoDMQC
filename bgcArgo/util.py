@@ -55,7 +55,7 @@ def get_lat_index(lat, lat_bounds):
         if lat_ix[0] != 0:
             lat_ix = np.append(np.array([lat_ix[0]-1]), lat_ix)
 
-        if lat_ix[-1] != lat_ix.shape[0] - 1:
+        if lat_ix[-1] != lat.shape[0] - 1:
             lat_ix = np.append(lat_ix, np.array([lat_ix[-1]+1]))
 
         return lat_ix
