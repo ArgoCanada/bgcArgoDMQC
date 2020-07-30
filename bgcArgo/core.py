@@ -735,9 +735,8 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
 
     floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
     # match the fill values
-    ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] > 99999.)
+    ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
     floatData['O2Sat'][ix] = 99999.
-    print(sum(ix))
     # get the worst QC flag from each quantity that goes into the calculation
     floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
