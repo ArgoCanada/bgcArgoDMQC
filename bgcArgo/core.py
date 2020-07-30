@@ -70,7 +70,7 @@ class sprof:
 
     set_dirs = set_dirs
 
-    def __init__(self, wmo):
+    def __init__(self, wmo, keep_fillvalue=False):
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
         self.__rawfloatdict__ = self.__floatdict__
 
@@ -80,7 +80,8 @@ class sprof:
         self.ncep_path = NCEP_PATH
 
         self.assign(self.__floatdict__)
-        self.rm_fillvalue()
+        if not keep_fillvalue:
+            self.rm_fillvalue()
 
     def assign(self, floatdict):
 
@@ -284,7 +285,7 @@ class profiles:
 
     set_dirs = set_dirs
 
-    def __init__(self, floats, cycles=None, mission='B', mode='RD'):
+    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False):
         if type(floats) is int:
             floats = [floats]
 
@@ -298,7 +299,8 @@ class profiles:
         self.ncep_path = NCEP_PATH
 
         self.assign(self.__floatdict__)
-        self.rm_fillvalue()
+        if not keep_fillvalue:
+            self.rm_fillvalue()
 
     def assign(self, floatdict):
 
