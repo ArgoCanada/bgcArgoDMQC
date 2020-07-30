@@ -80,6 +80,7 @@ class sprof:
         self.ncep_path = NCEP_PATH
 
         self.assign(self.__floatdict__)
+        self.rm_fillvalue()
 
     def assign(self, floatdict):
 
@@ -141,6 +142,11 @@ class sprof:
         if 'O2Sat' in floatdict.keys():
             self.O2Sat = floatdict['O2Sat']
             self.O2Sat_QC = floatdict['O2Sat_QC']
+
+    def rm_fillvalue(self):
+        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__floatdict__)
+        self.__floatdict__ = self.__nofillvaluefloatdict__
+        self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
@@ -292,6 +298,7 @@ class profiles:
         self.ncep_path = NCEP_PATH
 
         self.assign(self.__floatdict__)
+        self.rm_fillvalue()
 
     def assign(self, floatdict):
 
@@ -354,6 +361,11 @@ class profiles:
         if 'O2Sat' in floatdict.keys():
             self.O2Sat = floatdict['O2Sat']
             self.O2Sat_QC = floatdict['O2Sat_QC']
+
+    def rm_fillvalue(self):
+        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__floatdict__)
+        self.__floatdict__ = self.__nofillvaluefloatdict__
+        self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__)
@@ -917,6 +929,18 @@ def dict_clean(float_data):
                 clean_float_data[dk][bad_index] = np.nan
         else:
             clean_float_data[data_key][bad_index] = np.nan
+
+    return clean_float_data
+
+def dict_fillvalue_clean(float_data):
+
+    clean_float_data = float_data.copy()
+    data_keys = [k for k in clean_float_data.keys() if '_QC' not in k]
+
+    for k in data_keys:
+        fillvalue_index = clean_float_data[k] >= 99999. # use greater than because date fillval is 999999
+
+        clean_float_data[k][bad_index] = np.nan
 
     return clean_float_data
 
