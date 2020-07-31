@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import sys
 import numpy as np
 
 def decode_woa_var(varname):
@@ -93,3 +94,68 @@ def get_lon_index(lon, lon_bounds, cross180):
             lon_ix = np.append(lon_ix, np.array([lon_ix[-1]+1]))
 
     return lon_ix
+
+def get_qctests(hex_code):
+
+    # hex to numeric
+    num = int(hex_code, 16)
+    # list to save test number in
+    tests = []
+    for i in range(26,0,-1):
+        qc_binary_id = 2**i
+        if qc_binary_id <= num:
+            num -= qc_binary_id
+            tests.append(i)
+    
+    if num != 0:
+        sys.stdout.write('NOTE: decoding QC tests left a non-zero remainder, suggest investigation\n')
+
+    return tests[::-1]
+
+def display_qctests(QCP, QCF):
+
+    QCP_numbers = get_qctests(QCP)
+    QCF_numbers = get_qctests(QCF)
+
+    test_descriptions = [
+        'Platform Identification test\t\t\t ',
+        'Impossible Date test\t\t\t\t ',
+        'Impossible Location test\t\t\t ',
+        'Position on Land test\t\t\t\t ',
+        'Impossible Speed test\t\t\t\t ',
+        'Global Range test\t\t\t\t ',
+        'Regional Global Parameter test\t\t ',
+        'Pressure Increasing test\t\t\t ',
+        'Spike test\t\t\t\t\t ',
+        'Top and Bottom Spike test (obsolete)\t\t ',
+        'Gradient test\t\t\t\t\t ',
+        'Digit Rollover test\t\t\t\t ',
+        'Stuck Value test\t\t\t\t ',
+        'Density Inversion test\t\t\t ',
+        'Grey List test\t\t\t\t ',
+        'Gross Salinity or Temperature Sensor Drift test',
+        'Visual QC test\t\t\t\t ',
+        'Frozen profile test\t\t\t\t ',
+        'Deepest pressure test\t\t\t\t ',
+        'Questionable Argos position test\t\t ',
+        'Near-surface unpumped CTD salinity test\t ',
+        'Near-surface mixed air/water test\t\t '
+    ]
+
+    sys.stdout.write('---------------------------------------------------------------------------\n')
+    sys.stdout.write('| Test\t| Pass/Fail\t| Test name\t\t\t\t\t  |\n')
+    sys.stdout.write('---------------------------------------------------------------------------\n')
+
+    for i,t in enumerate(test_descriptions):
+
+        if i+1 in QCF_numbers:
+            pfn = 'Failed'
+        elif i+1 in QCP_numbers:
+            pfn = 'Passed'
+        else:
+            pfn = 'Not performed'
+
+        sys.stdout.write('| {:d}\t| {}\t| {} |\n'.format(i+1, pfn, t))
+
+    sys.stdout.write('---------------------------------------------------------------------------\n')
+
