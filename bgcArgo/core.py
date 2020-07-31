@@ -921,6 +921,30 @@ def load_profiles(files):
 
     return floatData
 
+def read_history_qctest(nc):
+
+    QC_ACTION = nc.variables['HISTORY_QCACTION'][:].data
+    actions = []
+    for row in QC_ACTION:
+        rval = ''
+        for let in row:
+            rval = rval + let.decode('UTF-8')
+        actions.append(rval)
+    actions = np.array(actions)
+
+    QC_TESTS  = nc.variables['HISTORY_QCTEST'][:].data
+    tests = []
+    for row in QC_ACTION:
+        rval = ''
+        for let in row:
+            rval = rval + let.decode('UTF-8')
+        tests.append(rval)
+    tests = np.array(tests)
+
+    QCP, QCF = tests[actions == 'QCP'], test[actions == 'QCF']
+
+    return QCP, QCF
+
 def dict_clean(float_data):
 
     clean_float_data = copy.deepcopy(float_data)
