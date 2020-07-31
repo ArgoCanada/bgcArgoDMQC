@@ -11,7 +11,7 @@ import seaborn as sns
 from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200725.csv')
+fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200730.csv')
 df = pd.read_csv(fn)
 df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
 
@@ -41,13 +41,13 @@ ax.set_aspect(10)
 ax.set_title('$N={:d}$'.format(df.shape[0]), loc='left')
 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_20200725.png', bbox_inches='tight', dpi=250)
+plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_20200730.png', bbox_inches='tight', dpi=250)
 plt.close()
 
 waf = plt.figure(FigureClass=Waffle, rows=5, values=counts[' '].values, labels=list(counts.name), colors=tuple(palette), 
     icons=['check-circle', 'check-circle', 'exclamation-triangle', 'times-circle', 'question-circle', 'infinity'], icon_legend=True, icon_size=10,
     title={'label': 'Absolute Deviation (AD) between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, legend={'loc': 3, 'bbox_to_anchor': (-0.02, -0.5), 'ncol': 3, 'fontsize': 10})
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_pct_20200725.png', bbox_inches='tight', dpi=250)
+plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_pct_20200730.png', bbox_inches='tight', dpi=250)
 plt.close()
 
 waf = plt.figure(FigureClass=Waffle, rows=50, values=counts['N'].values, labels=list(counts.name), colors=tuple(palette), 
@@ -55,5 +55,5 @@ waf = plt.figure(FigureClass=Waffle, rows=50, values=counts['N'].values, labels=
     title={'label': 'Absolute Deviation (AD) between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, 
     legend={'loc': 3, 'bbox_to_anchor': (-0.01, -0.135), 'ncol': 3, 'fontsize': 10})
 plt.gcf().set_size_inches(10,10)
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_20200725.png', bbox_inches='tight', dpi=250)
+plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_20200730.png', bbox_inches='tight', dpi=250)
 plt.close()

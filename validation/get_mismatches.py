@@ -19,7 +19,7 @@ df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
 audit_file = Path('../data/DOXY_audit_070720.TXT')
 xf = pd.read_csv(audit_file, sep='\t', header=25)
 
-nan = df[df.diffGAIN.isnull()]
+nan = df[df.pyGAIN.isna()]
 big = df[df.diffGAIN >= 0.2]
 
 # by dac
@@ -37,15 +37,31 @@ sub = df[df.diffGAIN >= 1]
 sub = sub[sub.DAC == 'coriolis']
 
 sprof.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo', woa_path='/Users/gordonc/Documents/data/WOA18')
-for wmo in sub.WMO.unique():
-    dac = sub.DAC.iloc[0]
-    syn = sprof(wmo)
-    syn.clean()
-    wf = sub[sub.WMO == wmo]
-    ff = syn.to_dataframe()
-    ff = ff[ff.CYCLE.isin(wf.CYCLE)]
+syn = sprof(sub.WMO.iloc[0])
+sf = syn.to_dataframe()
+sf = sf[sf.CYCLE.isin([0,130])]
 
-    if not ff.DOXY_ADJUSTED.isnull().all():
-        print('{} {:d}: There are some adjusted oxygen values'.format(dac, wmo))
-    else:
-        print('{} {:d}: No adjusted oxygen levels'.format(dac, wmo))
+for flt in nan.WMO.unique():
+    syn = sprof(flt)
+    # syn.clean()
+    syn.calc_gains(ref='WOA')
+
+    sub_nan = nan[nan.WMO == flt]
+
+    ff = syn.to_dataframe()
+    ff = ff[ff.CYCLE.isin(sub_nan.CYCLE)]
+    ff = ff[ff.PRES < 30]
+
+    fltWOA = syn.__WOAfloatref__
+    WOA = syn.__WOAref__
+    WOA = np.append(fltWOA, np.atleast_2d(WOA).T, axis=1)
+
+    wf = pd.DataFrame(data=WOA, columns=['cycle', 'date', 'fltmean', 'fltstd', 'WOA'])
+    wf = wf[wf.cycle.isin(sub_nan.CYCLE)]
+
+    sys.stdout.write('{}\n'.format(flt))
+    sys.stdout.write('cycle\tflt\tWOA\n')
+    for i,c in enumerate(sub_nan.CYCLE):
+        sys.stdout.write('{:d}\t{:.2f}\t{:.2f}\n'.format(int(wf.cycle.iloc[i]), wf.fltmean.iloc[i], wf.WOA.iloc[i]))
+
+    
