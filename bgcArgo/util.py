@@ -159,3 +159,30 @@ def display_qctests(QCP, QCF):
 
     sys.stdout.write('---------------------------------------------------------------------------\n')
 
+def utf_decode(nc_arr):
+
+    dlist = []
+    for row in nc_arr:
+        rval = ''
+        for let in row:
+            rval = rval + let.decode('UTF-8')
+        dlist.append(rval.strip())
+
+    return dlist
+
+def read_gain_value(nc):
+
+    eq    = nc.variables['SCIENTIFIC_CALIB_EQUATION']
+    coeff = nc.variables['SCIENTIFIC_CALIB_COEFFICIENT']
+    comm  = nc.variables['SCIENTIFIC_CALIB_COMMENT']
+
+    eqs    = np.array(utf_decode(np.squeeze(eq[:].data)))
+    coeffs = np.array(utf_decode(np.squeeze(coeff[:].data)))
+    comms  = np.array(utf_decode(np.squeeze(comm[:].data)))
+
+    ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
+
+    G = float(coeffs[ix][0][4:])
+    comment = comms[ix][0]
+
+    return G, eq, comment
