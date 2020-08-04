@@ -185,4 +185,4 @@ def read_gain_value(nc):
     G = float(coeffs[ix][0][4:])
     comment = comms[ix][0]
 
-    return G, eq, comment
+    return G, comment
