@@ -29,7 +29,9 @@ And this shows the success of comparisons as a percent of total comparisons:
 
 ![Percent of comparison](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/doxy_audit/DOXY_audit_comparison_breakdown_20200730.png)
 
-Plan moving forward is to look into the NaN-valued and high (> 0.2) difference
+### change log
+
+July 19, 2020: Plan moving forward is to look into the NaN-valued and high (> 0.2) difference
 gains to see if there is anything consistent about those data or metadata
 that are causing the mismatch.
 
