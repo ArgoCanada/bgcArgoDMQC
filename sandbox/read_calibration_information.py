@@ -18,3 +18,16 @@ for row in np.squeeze(eq[:]):
     for let in row.compressed():
         rval = rval + let.decode('UTF-8')
     eqs.append(rval)
+
+eqs = np.array(eqs)
+
+cs = []
+for row in np.squeeze(coeff[:]):
+    rval = ''
+    for let in row.compressed():
+        rval = rval + let.decode('UTF-8')
+    cs.append(rval)
+
+cs = np.array(cs)
+
+cal = cs[eqs == 'DOXY_ADJUSTED=C*DOXY'][0]
