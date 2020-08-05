@@ -182,7 +182,11 @@ def read_gain_value(nc):
 
     ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
 
-    G = float(coeffs[ix][0][4:])
-    comment = comms[ix][0]
+    if np.sum(ix) == 0:
+        return np.nan, 'No gain value found'
+    else:
+
+        G = float(coeffs[ix][0][4:])
+        comment = comms[ix][0]
 
     return G, comment
