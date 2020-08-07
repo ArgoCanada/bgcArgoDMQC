@@ -19,6 +19,7 @@ for wmo in wmos:
 
     files = bgc.get_files(local_path=argopath, wmo_numbers=[wmo], mission='B', mode='D')
 
+    file_time  = np.array(len(files)*[np.nan])
     file_gains = np.array(len(files)*[np.nan])
     file_msgs  = np.array(len(files)*[256*' '])
     syn_gains  = np.array(len(files)*[np.nan])
@@ -32,8 +33,10 @@ for wmo in wmos:
         else:
             syn_gain = gains[syn.CYCLE == c][0]
 
+        file_time[i]  = nc.variables['JULD'][:][0]
         file_gains[i] = gain
-        file_msgs[i] = msg
-        syn_gains[i] = syn_gain
+        file_msgs[i]  = msg
+        syn_gains[i]  = syn_gain
     
     diffs = syn_gains - file_gains
+    
