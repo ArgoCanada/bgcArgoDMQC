@@ -17,6 +17,7 @@ bp = bgc.get_index()
 bp = bp[bp.parameters.notna()]
 index = ['DOXY' in parameter_list for parameter_list in bp.parameters]
 doxy = bp[index]
+doxy = doxy[doxy.date >= 2.010e13]
 
 lat_bin_size = 5
 lon_bin_size = 10
@@ -39,4 +40,4 @@ plt.colorbar(h[-1], ax=ax, orientation='horizontal', extend='max', shrink=0.5, p
 
 ax.set_title('Number of Oxygen Profiles in each {:d}{}x{:d}{} box'.format(lat_bin_size, chr(176), lon_bin_size, chr(176)))
 
-plt.savefig(Path('figures/argo_oxygen_profiles_{:d}x{:d}.png'.format(lat_bin_size, lon_bin_size)), dpi=350, bbox_inches='tight')
+plt.savefig(Path('../figures/argo_oxygen_profiles_post2010_{:d}x{:d}.png'.format(lat_bin_size, lon_bin_size)), dpi=350, bbox_inches='tight')
