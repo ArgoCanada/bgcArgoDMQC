@@ -503,7 +503,7 @@ def calc_doxy_error(DOXY, G, eG):
 
     return 1
 
-def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
+def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=False):
     local_path = Path(local_path)
 
     if mission == 'B':
@@ -523,7 +523,8 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD'):
     remove_ix = []
     for i,fn in enumerate(local_files):
         if not Path(fn).exists():
-            sys.stdout.write('File {} does not exists locally - removing from returned list, suggest the user downloads using bgcArgo.io.get_argo(...)\n'.format(fn))
+            if verbose:
+                sys.stdout.write('File {} does not exists locally - removing from returned list, suggest the user downloads using bgcArgo.io.get_argo(...)\n'.format(fn))
             remove_ix.append(i)
     
     if len(remove_ix) > 0:
