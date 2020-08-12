@@ -159,15 +159,17 @@ def display_qctests(QCP, QCF):
 
     sys.stdout.write('---------------------------------------------------------------------------\n')
 
-def utf_decode(nc_arr):
-
-    print(nc_arr.shape)
+def utf_decode(nc_arr, verbose=False):
 
     dlist = []
     for row in nc_arr:
         rval = ''
         for let in row:
             rval = rval + let.decode('UTF-8')
+        
+        if verbose:
+            print(rval)
+
         dlist.append(rval.strip())
 
     return dlist
@@ -182,55 +184,60 @@ def read_gain_value(nc):
     ncalib =  nc.dimensions['N_CALIB'].size
 
     if nprof == 1 and ncalib == 1:
-        eqs    = np.array(utf_decode(np.squeeze(eq[:].data)))
-        coeffs = np.array(utf_decode(np.squeeze(coeff[:].data)))
-        comms  = np.array(utf_decode(np.squeeze(comm[:].data)))
+        eqs    = np.array(utf_decode(np.squeeze(eq[:].data), verbose=True)).flatten()
+        coeffs = np.array(utf_decode(np.squeeze(coeff[:].data))).flatten()
+        comms  = np.array(utf_decode(np.squeeze(comm[:].data))).flatten()
 
-        ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
+        ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
+        print(ix)
 
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
-            G = float(coeffs[ix][0][4:])
-            comment = comms[ix][0]
+            G = coeffs[ix]
+            comment = comms[ix]
 
     elif nprof > 1 and ncalib == 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq)) for eqq in eq[:].data])
-        coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in coeff[:].data])
-        comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in comm[:].data])
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for eqq in eq[:].data]).flatten()
+        coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in coeff[:].data]).flatten()
+        comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in comm[:].data]).flatten()
 
-        ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
+        ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
+        print(ix)
 
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
-            G = float(coeffs[ix][i][4:] for i in range(nprof))
+            G = coeffs[ix]
             comment = comms[ix]
         
     elif nprof == 1 and ncalib > 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq)) for eqq in np.squeeze(eq[:].data)])
-        coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in np.squeeze(coeff[:].data)])
-        comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in np.squeeze(comm[:].data)])
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for eqq in np.squeeze(eq[:].data)]).flatten()
+        coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in np.squeeze(coeff[:].data)]).flatten()
+        comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in np.squeeze(comm[:].data)]).flatten()
 
-        ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
+        ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
+        print(ix)
 
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
-            G = float(coeffs[ix][i][4:] for i in range(nprof))
+            G = coeffs[ix]
             comment = comms[ix]
 
     elif nprof > 1 and ncalib > 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq)) for p1 in eq[:].data for eqq in p1])
-        coeffs = np.array([utf_decode(np.squeeze(cqq)) for p1 in coeff[:].data for cqq in p1])
-        comms  = np.array([utf_decode(np.squeeze(mqq)) for p1 in comm[:].data for mqq in p1])
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for p1 in eq[:].data for eqq in p1]).flatten()
+        coeffs = np.array([utf_decode(np.squeeze(cqq)) for p1 in coeff[:].data for cqq in p1]).flatten()
+        comms  = np.array([utf_decode(np.squeeze(mqq)) for p1 in comm[:].data for mqq in p1]).flatten()
 
-        ix = eqs == 'DOXY_ADJUSTED = C * DOXY'
+        ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
+        print(ix)
 
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
-            G = float(coeffs[ix][i][4:] for i in range(nprof))
+            G = coeffs[ix]
             comment = comms[ix]
+    
 
     return G, comment
