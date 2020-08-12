@@ -34,13 +34,17 @@ for wmo in wmos:
         gains = syn.calc_gains(ref='WOA')
 
         file_time  = np.array(len(files)*[np.nan])
-        file_gains = np.array(len(files)*[np.nan])
-        file_msgs  = np.array(len(files)*[256*' '])
+        # file_gains = np.array(len(files)*[np.nan])
+        # file_msgs  = np.array(len(files)*[256*' '])
+        file_gains = []
+        file_msgs  = []
         syn_gains  = np.array(len(files)*[np.nan])
 
         for i,fn in enumerate(files):
             nc = Dataset(Path(fn))
             gain, msg = bgc.util.read_gain_value(nc)
+            print(gain)
+            print(msg)
             c = nc.variables['CYCLE_NUMBER'][:][0]
             if c > syn.CYCLE[-1]:
                 syn_gain = np.nan
@@ -48,10 +52,8 @@ for wmo in wmos:
                 syn_gain = gains[syn.CYCLE == c][0]
 
             file_time[i]  = nc.variables['JULD'][:][0]
-            file_gains[i] = gain
-            file_msgs[i]  = msg
+            file_gains.append(gain)
+            file_msgs.append(msg)
             syn_gains[i]  = syn_gain
         
-        diffs = syn_gains - file_gains
-
-        print(diffs)
+        # diffs = syn_gains - file_gains
