@@ -10,3 +10,4 @@ sagepy/__pycache__/
 .coverage
 .coveragerc
 coverage.xml
+/owc_plots/
