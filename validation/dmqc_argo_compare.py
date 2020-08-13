@@ -22,6 +22,36 @@ def get_all_wmos():
     
     return wmos
 
+def decode_file_gain_strings(fg_arr, msg_arr):
+
+    GAIN = np.array(fg_arr.shape[0]*[np.nan])
+    MSGS = np.array(fg_arr.shape[0]*[256*' '])
+
+    for n,glist in enumerate(fg_arr):
+        if type(glist) is float:
+            g = glist
+        else:
+            if len(glist) == 1:
+                g = float(glist[0].split('=')[-1].strip())
+                msg = msg_arr[n][0]
+            else:
+                g = len(glist) * [np.nan]
+                for i,gstr in enumerate(glist):
+                    g[i] = float(gstr.split('=')[-1].strip())
+                g = np.array(g)
+                if (g == g[0]).all():
+                    g = g[0]
+                    msgs = msg_arr[n][0]
+                else:
+                    print('Different calibration values, taking last one')
+                    g = g[-1]
+                    msg = msg_arr[n][-1]
+        
+        GAIN[n] = g
+        MSGS[n] = msg
+    
+    return GAIN, MSGS
+
 argopath = '/Users/gordonc/Documents/data/Argo/'
 bgc.set_dirs(argo_path=argopath, woa_path='/Users/gordonc/Documents/data/WOA18/')
 wmos = get_all_wmos()
@@ -35,8 +65,13 @@ file_gains = []
 file_msgs  = []
 file_time  = np.array([])
 syn_gains  = np.array([])
+arr_sdn    = np.array([])
+arr_dac    = np.array([])
+arr_wmo    = np.array([])
+arr_cyc    = np.array([])
 
 for wmo in wmos:
+    print(wmo)
     if len(files) > 0:
         syn = bgc.sprof(wmo)
         gains = syn.calc_gains(ref='WOA')
@@ -45,24 +80,43 @@ for wmo in wmos:
         # sub_file_gains = np.array(len(files)*[np.nan])
         # sub_file_msgs  = np.array(len(files)*[256*' '])
         sub_syn_gains  = np.array(len(files)*[np.nan])
+        sub_cycles     = np.array(len(files)*[np.nan])
+        sub_wmo        = np.array(len(files)*[wmo])
+        sub_dac        = np.array(len(files)*[bgc.get_dac(wmo)])
+        sub_sdn        = np.array(len(files)*[np.nan])
 
         for i,fn in enumerate(files):
             nc = Dataset(Path(fn))
             gain, msg = bgc.util.read_gain_value(nc)
-            print(gain)
-            print(msg)
             c = nc.variables['CYCLE_NUMBER'][:][0]
+            sub_cycles[i] = c
             if c not in syn.CYCLE:
                 syn_gain = np.nan
+                syn_sdn  = np.nan
             else:
                 syn_gain = gains[syn.CYCLE == c][0]
+                syn_sdn  = syn.SDN[syn.CYCLE == c][0]
 
             sub_file_time[i]  = nc.variables['JULD'][:][0]
             file_gains.append(gain)
             file_msgs.append(msg)
             sub_syn_gains[i]  = syn_gain
+            sub_sdn[i] = syn_sdn
 
     file_time = np.append(file_time, sub_file_time)
     syn_gains = np.append(syn_gains, sub_syn_gains)
+    arr_wmo   = np.append(arr_wmo, sub_wmo)
+    arr_dac   = np.append(arr_dac, sub_dac)
+    arr_sdn   = np.append(arr_sdn, sub_sdn)
+    arr_cyc   = np.append(arr_cyc, sub_cycles)
         
-    # diffs = syn_gains - file_gains
+file_gains = np.array(file_gains, dtype=object)
+file_msgs  = np.array(file_msgs, dtype=object)
+
+processed_gains, processed_msgs = decode_file_gain_strings(file_gains, file_msgs)
+
+df = pd.DataFrame(dict(WMO=arr_wmo, CYCLE=arr_cyc, DAC=arr_dac, DATE=arr_sdn, pyGAIN=syn_gains, argoGAIN=processed_gains, argoMSG=processed_msgs))
+
+store = pd.HDFStore(Path('../data/argo_dmqc_comparison.h5'))
+store.put('df', df, data_columns=df.columns)
+store.close()
