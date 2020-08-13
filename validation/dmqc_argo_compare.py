@@ -25,20 +25,26 @@ def get_all_wmos():
 argopath = '/Users/gordonc/Documents/data/Argo/'
 bgc.set_dirs(argo_path=argopath, woa_path='/Users/gordonc/Documents/data/WOA18/')
 wmos = get_all_wmos()
+files = bgc.get_files(local_path=argopath, wmo_numbers=wmos, mission='B', mode='D')
+
+index = bgc.get_index()
+wmos = pd.DataFrame(dict(wmos=wmos))
+wmos = wmos[wmos.wmos.isin(index.wmo)].wmos.unique()\
+
+file_gains = []
+file_msgs  = []
+file_time  = np.array([])
+syn_gains  = np.array([])
 
 for wmo in wmos:
-    files = bgc.get_files(local_path=argopath, wmo_numbers=[wmo], mission='B', mode='D')
-
     if len(files) > 0:
         syn = bgc.sprof(wmo)
         gains = syn.calc_gains(ref='WOA')
 
-        file_time  = np.array(len(files)*[np.nan])
-        # file_gains = np.array(len(files)*[np.nan])
-        # file_msgs  = np.array(len(files)*[256*' '])
-        file_gains = []
-        file_msgs  = []
-        syn_gains  = np.array(len(files)*[np.nan])
+        sub_file_time  = np.array(len(files)*[np.nan])
+        # sub_file_gains = np.array(len(files)*[np.nan])
+        # sub_file_msgs  = np.array(len(files)*[256*' '])
+        sub_syn_gains  = np.array(len(files)*[np.nan])
 
         for i,fn in enumerate(files):
             nc = Dataset(Path(fn))
@@ -46,14 +52,17 @@ for wmo in wmos:
             print(gain)
             print(msg)
             c = nc.variables['CYCLE_NUMBER'][:][0]
-            if c > syn.CYCLE[-1]:
+            if c not in syn.CYCLE:
                 syn_gain = np.nan
             else:
                 syn_gain = gains[syn.CYCLE == c][0]
 
-            file_time[i]  = nc.variables['JULD'][:][0]
+            sub_file_time[i]  = nc.variables['JULD'][:][0]
             file_gains.append(gain)
             file_msgs.append(msg)
-            syn_gains[i]  = syn_gain
+            sub_syn_gains[i]  = syn_gain
+
+    file_time = np.append(file_time, sub_file_time)
+    syn_gains = np.append(syn_gains, sub_syn_gains)
         
-        # diffs = syn_gains - file_gains
+    # diffs = syn_gains - file_gains
