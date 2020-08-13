@@ -184,13 +184,11 @@ def read_gain_value(nc):
     ncalib =  nc.dimensions['N_CALIB'].size
 
     if nprof == 1 and ncalib == 1:
-        eqs    = np.array(utf_decode(np.squeeze(eq[:].data), verbose=True)).flatten()
+        eqs    = np.array(utf_decode(np.squeeze(eq[:].data), verbose=False)).flatten()
         coeffs = np.array(utf_decode(np.squeeze(coeff[:].data))).flatten()
         comms  = np.array(utf_decode(np.squeeze(comm[:].data))).flatten()
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
-        print(ix)
-
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
@@ -198,13 +196,11 @@ def read_gain_value(nc):
             comment = comms[ix]
 
     elif nprof > 1 and ncalib == 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for eqq in eq[:].data]).flatten()
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=False) for eqq in eq[:].data]).flatten()
         coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in coeff[:].data]).flatten()
         comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in comm[:].data]).flatten()
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
-        print(ix)
-
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
@@ -212,13 +208,11 @@ def read_gain_value(nc):
             comment = comms[ix]
         
     elif nprof == 1 and ncalib > 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for eqq in np.squeeze(eq[:].data)]).flatten()
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=False) for eqq in np.squeeze(eq[:].data)]).flatten()
         coeffs = np.array([utf_decode(np.squeeze(cqq)) for cqq in np.squeeze(coeff[:].data)]).flatten()
         comms  = np.array([utf_decode(np.squeeze(mqq)) for mqq in np.squeeze(comm[:].data)]).flatten()
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
-        print(ix)
-
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
@@ -226,13 +220,11 @@ def read_gain_value(nc):
             comment = comms[ix]
 
     elif nprof > 1 and ncalib > 1:
-        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=True) for p1 in eq[:].data for eqq in p1]).flatten()
+        eqs    = np.array([utf_decode(np.squeeze(eqq), verbose=False) for p1 in eq[:].data for eqq in p1]).flatten()
         coeffs = np.array([utf_decode(np.squeeze(cqq)) for p1 in coeff[:].data for cqq in p1]).flatten()
         comms  = np.array([utf_decode(np.squeeze(mqq)) for p1 in comm[:].data for mqq in p1]).flatten()
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
-        print(ix)
-
         if np.sum(ix) == 0:
             return np.nan, 'No gain value found'
         else:
