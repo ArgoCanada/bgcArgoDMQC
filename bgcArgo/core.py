@@ -89,6 +89,7 @@ class sprof:
         # metadata and dimension variables
         self.floatName  = floatdict['floatName']
         self.floatType  = floatdict['floatType']
+        self.N_CYCLES   = floatdict['N_CYCLES']
         self.N_LEVELS   = floatdict['N_LEVELS']
         self.CYCLE      = floatdict['CYCLES']
         self.CYCLE_GRID = floatdict['CYCLE_GRID']
@@ -240,8 +241,12 @@ class sprof:
             if not hasattr(self, 'NCEP'):
                 self.get_ncep()
 
-            ix = [c in np.unique(self.__floatdict__['TRAJ_CYCLE']) for c in self.CYCLES]
-            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[ix], unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__)))/100
+            pH2O = unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
+
+            common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
+            print(common_cycles)
+
+            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
             self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX)
             self.gains = self.__NCEPgains__
 
@@ -979,6 +984,11 @@ def dict_fillvalue_clean(float_data):
             fillvalue_index = clean_float_data[data_key] >= 99999. # use greater than because date fillval is 999999
             clean_float_data[data_key][fillvalue_index] = np.nan
 
+    # check if there is in-air data present
+    if 'PPOX_DOXY' in float_data.keys():
+        fillvalue_index = clean_float_data['PPOX_DOXY'] >= 99999. # use greater than because date fillval is 999999
+        clean_float_data['PPOX_DOXY'][fillvalue_index] = np.nan
+
     return clean_float_data
 
 def track(float_data):
@@ -1099,8 +1109,10 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         cycle = data['CYCLES']
         inair_cycle = data['TRAJ_CYCLE']
 
+        intersect_cycles = np.intersect1d(cycle, np.unique(inair_cycle), assume_unique=True)
+
         mean_float_data = np.nan*np.ones((ref.shape[0],4))
-        for i,c in enumerate(np.unique(inair_cycle)):
+        for i,c in enumerate(intersect_cycles):
             subset_ppox = ppox[inair_cycle == c]
             mean_float_data[i,0] = c
             mean_float_data[i,1] = np.sum(~np.isnan(subset_ppox))
