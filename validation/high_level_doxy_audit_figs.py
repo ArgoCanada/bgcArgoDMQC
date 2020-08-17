@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import seaborn as sns
-from pywaffle import Waffle
+# from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
 fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200730.csv')
@@ -25,7 +25,7 @@ counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.diffGAIN < 0.01].shape[
                         name=np.array(['Total', 'AD < 0.01', '0.01 <= AD < 0.05',
                                         '0.05 <= AD < 0.2', 'AD >= 0.2',
                                         'NaN valued', 'Both inf valued',])))
-
+"""
 # calculate percent
 counts[' '] = counts.N/counts.N.iloc[0]*100
 # don't need total now
@@ -57,3 +57,67 @@ waf = plt.figure(FigureClass=Waffle, rows=50, values=counts['N'].values, labels=
 plt.gcf().set_size_inches(10,10)
 plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_20200730.png', bbox_inches='tight', dpi=250)
 plt.close()
+"""
+
+fig, axes = plt.subplots(1,2)
+axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
+ll = np.min(axes[0].get_xlim() + axes[0].get_ylim())
+ul = np.max(axes[0].get_xlim() + axes[0].get_ylim())
+axes[0].plot((ll,ul), (ll,ul), 'k-')
+axes[0].set_xlim((ll,ul))
+axes[0].set_ylim((ll,ul))
+
+axes[0].set_xlabel('$G_{SAGE}$')
+axes[0].set_ylabel('$G_{bgcArgo}$')
+
+xf = df[df.diffGAIN < 1e9]
+sns.distplot(xf.diffGAIN, kde=False, ax=axes[1])
+
+axes[1].set_xlabel('$\Delta$G')
+
+w, h = fig.get_figwidth(), fig.get_figheight()
+fig.set_size_inches(w, h/2)
+fig.tight_layout()
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_fulllims.png'), bbox_inches='tight', dpi=250)
+
+fig, axes = plt.subplots(1,2)
+axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
+ll = 0
+ul = 20
+axes[0].plot((ll,ul), (ll,ul), 'k-')
+axes[0].set_xlim((ll,ul))
+axes[0].set_ylim((ll,ul))
+
+axes[0].set_xlabel('$G_{SAGE}$')
+axes[0].set_ylabel('$G_{bgcArgo}$')
+
+xf = df[df.diffGAIN < 1e9]
+sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(0, 0.5, 0.01))
+
+axes[1].set_xlabel('$\Delta$G')
+
+fig.set_size_inches(w, h/2)
+fig.tight_layout()
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_medlims.png'), bbox_inches='tight', dpi=250)
+
+fig, axes = plt.subplots(1,2)
+axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
+ll = 0.5
+ul = 2.5
+axes[0].plot((ll,ul), (ll,ul), 'k-')
+axes[0].set_xlim((ll,ul))
+axes[0].set_ylim((ll,ul))
+
+axes[0].set_xlabel('$G_{SAGE}$')
+axes[0].set_ylabel('$G_{bgcArgo}$')
+
+xf = df[df.diffGAIN < 1e9]
+sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(0, 0.2, 0.01))
+
+axes[1].set_xlabel('$\Delta$G')
+
+fig.set_size_inches(w, h/2)
+fig.tight_layout()
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_smalllims.png'), bbox_inches='tight', dpi=250)
+
+plt.close('all')
