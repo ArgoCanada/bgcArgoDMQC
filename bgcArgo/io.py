@@ -320,7 +320,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, mode=None):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission=None, mode='RD'):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -375,7 +375,36 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, mode
                 dac = ftp_wmo_path.split('/')[-2]
                 ftp.cwd(ftp_wmo_path)
 
-                files = ftp.nlst('*.nc')
+                if mission is None or mission == 'CB':
+                    if mode == 'RD':
+                        files = ftp.nlst('*.nc')
+                    elif mode == 'R':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('D*.nc') + ftp.nlst('BD*.nc')
+                if mission == 'C':
+                    if mode == 'RD':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['B' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'R':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['B' in fn or 'D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('D*.nc')
+                if mission == 'B':
+                    if mode == 'RD':
+                        files = ftp.nlst('B*.nc')
+                    elif mode == 'R':
+                        files = ftp.nlst('B*.nc')
+                        ix = np.array(['D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('BD*.nc')
+                    
                 # define local location to save file
                 dac_path = local_path / dac
                 wmo_path = local_path / dac / wmo
@@ -399,7 +428,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, mode
                         ftp.retrbinary('RETR ' + fn, lf.write)
 
                 # repeat as above
-                if 'profiles' in ftp.nlst() and mode != 'summary':
+                if 'profiles' in ftp.nlst() and ftype != 'summary':
                     ftp.cwd('profiles')
                     files = ftp.nlst('*.nc')
 
@@ -456,7 +485,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, mode
 
             # ------------------------ INDIVIDUAL PROFILE FILES -------------------
             # repeat as above
-            if 'profiles' in ftp.nlst() and mode != 'summary':
+            if 'profiles' in ftp.nlst() and ftype != 'summary':
                 ftp.cwd('profiles')
                 files = ftp.nlst('*.nc')
 
