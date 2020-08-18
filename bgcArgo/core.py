@@ -58,8 +58,12 @@ def get_index(index='bgc'):
         return __synthindex__
 
 def get_dac(wmo):
+
+    if '__globalindex__' not in globals():
+            global __globalindex__
+            __globalindex__ = io.read_index(mission='C')
     
-    dac = __bgcindex__[__bgcindex__.wmo == wmo].dac.iloc[0]
+    dac = __globalindex__[__globalindex__.wmo == wmo].dac.iloc[0]
 
     return dac
 
