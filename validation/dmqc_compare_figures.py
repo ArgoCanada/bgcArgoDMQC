@@ -11,7 +11,7 @@ import seaborn as sns
 # from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/argo_dmqc_comparison.h5')
+fn = Path('../data/argo_dmqc_comparison_20200818.h5')
 df = pd.read_hdf(fn)
 df['diffGAIN'] = df.pyGAIN - df.argoGAIN
 df['absdiffGAIN'] = np.abs(df.pyGAIN - df.argoGAIN)
@@ -35,7 +35,7 @@ axes[1].set_xlabel('$\Delta$G')
 w, h = fig.get_figwidth(), fig.get_figheight()
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/dmqc/scatter_and_dist_fulllims.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/dmqc/scatter_and_dist_fulllims_20200818.png'), bbox_inches='tight', dpi=250)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.argoGAIN, df.pyGAIN, 'k.')
@@ -56,4 +56,4 @@ axes[1].set_xlabel('$\Delta$G')
 w, h = fig.get_figwidth(), fig.get_figheight()
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/dmqc/scatter_and_dist_medlims.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/dmqc/scatter_and_dist_medlims_20200818.png'), bbox_inches='tight', dpi=250)

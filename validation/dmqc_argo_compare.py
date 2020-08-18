@@ -55,11 +55,10 @@ def decode_file_gain_strings(fg_arr, msg_arr):
 argopath = '/Users/gordonc/Documents/data/Argo/'
 bgc.set_dirs(argo_path=argopath, woa_path='/Users/gordonc/Documents/data/WOA18/')
 wmos = get_all_wmos()
-files = bgc.get_files(local_path=argopath, wmo_numbers=wmos, mission='B', mode='D')
 
 index = bgc.get_index()
 wmos = pd.DataFrame(dict(wmos=wmos))
-wmos = wmos[wmos.wmos.isin(index.wmo)].wmos.unique()\
+wmos = wmos[wmos.wmos.isin(index.wmo)].wmos.unique()
 
 file_gains = []
 file_msgs  = []
@@ -67,11 +66,12 @@ file_time  = np.array([])
 syn_gains  = np.array([])
 arr_sdn    = np.array([])
 arr_dac    = np.array([])
-arr_wmo    = np.array([])
+arr_wmo    = np.array([], dtype=int)
 arr_cyc    = np.array([])
 
 for wmo in wmos:
     print(wmo)
+    files = bgc.get_files(local_path=argopath, wmo_numbers=[wmo], mission='B', mode='D')
     if len(files) > 0:
         syn = bgc.sprof(wmo)
         syn.clean()
@@ -82,7 +82,7 @@ for wmo in wmos:
         # sub_file_msgs  = np.array(len(files)*[256*' '])
         sub_syn_gains  = np.array(len(files)*[np.nan])
         sub_cycles     = np.array(len(files)*[np.nan])
-        sub_wmo        = np.array(len(files)*[wmo])
+        sub_wmo        = np.array(len(files)*[int(wmo)], dtype=int)
         sub_dac        = np.array(len(files)*[bgc.get_dac(wmo)])
         sub_sdn        = np.array(len(files)*[np.nan])
 
@@ -104,12 +104,12 @@ for wmo in wmos:
             sub_syn_gains[i]  = syn_gain
             sub_sdn[i] = syn_sdn
 
-    file_time = np.append(file_time, sub_file_time)
-    syn_gains = np.append(syn_gains, sub_syn_gains)
-    arr_wmo   = np.append(arr_wmo, sub_wmo)
-    arr_dac   = np.append(arr_dac, sub_dac)
-    arr_sdn   = np.append(arr_sdn, sub_sdn)
-    arr_cyc   = np.append(arr_cyc, sub_cycles)
+        file_time = np.append(file_time, sub_file_time)
+        syn_gains = np.append(syn_gains, sub_syn_gains)
+        arr_wmo   = np.append(arr_wmo, sub_wmo)
+        arr_dac   = np.append(arr_dac, sub_dac)
+        arr_sdn   = np.append(arr_sdn, sub_sdn)
+        arr_cyc   = np.append(arr_cyc, sub_cycles)
         
 file_gains = np.array(file_gains, dtype=object)
 file_msgs  = np.array(file_msgs, dtype=object)
@@ -118,6 +118,6 @@ processed_gains, processed_msgs = decode_file_gain_strings(file_gains, file_msgs
 
 df = pd.DataFrame(dict(WMO=arr_wmo, CYCLE=arr_cyc, DAC=arr_dac, DATE=arr_sdn, pyGAIN=syn_gains, argoGAIN=processed_gains, argoMSG=processed_msgs))
 
-store = pd.HDFStore(Path('../data/argo_dmqc_comparison.h5'))
+store = pd.HDFStore(Path('../data/argo_dmqc_comparison_20200818.h5'))
 store.put('df', df, data_columns=df.columns)
 store.close()
