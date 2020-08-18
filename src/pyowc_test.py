@@ -46,6 +46,9 @@ mdict = loadmat(datapath / 'data/float_source/3901960.mat')
 # print out variable names
 print([k for k in mdict.keys()])
 
+# see what wmo_boxes file is/does
+wmo_boxes = loadmat(datapath / 'data/constants/wmo_boxes.mat')
+
 # ----------------------------------------------------------------------------
 # Attempt at using the module to do something similar on actual Argo nc files
 # am having trouble seeing if this module is even meant to handle .nc files, 
@@ -63,14 +66,14 @@ sprof.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo')
 def nc_to_owc_mat(ncfile):
     nc = Dataset(ncfile)
     export_dict = dict(
-        PROFILE_NO = nc.variables['CYCLE_NUMBER'][:].data,
-        LAT = nc.variables['LATITUDE'][:].data,
-        LONG = nc.variables['LONGITUDE'][:].data,
-        DATES = (nc.variables['JULD'][:].data + datestr2num('1950-01-01'))/365 + 1970, # note dates are in years which is gross
-        PRES = nc.variables['PRES'][:].data,
-        TEMP = nc.variables['TEMP'][:].data,
-        PTMP = gsw.pt0_from_t(nc.variables['PSAL'][:].data, nc.variables['TEMP'][:].data, nc.variables['PRES'][:].data,),
-        SAL = nc.variables['PSAL'][:].data,
+        PROFILE_NO = nc.variables['CYCLE_NUMBER'][:].data.T,
+        LAT = nc.variables['LATITUDE'][:].data.T,
+        LONG = nc.variables['LONGITUDE'][:].data.T,
+        DATES = (nc.variables['JULD'][:].data.T + datestr2num('1950-01-01'))/365 + 1970, # note dates are in years which is gross
+        PRES = nc.variables['PRES'][:].data.T,
+        TEMP = nc.variables['TEMP'][:].data.T,
+        PTMP = gsw.pt0_from_t(nc.variables['PSAL'][:].data.T, nc.variables['TEMP'][:].data.T, nc.variables['PRES'][:].data.T,),
+        SAL = nc.variables['PSAL'][:].data.T,
     )
 
     return export_dict
