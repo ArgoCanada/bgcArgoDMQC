@@ -74,6 +74,7 @@ for wmo in wmos:
     print(wmo)
     if len(files) > 0:
         syn = bgc.sprof(wmo)
+        syn.clean()
         gains = syn.calc_gains(ref='WOA')
 
         sub_file_time  = np.array(len(files)*[np.nan])

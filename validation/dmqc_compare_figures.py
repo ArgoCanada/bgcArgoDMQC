@@ -13,7 +13,8 @@ import seaborn as sns
 # summary comparison between bgcArgo and SAGE/DOXY audit
 fn = Path('../data/argo_dmqc_comparison.h5')
 df = pd.read_hdf(fn)
-df['diffGAIN'] = np.abs(df.pyGAIN - df.argoGAIN)
+df['diffGAIN'] = df.pyGAIN - df.argoGAIN
+df['absdiffGAIN'] = np.abs(df.pyGAIN - df.argoGAIN)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.argoGAIN, df.pyGAIN, 'k.')
