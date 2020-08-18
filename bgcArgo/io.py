@@ -375,35 +375,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 dac = ftp_wmo_path.split('/')[-2]
                 ftp.cwd(ftp_wmo_path)
 
-                if mission is None or mission == 'CB':
-                    if mode == 'RD':
-                        files = ftp.nlst('*.nc')
-                    elif mode == 'R':
-                        files = ftp.nlst('*.nc')
-                        ix = np.array(['D' in fn for fn in files])
-                        files = list(np.array(files)[~ix])
-                    elif mode == 'D':
-                        files = ftp.nlst('D*.nc') + ftp.nlst('BD*.nc')
-                if mission == 'C':
-                    if mode == 'RD':
-                        files = ftp.nlst('*.nc')
-                        ix = np.array(['B' in fn for fn in files])
-                        files = list(np.array(files)[~ix])
-                    elif mode == 'R':
-                        files = ftp.nlst('*.nc')
-                        ix = np.array(['B' in fn or 'D' in fn for fn in files])
-                        files = list(np.array(files)[~ix])
-                    elif mode == 'D':
-                        files = ftp.nlst('D*.nc')
-                if mission == 'B':
-                    if mode == 'RD':
-                        files = ftp.nlst('B*.nc')
-                    elif mode == 'R':
-                        files = ftp.nlst('B*.nc')
-                        ix = np.array(['D' in fn for fn in files])
-                        files = list(np.array(files)[~ix])
-                    elif mode == 'D':
-                        files = ftp.nlst('BD*.nc')
+                files = ftp.nlst('*.nc')
                     
                 # define local location to save file
                 dac_path = local_path / dac
@@ -430,7 +402,35 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 # repeat as above
                 if 'profiles' in ftp.nlst() and ftype != 'summary':
                     ftp.cwd('profiles')
-                    files = ftp.nlst('*.nc')
+                    if mission is None or mission == 'CB':
+                        if mode == 'RD':
+                            files = ftp.nlst('*.nc')
+                        elif mode == 'R':
+                            files = ftp.nlst('*.nc')
+                            ix = np.array(['D' in fn for fn in files])
+                            files = list(np.array(files)[~ix])
+                        elif mode == 'D':
+                            files = ftp.nlst('D*.nc') + ftp.nlst('BD*.nc')
+                    if mission == 'C':
+                        if mode == 'RD':
+                            files = ftp.nlst('*.nc')
+                            ix = np.array(['B' in fn for fn in files])
+                            files = list(np.array(files)[~ix])
+                        elif mode == 'R':
+                            files = ftp.nlst('*.nc')
+                            ix = np.array(['B' in fn or 'D' in fn for fn in files])
+                            files = list(np.array(files)[~ix])
+                        elif mode == 'D':
+                            files = ftp.nlst('D*.nc')
+                    if mission == 'B':
+                        if mode == 'RD':
+                            files = ftp.nlst('B*.nc')
+                        elif mode == 'R':
+                            files = ftp.nlst('B*.nc')
+                            ix = np.array(['D' in fn for fn in files])
+                            files = list(np.array(files)[~ix])
+                        elif mode == 'D':
+                            files = ftp.nlst('BD*.nc')
 
                     profile_path = wmo_path / 'profiles'
                     if not profile_path.exists():
