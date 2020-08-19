@@ -32,7 +32,10 @@ def decode_file_gain_strings(fg_arr, msg_arr):
             g = glist
         else:
             if len(glist) == 1:
-                g = float(glist[0].split('=')[-1].strip())
+                if type(glist[0]) is str:
+                    g = float(glist[0].split('=')[-1].strip())
+                else:
+                    g = np.nan
                 msg = msg_arr[n][0]
             else:
                 g = len(glist) * [np.nan]
@@ -64,6 +67,7 @@ file_gains = []
 file_msgs  = []
 file_time  = np.array([])
 syn_gains  = np.array([])
+mean_gain  = np.array([])
 arr_sdn    = np.array([])
 arr_dac    = np.array([])
 arr_wmo    = np.array([], dtype=int)
@@ -106,6 +110,7 @@ for wmo in wmos:
 
         file_time = np.append(file_time, sub_file_time)
         syn_gains = np.append(syn_gains, sub_syn_gains)
+        mean_gain = np.append(mean_gain, np.array(sub_syn_gains.shape[0]*[np.nanmean(sub_syn_gains)]))
         arr_wmo   = np.append(arr_wmo, sub_wmo)
         arr_dac   = np.append(arr_dac, sub_dac)
         arr_sdn   = np.append(arr_sdn, sub_sdn)
@@ -116,8 +121,8 @@ file_msgs  = np.array(file_msgs, dtype=object)
 
 processed_gains, processed_msgs = decode_file_gain_strings(file_gains, file_msgs)
 
-df = pd.DataFrame(dict(WMO=arr_wmo, CYCLE=arr_cyc, DAC=arr_dac, DATE=arr_sdn, pyGAIN=syn_gains, argoGAIN=processed_gains, argoMSG=processed_msgs))
+df = pd.DataFrame(dict(WMO=arr_wmo, CYCLE=arr_cyc, DAC=arr_dac, DATE=arr_sdn, pyGAIN=syn_gains, pyMEANGAIN=mean_gain, argoGAIN=processed_gains, argoMSG=processed_msgs))
 
-store = pd.HDFStore(Path('../data/argo_dmqc_comparison_20200818.h5'))
+store = pd.HDFStore(Path('../data/argo_dmqc_comparison_20200819.h5'))
 store.put('df', df, data_columns=df.columns)
 store.close()

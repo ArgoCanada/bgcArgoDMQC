@@ -190,7 +190,7 @@ def read_gain_value(nc):
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
         if np.sum(ix) == 0:
-            return np.nan, 'No gain value found'
+            return np.array([np.nan]), np.array(['No gain value found'])
         else:
             G = coeffs[ix]
             comment = comms[ix]
@@ -202,7 +202,7 @@ def read_gain_value(nc):
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
         if np.sum(ix) == 0:
-            return np.nan, 'No gain value found'
+            return np.array([np.nan]), np.array(['No gain value found'])
         else:
             G = coeffs[ix]
             comment = comms[ix]
@@ -214,7 +214,7 @@ def read_gain_value(nc):
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
         if np.sum(ix) == 0:
-            return np.nan, 'No gain value found'
+            return np.array([np.nan]), np.array(['No gain value found'])
         else:
             G = coeffs[ix]
             comment = comms[ix]
@@ -226,7 +226,7 @@ def read_gain_value(nc):
 
         ix = np.array(['DOXY_ADJUSTED' in s for s in eqs])
         if np.sum(ix) == 0:
-            return np.nan, 'No gain value found'
+            return np.array([np.nan]), np.array(['No gain value found'])
         else:
             G = coeffs[ix]
             comment = comms[ix]
