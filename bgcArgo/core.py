@@ -13,7 +13,17 @@ from scipy.interpolate import interp1d, RectBivariateSpline
 
 import matplotlib.pyplot as plt
 
-import seawater as sw
+# soft attempt to load gsw, but allow for seawater as well
+try: 
+    from gsw import pot_rho_t_exact as pden
+except:
+    try:
+        # if this also fails, just load gsw to throw the error
+        from seawater import pden
+        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater uses EOS-80 which is deprecated in favor of TEOS-10, used in gsw-python, see https://teos-10.github.io/GSW-Python/\n')
+    except:
+        from gsw import pot_rho_t_exact as pden
+
 
 from netCDF4 import Dataset
 
@@ -116,7 +126,7 @@ class sprof:
         self.PSAL    = floatdict['PSAL']
         self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
-        self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+        self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -340,7 +350,7 @@ class profiles:
             self.PSAL    = floatdict['PSAL']
             self.PSAL_QC = floatdict['PSAL_QC']
             # potential density
-            self.PDEN = sw.pden(self.PSAL, self.TEMP, self.PRES) - 1000
+            self.PDEN = pden(self.PSAL, self.TEMP, self.PRES) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
