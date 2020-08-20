@@ -62,18 +62,21 @@ fig.savefig(Path('../figures/dmqc/scatter_and_dist_medlims_20200819.png'), bbox_
 wm = []
 gv = []
 gf = []
+mm = []
 for w in df.WMO.unique():
     wm.append(w)
-    gv.append(df[df.WMO == w].pyMEANGAIN.mean())
+    gv.append(df[df.WMO == w].pyGAIN.mean())
     gf.append(df[df.WMO == w].argoGAIN.mean())
-wm = np.array(wm)
-gv = np.array(gv)
-gf = np.array(gf)
+    mm.append(df[df.WMO == w].argoMSG.iloc[0])
+wm = np.array(wm)[[1,4,5]]
+gv = np.array(gv)[[1,4,5]]
+gf = np.array(gf)[[1,4,5]]
+mm = np.array(mm)[[1,4,5]]
 
 fig, ax = plt.subplots()
 ax.plot(gf, gv, 'o', color=sns.color_palette('colorblind')[2])
-ll = 0
-ul = 2.0
+ll = 0.8
+ul = 1.2
 ax.plot((ll,ul), (ll,ul), 'k-')
 ax.set_xlim((ll,ul))
 ax.set_ylim((ll,ul))
