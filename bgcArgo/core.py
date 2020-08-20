@@ -20,7 +20,7 @@ except:
     try:
         # if this also fails, just load gsw to throw the error
         from seawater import pden
-        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater uses EOS-80 which is deprecated in favor of TEOS-10, used in gsw-python, see https://teos-10.github.io/GSW-Python/\n')
+        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater is deprecated in favour of gsw-python, see https://teos-10.github.io/GSW-Python/\n')
     except:
         from gsw import pot_rho_t_exact as pden
 
