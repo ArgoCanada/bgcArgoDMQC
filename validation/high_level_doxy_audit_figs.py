@@ -13,7 +13,7 @@ import seaborn as sns
 # summary comparison between bgcArgo and SAGE/DOXY audit
 fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200730.csv')
 df = pd.read_csv(fn)
-df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
+df['diffGAIN'] = df.pyGAIN - df.sageGAIN
 
 # make new dataframe with categories depending on absolute deviation
 counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.diffGAIN < 0.01].shape[0],
@@ -70,7 +70,9 @@ axes[0].set_ylim((ll,ul))
 axes[0].set_xlabel('$G_{SAGE}$')
 axes[0].set_ylabel('$G_{bgcArgo}$')
 
-xf = df[df.diffGAIN < 1e9]
+xf = df[df.diffGAIN.notnull()]
+xf = xf[~np.isinf(xf.diffGAIN)]
+
 sns.distplot(xf.diffGAIN, kde=False, ax=axes[1])
 
 axes[1].set_xlabel('$\Delta$G')
@@ -91,8 +93,7 @@ axes[0].set_ylim((ll,ul))
 axes[0].set_xlabel('$G_{SAGE}$')
 axes[0].set_ylabel('$G_{bgcArgo}$')
 
-xf = df[df.diffGAIN < 1e9]
-sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(0, 0.5, 0.01))
+sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(-0.505, 0.505, 0.01))
 
 axes[1].set_xlabel('$\Delta$G')
 
@@ -111,8 +112,7 @@ axes[0].set_ylim((ll,ul))
 axes[0].set_xlabel('$G_{SAGE}$')
 axes[0].set_ylabel('$G_{bgcArgo}$')
 
-xf = df[df.diffGAIN < 1e9]
-sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(0, 0.2, 0.01))
+sns.distplot(xf.diffGAIN, kde=False, ax=axes[1], bins=np.arange(-0.205, 0.205, 0.01))
 
 axes[1].set_xlabel('$\Delta$G')
 
