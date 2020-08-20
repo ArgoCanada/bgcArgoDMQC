@@ -19,7 +19,8 @@ user_config = owc.configuration.load()
 for k in user_config: 
     if 'DIRECTORY' in k and 'data' in user_config[k][:5]:
         user_config[k] = str(datapath / user_config[k])
-user_config['FLOAT_PLOTS_FORMAT'] = 'pdf'
+user_config['FLOAT_PLOTS_FORMAT'] = 'png'
+user_config['FLOAT_PLOTS_DIRECTORY'] = str(Path('../owc_plots'))
 
 # print configuration information
 print(owc.configuration.print_cfg(user_config))
@@ -32,7 +33,7 @@ owc.configuration.set_calseries('', wmo, user_config)
 owc.calibration.calc_piecewisefit('', wmo, user_config)
 
 # produces a lot of plots
-# owc.plot.dashboard('', wmo, user_config)
+owc.plot.dashboard('', wmo, user_config)
 
 # ----------------------------------------------------------------------------
 # Source data is all in .mat format, not traditional .nc format - is this
@@ -86,7 +87,6 @@ savemat(Path('../data/owc/{}.mat'.format(wmo)), nc_to_owc_mat(syn.__Sprof__))
 user_config['FLOAT_SOURCE_DIRECTORY'] = str(Path('../data/owc'))
 user_config['FLOAT_CALIB_DIRECTORY'] = str(Path('../data/owc'))
 user_config['FLOAT_MAPPED_DIRECTORY'] = str(Path('../data/owc'))
-user_config['FLOAT_PLOTS_DIRECTORY'] = str(Path('../owc_plots'))
 
 # try it
 print(owc.configuration.print_cfg(user_config))
