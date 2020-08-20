@@ -675,8 +675,10 @@ def load_ncep_data(track, varname, local_path='./'):
         ncep_file = local_path / varname / '{}.{}.nc'.format(base_file, y)
         nc = Dataset(ncep_file, 'r')
 
+        print(ncep_file)
         time = nc.variables['time'][:]
         time = time/24 + pl.datestr2num('1800-01-01')
+        print(time.shape)
 
         if y == yrs[0]:
             lat = nc.variables['lat'][:]
@@ -696,9 +698,18 @@ def load_ncep_data(track, varname, local_path='./'):
                 lon_sub[negative_lon] = lon_sub[negative_lon] + 360
                 xlon[lix] = xlon[lix] + 360
 
+            extra_time_indices = 0
+            for m in range(1,Nyear+1):
+                ytest = yrs[0] + m
+                ncep_file_test = local_path / varname / '{}.{}.nc'.format(base_file, ytest)
+                nctest = Dataset(ncep_file_test, 'r')
+                extra_time_indices += nctest.variables['time'].shape[0] - len(time)
+            print(extra_time_indices)
+
             landmask = lnc.variables['land'][:][0,:,:][:,lon_ix][lat_ix,:].astype(bool)
-            ncep_time = np.nan*np.ones((len(time)*(Nyear+1)))
-            data = np.nan*np.ones((len(time)*(Nyear+1), len(lat_sub), len(lon_sub)))
+            ncep_time = np.nan*np.ones((len(time)*(Nyear+1)+extra_time_indices))
+            data = np.nan*np.ones((len(time)*(Nyear+1)+extra_time_indices, len(lat_sub), len(lon_sub)))
+            print(data.shape)
 
         vdata = nc.variables[varname][:]
         for i in range(len(time)):
