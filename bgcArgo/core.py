@@ -175,7 +175,7 @@ class sprof:
         self.assign(self.__rawfloatdict__)
     
     def to_dict(self):
-        return self.__floatdict__.copy()
+        return copy.deepcopy(self.__floatdict__)
     
     def to_dataframe(self):
         import pandas as pd
@@ -210,7 +210,7 @@ class sprof:
 
         self.df = df
 
-        return df.copy()
+        return copy.deepcopy(self.df)
 
     def get_track(self):
         self.track = track(self.__floatdict__)
@@ -225,7 +225,7 @@ class sprof:
         #     f = interp1d(self.track[~ix,0], self.track[~ix,2], bounds_error=False)
         #     self.track[:,2] = f(self.track[:,0])
 
-        return self.track.copy()
+        return copy.deepcopy(self.track)
 
     def get_ncep(self):
 
@@ -234,7 +234,7 @@ class sprof:
 
         self.NCEP, self.__NCEPweights__ = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
         
-        return self.NCEP.copy()
+        return copy.deepcopy(self.NCEP)
 
     def get_woa(self):
 
@@ -243,7 +243,7 @@ class sprof:
         
         self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
 
-        return self.WOA.copy()
+        return copy.deepcopy(self.WOA)
 
     def calc_gains(self, ref='NCEP', zlim=25.):
 
@@ -272,7 +272,7 @@ class sprof:
             self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim)
             self.gains = self.__WOAgains__
         
-        return self.gains.copy()
+        return copy.deepcopy(self.gains)
 
     def plot(self, kind, **kwargs):
 
@@ -350,7 +350,7 @@ class profiles:
             self.PSAL    = floatdict['PSAL']
             self.PSAL_QC = floatdict['PSAL_QC']
             # potential density
-            self.PDEN = pden(self.PSAL, self.TEMP, self.PRES) - 1000
+            self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -399,7 +399,7 @@ class profiles:
         self.assign(self.__rawfloatdict__)
              
     def to_dict(self):
-        return self.__floatdict__.copy()
+        return copy.deepcopy(self.__floatdict__)
     
     def to_dataframe(self):
         import pandas as pd
@@ -411,9 +411,11 @@ class profiles:
         df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
         df['PRES']      = self.PRES
-        # df['TEMP']      = self.TEMP
-        # df['PSAL']      = self.PSAL
-        # df['PDEN']      = self.PDEN
+        df['TEMP']      = self.TEMP
+        df['TEMP_QC']   = self.TEMP_QC
+        df['PSAL']      = self.PSAL
+        df['PSAL_QC']   = self.PSAL_QC
+        df['PDEN']      = self.PDEN
         if 'DOXY' in self.__floatdict__.keys():
             df['DOXY']      = self.DOXY
             df['DOXY_QC']   = self.DOXY_QC
@@ -444,7 +446,7 @@ class profiles:
 
         self.df = df
 
-        return self.df.copy()
+        return copy.deepcopy(self.df)
 
     def get_track(self):
         self.track = track(self.__floatdict__)
@@ -846,6 +848,7 @@ def load_profile(fn):
 def load_profiles(files):
 
     common_variables = get_vars(files)
+    core_files = [fn.replace('B','') for fn in files]
 
     floatData = dict(
         floatName=[], N_LEVELS=[], N_PROF=[], CYCLE=np.array([]), floatType=[]
@@ -854,11 +857,6 @@ def load_profiles(files):
     for v in ['PRES', 'TEMP', 'PSAL', 'SDN']:
         floatData[v] = np.array([])
         floatData[v + '_QC'] = np.array([])
-    
-    floatData.pop('TEMP')
-    floatData.pop('TEMP_QC')
-    floatData.pop('PSAL')
-    floatData.pop('PSAL_QC')
     
     for v in ['WMO', 'LATITUDE', 'LONGITUDE', 'POSITION_QC', 'SDN_GRID', 'LATITUDE_GRID', 'LONGITUDE_GRID', 'CYCLE_GRID']:
         floatData[v] = np.array([])
@@ -871,7 +869,7 @@ def load_profiles(files):
                 floatData[v + '_ADJUSTED'] = np.array([])
                 floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
-    for fn in files:
+    for fn,cn in zip(files,core_files):
         # try to load the profile as absolute path or relative path
         try:
             nc = Dataset(fn, 'r')
@@ -881,9 +879,17 @@ def load_profiles(files):
             except:
                 raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
 
+        try:
+            cc = Dataset(cn, 'r')
+        except:
+            try:
+                cc = Dataset(Path(ARGO_PATH) / cn, 'r')
+            except:
+                warnings.warn('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+
         # number of profile cycles
-        M = nc.dimensions['N_LEVELS'].size
-        N = nc.dimensions['N_PROF'].size
+        M = cc.dimensions['N_LEVELS'].size
+        N = cc.dimensions['N_PROF'].size
 
         wmo = ''
         if N > 1:
@@ -909,35 +915,40 @@ def load_profiles(files):
         floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[wmo]))
 
         # load in variables that will be in every file
-        floatData['PRES'] = np.append(floatData['PRES'], nc.variables['PRES'][:].data.flatten())
-        # floatData['TEMP'] = np.append(floatData['TEMP'], nc.variables['TEMP'][:].data.flatten())
-        # floatData['PSAL'] = np.append(floatData['PSAL'], nc.variables['PSAL'][:].data.flatten())
-        floatData['SDN'] = np.append(floatData['SDN'], nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
-        floatData['SDN_QC'] = np.append(floatData['SDN_QC'], read_qc(nc.variables['JULD_QC'][:].data.flatten()))
-        floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))]))
-        floatData['LATITUDE'] = np.append(floatData['LATITUDE'], nc.variables['LATITUDE'][:].data.flatten())
-        floatData['LATITUDE_GRID'] = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(nc.variables['LATITUDE'][:].data.flatten())]))
-        floatData['LONGITUDE'] = np.append(floatData['LONGITUDE'], nc.variables['LONGITUDE'][:].data.flatten())
-        floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(nc.variables['LONGITUDE'][:].data.flatten())]))
-        floatData['POSITION_QC'] = np.append(floatData['POSITION_QC'], read_qc(nc.variables['POSITION_QC'][:].data.flatten()))
+        floatData['PRES'] = np.append(floatData['PRES'], cc.variables['PRES'][:].data.flatten())
+        floatData['PRES_QC'] = np.append(floatData['PRES_QC'], read_qc(cc.variables['PRES_QC'][:].data.flatten()))
+        floatData['TEMP'] = np.append(floatData['TEMP'], cc.variables['TEMP'][:].data.flatten())
+        floatData['TEMP_QC'] = np.append(floatData['TEMP_QC'], read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
+        floatData['PSAL'] = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
+        floatData['PSAL_QC'] = np.append(floatData['PSAL_QC'], read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
+        floatData['SDN'] = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
+        floatData['SDN_QC'] = np.append(floatData['SDN_QC'], read_qc(cc.variables['JULD_QC'][:].data.flatten()))
+        floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))]))
+        floatData['LATITUDE'] = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
+        floatData['LATITUDE_GRID'] = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
+        floatData['LONGITUDE'] = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())
+        floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
+        floatData['POSITION_QC'] = np.append(floatData['POSITION_QC'], read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
         # loop through other possible BGC variables
         bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
         for v in bgc_vars:
             if v in common_variables:
-                floatData[v] = np.append(floatData[v], nc.variables[v][:].data)
+                floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
             v_adj = v + '_ADJUSTED'
             if v_adj in common_variables:
-                floatData[v_adj] = np.append(floatData[v_adj], nc.variables[v_adj][:].data.flatten())
+                floatData[v_adj] = np.append(floatData[v_adj], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v_adj][:].data.flatten()))
 
-        # can't calculate without S, T, need to figure that out
-        # if 'DOXY' in floatData.keys():
-            # floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
+        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data, nc.variables['PRES'][:].data)
 
         for v in floatData.keys():
             v_qc = v + '_QC'
             if v_qc in common_variables:
                 floatData[v_qc] = np.append(floatData[v_qc], read_qc(nc.variables[v_qc][:].data.flatten()))
+
+        if 'DOXY' in floatData.keys():
+            floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
+            floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     return floatData
 
