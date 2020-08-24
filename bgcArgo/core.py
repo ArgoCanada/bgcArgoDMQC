@@ -961,7 +961,7 @@ def read_history_qctest(nc):
         tests.append(rval)
     tests = np.array(tests)
 
-    QCP, QCF = tests[actions == 'QCP'], test[actions == 'QCF']
+    QCP, QCF = tests[actions == 'QCP'], tests[actions == 'QCF']
 
     return QCP, QCF
 
