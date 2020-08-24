@@ -1170,6 +1170,26 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
 
         return g, mean_float_data, woa_surf
 
+def vertically_align(P1, P2, V2):
+
+	out = np.nan*np.ones(P1.shape)
+
+	for i, p in enumerate(P1):
+		index  = np.abs(P2 - p) == np.min(np.abs(P2 - p))
+		out[i] = np.nanmean(V2[index])
+
+	return out
+
+def delta_pres(P1, P2):
+
+	dpres = np.nan*np.ones(P1.shape)
+
+	for i, p in enumerate(P1):
+		index    = np.abs(P2 - p) == np.min(np.abs(P2 - p))
+		dpres[i] = np.nanmean(P2[index] - p)
+
+	return dpres
+
 def aic(data,resid):
     '''
     Function to calculate the Akiake Information Criteria (AIC) as a metric
