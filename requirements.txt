@@ -2,7 +2,7 @@ numpy
 scipy
 pylab
 matplotlib
-seawater
+gsw
 netCDF4
 pandas
 seaborn
