@@ -840,7 +840,7 @@ def load_profiles(files):
     core_files = [fn.replace('B','') for fn in files]
 
     floatData = dict(
-        floatName=[], N_LEVELS=[], N_PROF=[], CYCLES=np.array([]), floatType=[]
+        floatName=[], N_LEVELS=[], N_PROF=[], CYCLES=np.array([], dtype=int), floatType=[]
     )
 
     for v in ['PRES', 'TEMP', 'PSAL', 'SDN']:
