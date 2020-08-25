@@ -215,16 +215,6 @@ class sprof:
     def get_track(self):
         self.track = track(self.__floatdict__)
 
-        # if any(np.isnan(self.track[:,1])):
-        #     ix = np.isnan(self.track[:,1])
-        #     f = interp1d(self.track[~ix,0], self.track[~ix,1], bounds_error=False)
-        #     self.track[:,1] = f(self.track[:,0])
-
-        # if any(np.isnan(self.track[:,2])):
-        #     ix = np.isnan(self.track[:,2])
-        #     f = interp1d(self.track[~ix,0], self.track[~ix,2], bounds_error=False)
-        #     self.track[:,2] = f(self.track[:,0])
-
         return copy.deepcopy(self.track)
 
     def get_ncep(self):
@@ -258,7 +248,6 @@ class sprof:
             pH2O = unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
 
             common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
-            print(common_cycles)
 
             self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
             self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX)
@@ -328,7 +317,7 @@ class profiles:
         self.floatName  = floatdict['floatName']
         self.floatType  = floatdict['floatType']
         self.N_LEVELS   = floatdict['N_LEVELS']
-        self.CYCLE      = floatdict['CYCLE']
+        self.CYCLE      = floatdict['CYCLES']
         self.CYCLE_GRID = floatdict['CYCLE_GRID']
 
         # time and location data
@@ -851,7 +840,7 @@ def load_profiles(files):
     core_files = [fn.replace('B','') for fn in files]
 
     floatData = dict(
-        floatName=[], N_LEVELS=[], N_PROF=[], CYCLE=np.array([]), floatType=[]
+        floatName=[], N_LEVELS=[], N_PROF=[], CYCLES=np.array([]), floatType=[]
     )
 
     for v in ['PRES', 'TEMP', 'PSAL', 'SDN']:
@@ -909,7 +898,7 @@ def load_profiles(files):
         floatData['floatName']  = floatData['floatName'] + [int(wmo)]
         floatData['N_LEVELS']   = floatData['N_LEVELS']  + [M]
         floatData['N_PROF']     = floatData['N_PROF']    + [N]
-        floatData['CYCLE']      = np.append(floatData['CYCLE'], cycle)
+        floatData['CYCLES']     = np.append(floatData['CYCLES'], cycle)
         floatData['CYCLE_GRID'] = np.append(floatData['CYCLE_GRID'], np.array(N*M*[cycle[0]]))
         floatData['floatType']  = floatData['floatType'] + [ftype]
         floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[wmo]))
@@ -997,7 +986,7 @@ def dict_clean(float_data):
 def dict_fillvalue_clean(float_data):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k]
+    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k and 'SDN' not in k]
 
     for k in qc_keys:
         data_key   = k.replace('_QC','')
@@ -1013,6 +1002,9 @@ def dict_fillvalue_clean(float_data):
     if 'PPOX_DOXY' in float_data.keys():
         fillvalue_index = clean_float_data['PPOX_DOXY'] >= 99999. # use greater than because date fillval is 999999
         clean_float_data['PPOX_DOXY'][fillvalue_index] = np.nan
+
+    fillvalue_index = clean_float_data['SDN'] >= 999999.
+    clean_float_data['SDN'][fillvalue_index] = np.nan
 
     return clean_float_data
 
