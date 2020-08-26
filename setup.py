@@ -30,5 +30,6 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',
         'Development Status :: 3 - Alpha'
-    ]
+    ],
+    python_requires='>=3.4',
 )
