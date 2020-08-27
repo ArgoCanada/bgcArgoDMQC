@@ -3,7 +3,7 @@
 import sys
 
 import numpy as np
-import pylab as pl
+import matplotlib.dates as mdates
 from scipy.interpolate import interp1d
 
 def interp_ncep_data(track, ncep_track, data):
@@ -125,8 +125,8 @@ def interp_woa_data(track, woa_track, data, verbose=False):
     # put float and WOA on common time axis/year
     M = z.shape[0]
     N = track.shape[0]
-    yrday = np.array([dn - pl.datestr2num('{}-01-01'.format(pl.num2date(dn).year)) for dn in track[:,0]])
-    woa_yrday = np.array([pl.datestr2num('2020-{:02d}-15'.format(i+1)) - pl.datestr2num('2020-01-01') for i in range(12)])
+    yrday = np.array([dn - mdates.datestr2num('{}-01-01'.format(mdates.num2date(dn).year)) for dn in track[:,0]])
+    woa_yrday = np.array([mdates.datestr2num('2020-{:02d}-15'.format(i+1)) - mdates.datestr2num('2020-01-01') for i in range(12)])
 
     # array for output
     woa_interp = np.nan*np.ones((M,N))

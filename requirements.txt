@@ -1,6 +1,5 @@
 numpy
 scipy
-pylab
 matplotlib
 gsw
 netCDF4
