@@ -8,10 +8,10 @@ import fnmatch
 import time
 
 import numpy as np
-import pylab as pl
 from scipy.interpolate import interp1d, RectBivariateSpline
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 # soft attempt to load gsw, but allow for seawater as well
 try: 
@@ -710,7 +710,7 @@ def load_argo(local_path, wmo, grid=False, verbose=False):
     floatData['PRES'] = Sprof_nc.variables['PRES'][:].data.flatten()
     floatData['TEMP'] = Sprof_nc.variables['TEMP'][:].data.flatten()
     floatData['PSAL'] = Sprof_nc.variables['PSAL'][:].data.flatten()
-    floatData['SDN']  = Sprof_nc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01')
+    floatData['SDN']  = Sprof_nc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01')
     floatData['LATITUDE']  = Sprof_nc.variables['LATITUDE'][:].data.flatten()
     floatData['LONGITUDE'] = Sprof_nc.variables['LONGITUDE'][:].data.flatten()
 
@@ -813,7 +813,7 @@ def load_profile(fn):
     # floatData['PRES'] = nc.variables['PRES'][:].data
     # floatData['TEMP'] = nc.variables['TEMP'][:].data
     # floatData['PSAL'] = nc.variables['PSAL'][:].data
-    # floatData['SDN']  = nc.variables['JULD'][:].data + pl.datestr2num('1950-01-01')
+    # floatData['SDN']  = nc.variables['JULD'][:].data + mdates.datestr2num('1950-01-01')
     # floatData['LATITUDE']  = nc.variables['LATITUDE'][:].data
     # floatData['LONGITUDE'] = nc.variables['LONGITUDE'][:].data
 
@@ -910,9 +910,9 @@ def load_profiles(files):
         floatData['TEMP_QC'] = np.append(floatData['TEMP_QC'], read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
         floatData['PSAL'] = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
         floatData['PSAL_QC'] = np.append(floatData['PSAL_QC'], read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
-        floatData['SDN'] = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))
+        floatData['SDN'] = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))
         floatData['SDN_QC'] = np.append(floatData['SDN_QC'], read_qc(cc.variables['JULD_QC'][:].data.flatten()))
-        floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + pl.datestr2num('1950-01-01'))]))
+        floatData['SDN_GRID'] = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))]))
         floatData['LATITUDE'] = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
         floatData['LATITUDE_GRID'] = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
         floatData['LONGITUDE'] = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())

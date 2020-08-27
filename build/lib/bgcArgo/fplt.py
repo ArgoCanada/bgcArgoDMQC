@@ -3,7 +3,6 @@
 import os, sys
 
 import numpy as np
-import pylab as pl
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -285,7 +284,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
         axes[i].set_xlabel(xlabels[i])
 
     subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1]]
-    date = pl.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
+    date = mdates.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
 
     axes[0].set_ylabel(ylabel)
     if Nprof != 1:

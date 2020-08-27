@@ -9,7 +9,7 @@ import ftplib
 import pandas as pd
 
 import numpy as np
-import pylab as pl
+import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
 
@@ -604,7 +604,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
             data = np.nan*np.ones((12, len(z_sub), len(lat_sub), len(lon_sub)))
 
         if verbose:
-            sys.stdout.write('Extracting WOA data for {}\n'.format(pl.num2date(pl.datestr2num('2020-{:02d}-01'.format(i+1))).strftime('%b')))
+            sys.stdout.write('Extracting WOA data for {}\n'.format(mdates.num2date(mdates.datestr2num('2020-{:02d}-01'.format(i+1))).strftime('%b')))
         data[i,:,:,:] = nc.variables[var_name][:].data[0,z_ix,:,:][:,lat_ix,:][:,:,lon_ix]
 
     data[data > 9e36] = np.nan
@@ -662,7 +662,7 @@ def load_ncep_data(track, varname, local_path='./'):
     lat_bounds = (np.min(track[:,1]), np.max(track[:,1]))
 
     sdn = track[:,0]
-    yrs = (pl.num2date(np.min(sdn)).year, pl.num2date(np.max(sdn)).year)
+    yrs = (mdates.num2date(np.min(sdn)).year, mdates.num2date(np.max(sdn)).year)
     Nyear = yrs[1]-yrs[0]
 
     if Nyear == 0:
@@ -676,7 +676,7 @@ def load_ncep_data(track, varname, local_path='./'):
         nc = Dataset(ncep_file, 'r')
 
         time = nc.variables['time'][:]
-        time = time/24 + pl.datestr2num('1800-01-01')
+        time = time/24 + mdates.datestr2num('1800-01-01')
 
         if y == yrs[0]:
             lat = nc.variables['lat'][:]
