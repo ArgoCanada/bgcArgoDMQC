@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setuptools.setup(
-    name='BGC-QC',
+    name='bgcArgo',
     version='0.2.1',
     license='The MIT License (MIT)',
     author_email='chris.gordon@dfo-mpo.gc.ca',
