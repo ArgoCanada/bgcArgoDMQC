@@ -8,7 +8,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name='bgcArgo',
-    version='0.2.1',
+    version='0.2.2',
     license='The MIT License (MIT)',
     author_email='chris.gordon@dfo-mpo.gc.ca',
     description='A python library for quality control of BGC-Argo data',
