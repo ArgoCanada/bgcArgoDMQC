@@ -128,7 +128,7 @@ class sprof:
         self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
         if flagSA:
-            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID)
+            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
         else:
             self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
 
