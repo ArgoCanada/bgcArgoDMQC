@@ -43,7 +43,7 @@ about:
   home: https://github.com/ArgoCanada/BGC-QC
   summary: A python library for quality control of BGC-Argo data
   license: MIT
-  license_file: ..\\LICENSE.txt
+  license_file: LICENSE.txt
 
 extra:
   recipe-maintainers:
