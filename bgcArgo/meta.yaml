@@ -1,4 +1,4 @@
-{% set name = "bgcARgo" %}
+{% set name = "bgcArgo" %}
 {% set version = "0.2.2" %}
 
 
@@ -32,7 +32,7 @@ requirements:
 
 test:
   imports:
-    - bgcARgo
+    - bgcArgo
   commands:
     - pip check
   requires:
@@ -42,7 +42,7 @@ about:
   home: https://github.com/ArgoCanada/BGC-QC
   summary: A python library for quality control of BGC-Argo data
   license: MIT
-  license_file: PLEASE_ADD_LICENSE_FILE
+  license_file: ../LICENSE
 
 extra:
   recipe-maintainers:
