@@ -6,6 +6,16 @@
 
 This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
 
+## installation
+
+Available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
+
+```bash
+pip install bgcArgo
+```
+
+Working on building install via conda, but not available yet.
+
 ## general description
 
 A `python` library of functions for quality controlling dissolved oxygen data.
