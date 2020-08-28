@@ -55,3 +55,5 @@ fig, axes = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY_ADJUSTED'], Nprof
 0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class
 
 0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient
+
+0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe
