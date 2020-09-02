@@ -1,4 +1,7 @@
+LICENSE.txt
+MANIFEST.in
 README.md
+requirements.txt
 setup.py
 bgcArgo/__init__.py
 bgcArgo/core.py
