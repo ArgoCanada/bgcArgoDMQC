@@ -3,8 +3,8 @@ import setuptools
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
+with open('requirements.txt') as fr:
+    requirements = fr.read().splitlines()
 
 setuptools.setup(
     name='bgcArgo',
