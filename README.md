@@ -14,7 +14,7 @@ Available through the python package index <https://pypi.org/project/bgcArgo/>, 
 pip install bgcArgo
 ```
 
-Working on building install via conda, but not available yet.
+Pull request has been submitted to get the recipe on conda-forge
 
 ## general description
 
