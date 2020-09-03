@@ -6,8 +6,4 @@ sagepy/__pycache__/
 *cpython*
 *.pyc
 *checkpoint*
-/htmlcov/
-.coverage
-.coveragerc
-coverage.xml
 /owc_plots/
