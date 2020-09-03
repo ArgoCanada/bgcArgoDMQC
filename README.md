@@ -67,3 +67,5 @@ fig, axes = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY_ADJUSTED'], Nprof
 0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient
 
 0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe
+
+0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well 
