@@ -1,3 +1,4 @@
+script: python -m unittest discover
 jobs:
   include:
     - name: "Python 3.8.0 on Xenial Linux"
