@@ -26,6 +26,25 @@ class sprofTest(unittest.TestCase):
         woa_gains  = sprof.calc_gains(ref='WOA')
 
         self.assertIs(type(ncep_gains), np.ndarray)
+        self.assertIs(type(woa_gains), np.ndarray)
+
+class profilesTest(unittest.TestCase):
+    def test_sprof(self):
+        prof = bgc.profiles(wmo)
+        # test multiple profs
+        profs = bgc.profiles([wmo-1, wmo])
+        # test specific cycles
+        cycs = bgc.profiles(wmo, cycles=np.arange(1,10))
+
+        self.assertIsInstance(prof, bgc.profiles)
+        self.assertIsInstance(profs, bgc.profiles)
+        self.assertIsInstance(cycs, bgc.profiles)
+
+    def test_calc_gains(self):
+        prof = bgc.profiles(wmo)
+        woa_gains  = prof.calc_gains(ref='WOA')
+
+        self.assertIs(type(woa_gains), np.ndarray)
 
 if __name__ == '__main__':
     unittest.main()
