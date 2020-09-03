@@ -30,6 +30,11 @@ def read_index(mission='B'):
         filename = module_path / 'ar_index_global_prof.txt.gz'
     elif mission == 'S':
         filename = module_path / 'argo_synthetic-profile_index.txt.gz'
+
+    if not Path(filename).exists():
+        sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
+        update_index(ftype=mission)
+
     df =  pd.read_csv(filename, compression='gzip', header=8)
 
     df['dac'] = np.array([f.split('/')[0] for f in df.file])
@@ -60,17 +65,17 @@ def update_index(ftype=None):
 
     local_index = module_path / index
     lf = open(local_index, 'wb')
-    if ftype is None or ftype =='profile':
+    if ftype is None or ftype =='profile' or ftype == 'C':
         ftp.retrbinary('RETR ' + index, lf.write)
 
     local_bgc = module_path / bgc
     lf = open(local_bgc, 'wb')
-    if ftype is None or ftype =='bgc':
+    if ftype is None or ftype =='bgc' or ftype == 'B':
         ftp.retrbinary('RETR ' + bgc, lf.write)
 
     local_synth = module_path / synth
     lf = open(local_synth, 'wb')
-    if ftype is None or ftype =='synthetic':
+    if ftype is None or ftype =='synthetic' or ftype == 'S':
         ftp.retrbinary('RETR ' + synth, lf.write)
 
     return ftp
