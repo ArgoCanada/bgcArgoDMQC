@@ -16,11 +16,7 @@ from netCDF4 import Dataset
 from . import util
 
 global module_path
-module_path = Path('fake_directory_name')
-i = 0
-while not module_path.exists():
-    module_path = Path(sys.path[i]) / 'bgcArgo/ref'
-    i += 1
+module_path = Path(__file__).parent.absolute() / 'ref'
 
 def read_index(mission='B'):
     '''
