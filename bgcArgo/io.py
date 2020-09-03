@@ -15,8 +15,10 @@ from netCDF4 import Dataset
 
 from . import util
 
-global module_path
-module_path = Path(__file__).parent.absolute() / 'ref'
+global index_path
+index_path = Path(__file__).parent.absolute() / 'ref'
+if not index_path.exists():
+    index_path.mkdir()
 
 def read_index(mission='B'):
     '''
@@ -25,11 +27,11 @@ def read_index(mission='B'):
     '''
 
     if mission == 'B':
-        filename = module_path / 'argo_bio-profile_index.txt.gz'
+        filename = index_path / 'argo_bio-profile_index.txt.gz'
     elif mission == 'C':
-        filename = module_path / 'ar_index_global_prof.txt.gz'
+        filename = index_path / 'ar_index_global_prof.txt.gz'
     elif mission == 'S':
-        filename = module_path / 'argo_synthetic-profile_index.txt.gz'
+        filename = index_path / 'argo_synthetic-profile_index.txt.gz'
 
     if not Path(filename).exists():
         sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
@@ -58,22 +60,22 @@ def update_index(ftype=None):
     bgc   = 'argo_bio-profile_index.txt.gz'
     synth = 'argo_synthetic-profile_index.txt.gz'
 
-    local_meta = module_path / meta
+    local_meta = index_path / meta
     lf = open(local_meta, 'wb')
     if ftype is None or ftype == 'meta':
         ftp.retrbinary('RETR ' + meta, lf.write)
 
-    local_index = module_path / index
+    local_index = index_path / index
     lf = open(local_index, 'wb')
     if ftype is None or ftype =='profile' or ftype == 'C':
         ftp.retrbinary('RETR ' + index, lf.write)
 
-    local_bgc = module_path / bgc
+    local_bgc = index_path / bgc
     lf = open(local_bgc, 'wb')
     if ftype is None or ftype =='bgc' or ftype == 'B':
         ftp.retrbinary('RETR ' + bgc, lf.write)
 
-    local_synth = module_path / synth
+    local_synth = index_path / synth
     lf = open(local_synth, 'wb')
     if ftype is None or ftype =='synthetic' or ftype == 'S':
         ftp.retrbinary('RETR ' + synth, lf.write)
@@ -91,10 +93,10 @@ def check_index(mode=None):
         index = 'ar_index_global_prof.txt.gz'
         bgc   = 'argo_bio-profile_index.txt.gz'
         synth = 'argo_synthetic-profile_index.txt.gz'
-        local_meta  = module_path / meta
-        local_index = module_path / index
-        local_bgc   = module_path / bgc
-        local_synth = module_path / synth
+        local_meta  = index_path / meta
+        local_index = index_path / index
+        local_bgc   = index_path / bgc
+        local_synth = index_path / synth
 
         meta_mtime  = local_meta.stat().st_mtime
         index_mtime = local_index.stat().st_mtime
@@ -129,10 +131,10 @@ def check_index(mode=None):
         index = 'ar_index_global_prof.txt.gz'
         bgc   = 'argo_bio-profile_index.txt.gz'
         synth = 'argo_synthetic-profile_index.txt.gz'
-        local_meta  = module_path / meta
-        local_index = module_path / index
-        local_bgc   = module_path / bgc
-        local_synth = module_path / synth
+        local_meta  = index_path / meta
+        local_index = index_path / index
+        local_bgc   = index_path / bgc
+        local_synth = index_path / synth
 
         if not ((local_meta.exists() and local_index.exists()) and (local_bgc.exists() and local_synth.exists())):
             sys.stdout.write('At least one index file does not exist - downloading now - this may take some time depending on your internet connection\n')
