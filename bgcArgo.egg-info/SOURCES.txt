@@ -21,3 +21,4 @@ bgcArgo/ref/ar_index_global_meta.txt.gz
 bgcArgo/ref/ar_index_global_prof.txt.gz
 bgcArgo/ref/argo_bio-profile_index.txt.gz
 bgcArgo/ref/argo_synthetic-profile_index.txt.gz
+test/test.py
