@@ -18,6 +18,7 @@ jobs:
 install: 
   - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
   - pip3 install -r requirements.txt
-script: python3 -m unittest discover || python -m unittest discover
+script: python3 -c "import bgcArgo" || python -c "import bgcArgo"
+# script: python3 -m unittest discover || python -m unittest discover
 after_success:
   - bash <(curl -s https://codecov.io/bash)

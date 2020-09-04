@@ -7,3 +7,4 @@ sagepy/__pycache__/
 *.pyc
 *checkpoint*
 /owc_plots/
+/tmp/

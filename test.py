@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from pathlib import Path
+import shutil
 
 import unittest
 import numpy as np
@@ -17,21 +18,29 @@ bgc.set_dirs(
 
 class downloadTest(unittest.TestCase):
 
-    def download_ncep(self):
+    def test_download_ncep(self):
 
-        self.assertTrue(Path('tmp/NCEP/').exists())
+        bgc.io.get_ncep('pres', local_path='tmp/NCEP')
+        bgc.io.get_ncep('land', local_path='tmp/NCEP')
 
-    def download_woa(self):
+        self.assertTrue(Path('tmp/NCEP/pres/pres.sfc.gauss.2010.nc').exists())
 
-        self.assertTrue(Path('tmp/WOA18/').exists())
+    def test_download_woa(self):
 
-    def download_argo(self):
+        bgc.io.get_woa18('O2sat', local_path='tmp/WOA18')
 
-        for w in [wmo-1, wmo]:
+        self.assertTrue(Path('tmp/WOA18/o2sat/woa18_all_O00_01.nc').exists())
 
-            bgc.io.get_argo(w, local_path='tmp/Argo')
+    def test_download_argo(self):
 
-            self.assertTrue(Path('tmp/Argo/{}'.format(w)))
+        dac = [bgc.get_dac(w) for w in [wmo-1,wmo]]
+
+        dacpath = '/ifremer/argo/dac'
+        fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
+        bgc.io.get_argo(fltpath, local_path='tmp/Argo')
+
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[0],wmo-1)).exists())
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[1],wmo)).exists())
 
 class sprofTest(unittest.TestCase):
 
@@ -67,4 +76,21 @@ class profilesTest(unittest.TestCase):
         self.assertIs(type(woa_gains), np.ndarray)
 
 if __name__ == '__main__':
+    if not Path('tmp').exists():
+        Path('tmp').mkdir()
+    if not Path('tmp/Argo').exists():
+        Path('tmp/Argo').mkdir()
+    if not Path('tmp/NCEP').exists():
+        Path('tmp/NCEP').mkdir()
+    if not Path('tmp/NCEP/pres').exists():
+        Path('tmp/NCEP/pres').mkdir()
+    if not Path('tmp/NCEP/land').exists():
+        Path('tmp/NCEP/land').mkdir()
+    if not Path('tmp/WOA18').exists():
+        Path('tmp/WOA18').mkdir()
+    if not Path('tmp/WOA18/o2sat').exists():
+        Path('tmp/WOA18/o2sat').mkdir()
+
     unittest.main()
+    
+    # shutil.rmtree('tmp')

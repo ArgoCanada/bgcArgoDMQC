@@ -61,24 +61,28 @@ def update_index(ftype=None):
     synth = 'argo_synthetic-profile_index.txt.gz'
 
     local_meta = index_path / meta
-    lf = open(local_meta, 'wb')
     if ftype is None or ftype == 'meta':
+        lf = open(local_meta, 'wb')
         ftp.retrbinary('RETR ' + meta, lf.write)
+        lf.close()
 
     local_index = index_path / index
-    lf = open(local_index, 'wb')
     if ftype is None or ftype =='profile' or ftype == 'C':
+        lf = open(local_index, 'wb')
         ftp.retrbinary('RETR ' + index, lf.write)
+        lf.close()
 
     local_bgc = index_path / bgc
-    lf = open(local_bgc, 'wb')
     if ftype is None or ftype =='bgc' or ftype == 'B':
+        lf = open(local_bgc, 'wb')
         ftp.retrbinary('RETR ' + bgc, lf.write)
+        lf.close()
 
     local_synth = index_path / synth
-    lf = open(local_synth, 'wb')
     if ftype is None or ftype =='synthetic' or ftype == 'S':
+        lf = open(local_synth, 'wb')
         ftp.retrbinary('RETR ' + synth, lf.write)
+        lf.close()
 
     return ftp
 
@@ -227,7 +231,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
             lf = open(local_file, 'wb')
             # retrieve the file on FTP server,
             ftp.retrbinary('RETR ' + fn, lf.write)
-
+            lf.close()
 
     return ftp
 
@@ -279,6 +283,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
+                lf.close()
 
     elif varname == 'rhum':
 
@@ -297,6 +302,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
+                lf.close()
 
     elif varname == 'land':
 
@@ -310,6 +316,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         if not local_file.exists() | overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
+            lf.close()
 
         ftp.cwd('../../ncep.reanalysis/surface/')
         fn = 'land.nc'
@@ -317,6 +324,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         if not local_file.exists() | overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
+            lf.close()
 
     else:
         raise ValueError('Invalid varname input')
@@ -401,6 +409,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                         lf = open(wmo_file, 'wb')
                         # retrieve the file on FTP server,
                         ftp.retrbinary('RETR ' + fn, lf.write)
+                        lf.close()
 
                 # repeat as above
                 if 'profiles' in ftp.nlst() and ftype != 'summary':
@@ -445,7 +454,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                             print(profile_file)
                             lf = open(profile_file, 'wb')
                             ftp.retrbinary('RETR ' + fn, lf.write)
-
+                            lf.close()
 
     elif len(args) > 1:
         local_path = Path(local_path)
@@ -485,6 +494,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     lf = open(wmo_file, 'wb')
                     # retrieve the file on FTP server,
                     ftp.retrbinary('RETR ' + fn, lf.write)
+                    lf.close()
 
             # ------------------------ INDIVIDUAL PROFILE FILES -------------------
             # repeat as above
@@ -502,6 +512,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                         print(profile_file)
                         lf = open(profile_file, 'wb')
                         ftp.retrbinary('RETR ' + fn, lf.write)
+                        lf.close()
 
                 # back to parent directory
                 ftp.cwd('../../')
