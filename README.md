@@ -8,13 +8,17 @@ This code is in _very_ active development. Use of this code is available (encour
 
 ## installation
 
-Available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
+The recommended install is through the conda-forge channel, via the command: 
+
+```bash
+conda install -c conda-forge bgcargo
+```
+
+The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
 
 ```bash
 pip install bgcArgo
 ```
-
-Pull request has been submitted to get the recipe on conda-forge
 
 ## general description
 
