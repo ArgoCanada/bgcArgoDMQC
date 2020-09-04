@@ -18,7 +18,7 @@ jobs:
 install: 
   - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
   - pip3 install -r requirements.txt
-  - pip3 install bgcArgo
+  - pip3 install bgcArgo || pip3 install --user bgcArgo
 script: python3 -c "import bgcArgo" || python -c "import bgcArgo"
 # script: python3 -m unittest discover || python -m unittest discover
 after_success:
