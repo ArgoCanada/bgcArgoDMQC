@@ -950,7 +950,7 @@ def load_profiles(files):
 
 def read_history_qctest(nc):
 
-    QC_ACTION = nc.variables['HISTORY_QCACTION'][:].data
+    QC_ACTION = np.squeeze(nc.variables['HISTORY_ACTION'][:].data)
     actions = []
     for row in QC_ACTION:
         rval = ''
@@ -967,8 +967,11 @@ def read_history_qctest(nc):
             rval = rval + let.decode('UTF-8')
         tests.append(rval)
     tests = np.array(tests)
+    print(tests)
 
-    QCP, QCF = tests[actions == 'QCP'], tests[actions == 'QCF']
+    qcp_index = np.logical_or(actions == 'QCP', actions == 'QCP$')
+    qcf_index = np.logical_or(actions == 'QCF', actions == 'QCF$')
+    QCP, QCF = tests[qcp_index], tests[qcf_index]
 
     return QCP, QCF
 
