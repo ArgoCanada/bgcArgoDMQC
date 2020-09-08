@@ -3,8 +3,11 @@
 from pathlib import Path
 import shutil
 
+from netCDF4 import Dataset
+
 import unittest
 import numpy as np
+import pandas as pd
 import bgcArgo as bgc
 
 global wmo
@@ -58,6 +61,7 @@ class sprofTest(unittest.TestCase):
         self.assertIs(type(woa_gains), np.ndarray)
 
 class profilesTest(unittest.TestCase):
+
     def test_sprof(self):
         prof = bgc.profiles(wmo)
         # test multiple profs
@@ -74,6 +78,60 @@ class profilesTest(unittest.TestCase):
         woa_gains  = prof.calc_gains(ref='WOA')
 
         self.assertIs(type(woa_gains), np.ndarray)
+
+class plottingTest(unittest.TestCase):
+
+    def test_gain_plot(self):
+
+        syn  = bgc.sprof(4902480)
+        prof = bgc.profiles([4902480, 6902905])
+
+        syn.calc_gains()
+        syn.calc_gains(ref='WOA')
+
+        g_ncep = syn.plot('gain', ref='NCEP')
+        g_woa  = syn.plot('gain', ref='WOA')
+
+        self.assertIsInstance(g_ncep, bgc.fplt.pltClass)
+        self.assertIsInstance(g_woa, bgc.fplt.pltClass)
+    
+    def test_scatter_plot(self):
+
+        syn = bgc.sprof(4902480)
+        g = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
+
+        self.assertIsInstance(g, bgc.fplt.pltClass)
+
+    # def test_profile_plot(self):
+
+        # self.assertIsInstance(g_pres)
+        # self.assertIsInstance(g_pden)
+
+class coreTest(unittest.TestCase):
+
+    def test_index_files(self):
+        # get index files
+        bgc_index  = bgc.get_index('bgc')
+        core_index = bgc.get_index('global')
+        syn_index  = bgc.get_index('synthetic')
+
+        self.assertIs(type(bgc_index), pd.core.frame.DataFrame)
+        self.assertIs(type(core_index), pd.core.frame.DataFrame)
+        self.assertIs(type(syn_index), pd.core.frame.DataFrame)
+
+    def test_qc_read(self):
+        # read QC test
+        nc = Dataset(Path('tmp/Argo/meds/4902480/profiles/BR4902480_001.nc'))
+        qcp, qcf = bgc.read_history_qctest(nc)
+
+        self.assertIs(type(qcp), np.ndarray)
+        self.assertIs(type(qcf), np.ndarray)
+        self.assertIs(type(qcp[0]), np.str_)
+        self.assertIs(type(qcf[0]), np.str_)
+
+    # aic and bic
+
+    # time correction
 
 if __name__ == '__main__':
     if not Path('tmp').exists():
