@@ -57,8 +57,10 @@ class sprofTest(unittest.TestCase):
 
     def test_sprof(self):
         sprof = bgc.sprof(wmo)
+        df = sprof.to_dataframe()
 
         self.assertIsInstance(sprof, bgc.sprof)
+        self.assertIs(type(df), pd.core.frame.DataFrame)
 
     def test_calc_gains(self):
         sprof = bgc.sprof(wmo)
@@ -70,16 +72,19 @@ class sprofTest(unittest.TestCase):
 
 class profilesTest(unittest.TestCase):
 
-    def test_sprof(self):
+    def test_profiles(self):
         prof = bgc.profiles(wmo)
         # test multiple profs
         profs = bgc.profiles([wmo-1, wmo])
         # test specific cycles
         cycs = bgc.profiles(wmo, cycles=np.arange(1,10))
 
+        df = cycs.to_dataframe()
+
         self.assertIsInstance(prof, bgc.profiles)
         self.assertIsInstance(profs, bgc.profiles)
         self.assertIsInstance(cycs, bgc.profiles)
+        self.assertIs(type(df), pd.core.frame.DataFrame)
 
     def test_calc_gains(self):
         prof = bgc.profiles(wmo)
