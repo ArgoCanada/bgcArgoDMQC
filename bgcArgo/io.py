@@ -228,7 +228,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
 
     for fn in ftp.nlst():
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             print(local_file)
             # open the local file
             lf = open(local_file, 'wb')
@@ -280,7 +280,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
             fn = 'pres.sfc.gauss.{}.nc'.format(yr)
             local_file = local_path / fn
 
-            if not local_file.exists() | overwrite:
+            if not local_file.exists() or overwrite:
                 print(local_file)
                 # open the local file
                 lf = open(local_file, 'wb')
@@ -299,7 +299,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         for yr in range(2010, 2021):
             fn = 'rhum.sig995.{}.nc'.format(yr)
             local_file = local_path / fn
-            if not local_file.exists() | overwrite:
+            if not local_file.exists() or overwrite:
                 print(local_file)
                 # open the local file
                 lf = open(local_file, 'wb')
@@ -316,7 +316,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
         fn = 'land.sfc.gauss.nc'
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
             lf.close()
@@ -324,7 +324,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         ftp.cwd('../../ncep.reanalysis/surface/')
         fn = 'land.nc'
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
             lf.close()
@@ -406,7 +406,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     # define the local file to have the same name as on the FTP server
                     wmo_file = wmo_path / fn
                     # only download the file if it doesn't already exist locally
-                    if not wmo_file.exists() | overwrite:
+                    if not wmo_file.exists() or overwrite:
                         print(wmo_file)
                         # open the local file
                         lf = open(wmo_file, 'wb')
@@ -453,7 +453,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
                     for fn in files:
                         profile_file = profile_path / fn
-                        if not profile_file.exists() | overwrite:
+                        if not profile_file.exists() or overwrite:
                             print(profile_file)
                             lf = open(profile_file, 'wb')
                             ftp.retrbinary('RETR ' + fn, lf.write)
@@ -491,7 +491,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 # define the local file to have the same name as on the FTP server
                 wmo_file = wmo_path / fn
                 # only download the file if it doesn't already exist locally
-                if not wmo_file.exists() | overwrite:
+                if not wmo_file.exists() or overwrite:
                     print(wmo_file)
                     # open the local file
                     lf = open(wmo_file, 'wb')
@@ -511,7 +511,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
                 for fn in files:
                     profile_file = profile_path / fn
-                    if not profile_file.exists() | overwrite:
+                    if not profile_file.exists() or overwrite:
                         print(profile_file)
                         lf = open(profile_file, 'wb')
                         ftp.retrbinary('RETR ' + fn, lf.write)
