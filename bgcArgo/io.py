@@ -151,8 +151,11 @@ def check_index(mode=None):
 
             # get time since last update
             curr_time   = time()
+            curr_time   = time()
             meta_delta  = curr_time - meta_mtime
             index_delta = curr_time - index_mtime
+            bgc_delta   = curr_time - bgc_mtime
+            synth_delta = curr_time - synth_mtime
 
             if meta_delta / 60 / 60 / 24 > 7:
                 d = meta_delta / 60 / 60 / 24

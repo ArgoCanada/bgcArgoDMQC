@@ -956,22 +956,21 @@ def read_history_qctest(nc):
         rval = ''
         for let in row:
             rval = rval + let.decode('UTF-8')
-        actions.append(rval)
+        actions.append(rval.strip())
     actions = np.array(actions)
 
-    QC_TESTS  = nc.variables['HISTORY_QCTEST'][:].data
+    QC_TESTS  = np.squeeze(nc.variables['HISTORY_QCTEST'][:].data)
     tests = []
-    for row in QC_ACTION:
+    for row in QC_TESTS:
         rval = ''
         for let in row:
             rval = rval + let.decode('UTF-8')
-        tests.append(rval)
+        tests.append(rval.strip())
     tests = np.array(tests)
-    print(tests)
 
     qcp_index = np.logical_or(actions == 'QCP', actions == 'QCP$')
     qcf_index = np.logical_or(actions == 'QCF', actions == 'QCF$')
-    QCP, QCF = tests[qcp_index], tests[qcf_index]
+    QCP, QCF = tests[qcp_index][0], tests[qcf_index][0]
 
     return QCP, QCF
 

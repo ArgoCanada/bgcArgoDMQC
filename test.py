@@ -5,6 +5,8 @@ import shutil
 
 from netCDF4 import Dataset
 
+import matplotlib.pyplot as plt
+
 import unittest
 import numpy as np
 import pandas as pd
@@ -40,7 +42,8 @@ class downloadTest(unittest.TestCase):
 
         dacpath = '/ifremer/argo/dac'
         fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
-        bgc.io.get_argo(fltpath, local_path='tmp/Argo')
+        bgc.io.get_argo(fltpath, local_path='tmp/Argo', overwrite=True)
+        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407], local_path='tmp/Argo', overwrite=True)
 
         self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[0],wmo-1)).exists())
         self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[1],wmo)).exists())
@@ -90,11 +93,13 @@ class plottingTest(unittest.TestCase):
         syn.calc_gains(ref='WOA')
 
         g_ncep = syn.plot('gain', ref='NCEP')
-        g_woa  = syn.plot('gain', ref='WOA')
-
         self.assertIsInstance(g_ncep, bgc.fplt.pltClass)
+        plt.close(g_ncep.fig)
+
+        g_woa  = syn.plot('gain', ref='WOA')
         self.assertIsInstance(g_woa, bgc.fplt.pltClass)
-    
+        plt.close(g_woa.fig)
+
     def test_scatter_plot(self):
 
         syn = bgc.sprof(4902480)
@@ -102,12 +107,25 @@ class plottingTest(unittest.TestCase):
 
         self.assertIsInstance(g, bgc.fplt.pltClass)
 
-    # def test_profile_plot(self):
+        plt.close(g.fig)
 
-        # self.assertIsInstance(g_pres)
-        # self.assertIsInstance(g_pden)
+    def test_profile_plot(self):
+        syn = bgc.sprof(4902480)
+
+        g_pres = syn.plot('profiles', varlist=['TEMP', 'DOXY'])
+        self.assertIsInstance(g_pres,bgc.fplt.pltClass)
+        plt.close(g_pres.fig)
+
+        g_pden = syn.plot('profiles', varlist=['PSAL', 'DOXY'], Nprof=5, Ncycle=3, zvar='PDEN')
+        self.assertIsInstance(g_pden,bgc.fplt.pltClass)
+        plt.close(g_pden.fig)
 
 class coreTest(unittest.TestCase):
+
+    bgc.io.check_index(mode='install')
+    bgc.io.check_index()
+
+    bgc.io.update_index()
 
     def test_index_files(self):
         # get index files
@@ -121,13 +139,12 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         # read QC test
-        nc = Dataset(Path('tmp/Argo/meds/4902480/profiles/BR4902480_001.nc'))
+        nc = Dataset(Path('tmp/Argo/aoml/3900407/profiles/D3900407_188.nc'))
         qcp, qcf = bgc.read_history_qctest(nc)
+        bgc.util.display_qctests(qcp, qcf)
 
-        self.assertIs(type(qcp), np.ndarray)
-        self.assertIs(type(qcf), np.ndarray)
-        self.assertIs(type(qcp[0]), np.str_)
-        self.assertIs(type(qcf[0]), np.str_)
+        self.assertIs(type(qcp), np.str_)
+        self.assertIs(type(qcf), np.str_)
 
     # aic and bic
 
