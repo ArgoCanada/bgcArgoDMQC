@@ -38,15 +38,20 @@ class downloadTest(unittest.TestCase):
 
     def test_download_argo(self):
 
-        dac = [bgc.get_dac(w) for w in [wmo-1,wmo]]
+        # dac = [bgc.get_dac(w) for w in [wmo-1,wmo]]
+        dac = [bgc.get_dac(w) for w in [wmo]]
 
         dacpath = '/ifremer/argo/dac'
-        fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
+        # fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
+        fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo])]
         bgc.io.get_argo(fltpath, local_path='tmp/Argo', overwrite=True)
-        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407], local_path='tmp/Argo', overwrite=True)
+        # bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407, 4900345], local_path='tmp/Argo/aoml', overwrite=True)
+        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407], local_path='tmp/Argo/aoml', overwrite=True)
 
-        self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[0],wmo-1)).exists())
-        self.assertTrue(Path('tmp/Argo/{}/{}'.format(dac[1],wmo)).exists())
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo-1)).exists())
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo)).exists())
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format('aoml',3900407)).exists())
+        self.assertTrue(Path('tmp/Argo/{}/{}'.format('aoml',4900345)).exists())
 
 class sprofTest(unittest.TestCase):
 
@@ -149,6 +154,20 @@ class coreTest(unittest.TestCase):
     # aic and bic
 
     # time correction
+
+class otherTest(unittest.TestCase):
+
+    def test_pO2(self):
+        syn = bgc.sprof(4902480)
+        pO2 = bgc.unit.pO2(syn.DOXY, syn.PSAL, syn.TEMP)
+        self.assertIs(type(pO2), np.ndarray)
+
+    def test_read_gain_value(self):
+        nc = Dataset(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_024.nc'), 'r')
+        g, comment = bgc.util.read_gain_value(nc)
+
+        self.assertIs(type(g[0]), np.str_)
+        self.assertIs(type(comment[0]), np.str_)
 
 if __name__ == '__main__':
     if not Path('tmp').exists():
