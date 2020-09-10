@@ -44,6 +44,8 @@ WOA_PATH  = None
 NCEP_PATH = None
 
 __bgcindex__ = io.read_index()
+global REF_PATH
+REF_PATH = Path(__file__).parent.absolute() / 'ref'
 
 def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
 
@@ -1286,7 +1288,7 @@ def bic(data,resid):
 def get_var_by(v1, v2, float_data):
     '''
     Function to calculate the mean of one variable (v1) indexed by a second
-    variable (v2) in a float_data dictionary (output of sagepy.argo), though
+    variable (v2) in a float_data dictionary (output of load_argo), though
     it would work with any python dict
     
     INPUT:
@@ -1338,7 +1340,7 @@ def correct_response_time(t, DO, T, thickness):
 
     # load temperature, boundary layer thickness, and tau matrix from 
     # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_data = np.loadtxt(Path('LUT/T_lL_tau_3830_4330.dat'))
+    lut_data = np.loadtxt(REF_PATH / 'T_lL_tau_3830_4330.dat')
     lut_lL = lut_data[0,1:]
     lut_T  = lut_data[1:,0]
     tau100 = lut_data[1:,1:]
@@ -1346,7 +1348,7 @@ def correct_response_time(t, DO, T, thickness):
 
     # translate boundary layer thickness to temperature dependent tau
     f_thickness = RectBivariateSpline(lut_T, lut_lL, tau100, kx=1, ky=1)
-    tau_T = np.squeeze(f_thickness(thickness[0], mean_temp))
+    tau_T = np.squeeze(f_thickness(thickness, mean_temp, grid=False))
 
     # loop through oxygen data
     for i in range(N-1):
