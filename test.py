@@ -154,9 +154,39 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(qcp), np.str_)
         self.assertIs(type(qcf), np.str_)
 
-    # aic and bic
+    def test_information_criteria(self):
+        # aic and bic
+        data  = np.random.randn(30)
+        resid = np.random.randn(20)
+        aic = bgc.aic(data, resid)
 
-    # time correction
+        self.assertIs(type(aic), np.float)
+
+        data  = np.random.randn(30)
+        resid = np.random.randn(20)
+        bic = bgc.bic(data, resid)
+
+        self.assertIs(type(bic), np.float)   
+
+    def test_response_time_correction(self):
+        # time correction
+        time = np.arange(0,20,1)
+        temp = 12*np.random.rand(time.shape[0])
+        doxy = 200*np.random.rand(time.shape[0])
+        thickness = 200
+
+        doxy_adj = bgc.correct_response_time(time, doxy, temp, 120)
+        self.assertIs(type(doxy_adj), np.ndarray)
+
+        doxy_adj_Tconst = bgc.correct_response_time_Tconst(time, doxy, 70)
+        self.assertIs(type(doxy_adj_Tconst), np.ndarray)
+
+    def test_get_var_by(self):
+        # get var by
+        dv = dict(a=np.random.randn(20), b=np.random.randn(20))
+        v = bgc.get_var_by('a', 'b', dv)
+
+        self.assertIs(type(v), np.ndarray)
 
 class otherTest(unittest.TestCase):
 

@@ -1358,7 +1358,7 @@ def correct_response_time(t, DO, T, thickness):
         mean_oxy[i]  = (1/(2*oxy_b(dt, tau_T[i])))*(DO[i+1] - oxy_a(dt, tau_T[i])*DO[i])
     
     # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_falue='extrapolate')
+    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
     DO_out = f(t_sec)
 
     return DO_out
@@ -1382,7 +1382,7 @@ def correct_response_time_Tconst(t, DO, tau):
         mean_time[i] = t_sec[i] + dt/2
     
     # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_falue='extrapolate')
+    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
     DO_out = f(t_sec)
 
     return DO_out
