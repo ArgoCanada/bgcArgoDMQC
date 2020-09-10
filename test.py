@@ -42,11 +42,9 @@ class downloadTest(unittest.TestCase):
         dac = [bgc.get_dac(w) for w in [wmo]]
 
         dacpath = '/ifremer/argo/dac'
-        # fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
-        fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo])]
+        fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
         bgc.io.get_argo(fltpath, local_path='tmp/Argo', overwrite=True)
-        # bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407, 4900345], local_path='tmp/Argo/aoml', overwrite=True)
-        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407], local_path='tmp/Argo/aoml', overwrite=True)
+        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407, 4900345], local_path='tmp/Argo/aoml', overwrite=True)
 
         self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo-1)).exists())
         self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo)).exists())
@@ -192,4 +190,4 @@ if __name__ == '__main__':
 
     unittest.main()
     
-    # shutil.rmtree('tmp')
+    shutil.rmtree('tmp')
