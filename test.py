@@ -25,14 +25,15 @@ class downloadTest(unittest.TestCase):
 
     def test_download_ncep(self):
 
-        bgc.io.get_ncep('pres', local_path='tmp/NCEP')
-        bgc.io.get_ncep('land', local_path='tmp/NCEP')
+        bgc.io.get_ncep('pres', local_path='tmp/NCEP', overwrite=True)
+        bgc.io.get_ncep('land', local_path='tmp/NCEP', overwrite=True)
+        bgc.io.get_ncep('rhum', local_path='tmp/NCEP', overwrite=True)
 
         self.assertTrue(Path('tmp/NCEP/pres/pres.sfc.gauss.2010.nc').exists())
 
     def test_download_woa(self):
 
-        bgc.io.get_woa18('O2sat', local_path='tmp/WOA18')
+        bgc.io.get_woa18('O2sat', local_path='tmp/WOA18', overwrite=True)
 
         self.assertTrue(Path('tmp/WOA18/o2sat/woa18_all_O00_01.nc').exists())
 
