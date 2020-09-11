@@ -18,7 +18,7 @@ the DOXY audit gains have a precision of 0.01), 2333 were greater than or
 equal 0.01 but less than 0.05, 514 were between 0.05 and 0.2, and 136 were
 greater than 0.2. There were also 225 gains that were NaN valued (NaN returned
 by the python package, no NaN values are reported in the audit), and 631 were
-infinite valued by both the python package and in the DOXY audit (there are 
+infinite valued by both the python package and in the DOXY audit (there are
 634 infinite values in the DOXY audit, so still missing 3 matches).
 
 This figure summarizes all the 5000+ comparisons made:
