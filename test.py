@@ -207,6 +207,17 @@ class otherTest(unittest.TestCase):
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(comment[0]), np.str_)
 
+    def test_unit_conversion(self):
+        S = np.random.rand(20)
+        T = np.random.rand(20)
+
+        sol = bgc.unit.oxy_sol(S, T, unit='millimole/m3')
+
+        self.assertIs(type(sol), np.ndarray)
+
+        with self.assertRaises(ValueError):
+            sol = bgc.unit.oxy_sol(S, T, unit='deg C')
+
 if __name__ == '__main__':
     if not Path('tmp').exists():
         Path('tmp').mkdir()
