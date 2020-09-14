@@ -56,7 +56,9 @@ class sprofTest(unittest.TestCase):
 
     def test_sprof(self):
         sprof = bgc.sprof(wmo)
+        sprof.clean()
         df = sprof.to_dataframe()
+        sprof.reset()
 
         self.assertIsInstance(sprof, bgc.sprof)
         self.assertIs(type(df), pd.core.frame.DataFrame)
@@ -73,6 +75,8 @@ class profilesTest(unittest.TestCase):
 
     def test_profiles(self):
         prof = bgc.profiles(wmo)
+        prof.clean()
+        prof.reset()
         # test multiple profs
         profs = bgc.profiles([wmo-1, wmo])
         # test specific cycles
