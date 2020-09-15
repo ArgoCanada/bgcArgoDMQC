@@ -882,6 +882,7 @@ def load_profiles(files):
                 floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
     for fn,cn in zip(files,core_files):
+        print(fn, cn)
         # try to load the profile as absolute path or relative path
         try:
             nc = Dataset(fn, 'r')
@@ -951,7 +952,7 @@ def load_profiles(files):
             if v_adj in common_variables:
                 floatData[v_adj] = np.append(floatData[v_adj], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v_adj][:].data.flatten()))
 
-        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data, nc.variables['PRES'][:].data)
+        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
 
         for v in floatData.keys():
             v_qc = v + '_QC'
