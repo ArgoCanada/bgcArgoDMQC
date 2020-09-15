@@ -296,6 +296,14 @@ class sprof:
 
         return g
 
+
+    def describe(self):
+
+        if not hasattr(self, 'df'):
+            self.to_dataframe()    
+        
+        print(self.df.describe())
+
 class profiles:
 
     set_dirs = set_dirs
@@ -508,6 +516,12 @@ class profiles:
 
         return
 
+    def describe(self):
+
+        if not hasattr(self, 'df'):
+            self.to_dataframe()
+        
+        print(self.df.describe())
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
@@ -1183,6 +1197,10 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         g[g == 0] = np.nan
 
         return g, mean_float_data, woa_surf
+
+def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
+
+    return gV
 
 def vertically_align(P1, P2, V2):
 
