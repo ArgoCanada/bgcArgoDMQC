@@ -179,6 +179,11 @@ class sprof:
     def reset(self):
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
+
+    def check_doxy_range(self):
+        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
+        self.__floatdict__ = self.__doxyrangedict__
+        self.assign(self.__doxyrangedict__)
     
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -403,6 +408,11 @@ class profiles:
     def reset(self):
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
+
+    def check_doxy_range(self):
+        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
+        self.__floatdict__ = self.__doxyrangedict__
+        self.assign(self.__doxyrangedict__)
              
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -1242,15 +1252,21 @@ def delta_pres(P1, P2):
 
 	return dpres
 
-def doxy_range_check(doxy, verbose=True):
+def doxy_range_check(floatdict, verbose=True, adjusted=False):
+    cleandict = copy.deepcopy(floatdict)
+    if adjusted:
+        key = 'DOXY_ADJUSTED'
+    else:
+        key = 'DOXY'
+    doxy = floatdict[key]
     outside_range = np.logical_or(doxy < -5, doxy > 600)
     if verbose:
         sys.stdout.write('{} valyes found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
-    out_doxy = copy.deepcopy(doxy)
 
-    out_doxy[outside_range] = np.nan
+    doxy[outside_range] = np.nan
+    cleandict[key] = doxy
 
-    return out_doxy
+    return cleandict
 
 def aic(data, resid):
     '''

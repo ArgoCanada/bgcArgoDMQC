@@ -20,12 +20,13 @@ local_path = '/Users/gordonc/Documents/data/Argo'
 # bgc.io.get_argo(fltpath, local_path=local_path, mode='summary')
 bgc.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo', woa_path='/Users/gordonc/Documents/data/WOA18')
 
-with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200918.csv'),'w') as fid:
+with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200919.csv'),'w') as fid:
     fid.write('WMO,CYCLE,DAC,DATE,pyGAIN,sageGAIN')
     for wmo in df.WMO.unique():
         sub = df[df.WMO == wmo]
         syn = bgc.sprof(wmo)
-        syn.clean(bad_flags=4)
+        # syn.clean(bad_flags=4)
+        syn.check_doxy_range()
         syn.calc_gains(ref='WOA')
         for i in range(sub.shape[0]):
             cycle = sub.cycle.iloc[i]
