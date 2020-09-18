@@ -172,7 +172,7 @@ class sprof:
         self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self, bad_flags=None):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__, bad_flags=bad_flags)
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
 
@@ -396,7 +396,7 @@ class profiles:
         self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self, bad_flags=None):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__, bad_flags=bad_flags)
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
