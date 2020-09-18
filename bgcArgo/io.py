@@ -525,7 +525,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
     return ftp
 
-def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
+def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     '''
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).

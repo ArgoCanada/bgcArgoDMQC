@@ -93,7 +93,7 @@ def interp_ncep_data(track, ncep_track, data):
 
     return ncep_interp, xwt
 
-def interp_woa_data(track, woa_track, data, verbose=False):
+def interp_woa_data(track, woa_track, data, verbose=True):
     '''
     Function to interpolate WOA18 climatological data along the provided 
     track (t, lat, lon).
