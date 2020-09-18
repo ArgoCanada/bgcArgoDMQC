@@ -991,22 +991,37 @@ def read_history_qctest(nc):
 
     return QCP, QCF
 
-def dict_clean(float_data):
+def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
     qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
 
-    for qc_key in qc_flags:
-        data_key   = qc_key.replace('_QC','')
-        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
-        bad_index  = np.invert(good_index)
+    if bad_flags is None:
+        for qc_key in qc_flags:
+            data_key   = qc_key.replace('_QC','')
+            good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+            bad_index  = np.invert(good_index)
 
-        if data_key == 'POSITION':
-            for dk in ['LATITUDE', 'LONGITUDE']:
-                clean_float_data[dk][bad_index] = np.nan
-        else:
-            clean_float_data[data_key][bad_index] = np.nan
+            if data_key == 'POSITION':
+                for dk in ['LATITUDE', 'LONGITUDE']:
+                    clean_float_data[dk][bad_index] = np.nan
+            else:
+                clean_float_data[data_key][bad_index] = np.nan
+    else:
+        if type(bad_flags) is int:
+            bad_flags = [bad_flags]
+        
+        for flag in bad_flags:
+            for qc_key in qc_flags:
+                data_key = qc_key.replace('_QC','')
+                bad_index = clean_float_data[qc_key] == flag
 
+                if data_key == 'POSITION':
+                    for dk in ['LATITUDE', 'LONGITUDE']:
+                        clean_float_data[df][bad_index] = np.nan
+                else:
+                    clean_float_data[data_key][bad_index] = np.nan
+        
     return clean_float_data
 
 def dict_fillvalue_clean(float_data):
