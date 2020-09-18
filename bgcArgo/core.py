@@ -1018,7 +1018,7 @@ def dict_clean(float_data, bad_flags=None):
 
                 if data_key == 'POSITION':
                     for dk in ['LATITUDE', 'LONGITUDE']:
-                        clean_float_data[df][bad_index] = np.nan
+                        clean_float_data[dk][bad_index] = np.nan
                 else:
                     clean_float_data[data_key][bad_index] = np.nan
         

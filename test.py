@@ -57,6 +57,8 @@ class sprofTest(unittest.TestCase):
     def test_sprof(self):
         sprof = bgc.sprof(wmo)
         sprof.clean()
+        sprof.reset()
+        sprof.clean(bad_flags=[3,4])
         df = sprof.to_dataframe()
         sprof.reset()
 
@@ -76,6 +78,8 @@ class profilesTest(unittest.TestCase):
     def test_profiles(self):
         prof = bgc.profiles(wmo)
         prof.clean()
+        prof.reset()
+        prof.clean(bad_flags=4)
         prof.reset()
         # test multiple profs
         profs = bgc.profiles([wmo-1, wmo])
