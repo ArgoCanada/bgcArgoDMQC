@@ -171,8 +171,8 @@ class sprof:
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
 
-    def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
+    def clean(self, bad_flags=None):
+        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
 
@@ -395,8 +395,8 @@ class profiles:
         self.__floatdict__ = self.__nofillvaluefloatdict__
         self.assign(self.__nofillvaluefloatdict__)
 
-    def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
+    def clean(self, bad_flags=None):
+        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__, bad_flags=bad_flags)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
@@ -536,7 +536,7 @@ def calc_doxy_error(DOXY, G, eG):
 
     return 1
 
-def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=False):
+def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
     local_path = Path(local_path)
 
     if mission == 'B':
@@ -614,7 +614,7 @@ def get_worst_flag(*args):
         
     return out_flags
 
-def load_argo(local_path, wmo, grid=False, verbose=False):
+def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
     and Sprof files
@@ -1125,7 +1125,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     return ncep_interp, wt
 
 
-def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
+def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     '''
     Calculate the gain for each profile by comparing float oxygen data to a
     reference data set, either NCEP for in-air or WOA surface data if in-air
@@ -1238,7 +1238,17 @@ def delta_pres(P1, P2):
 
 	return dpres
 
-def aic(data,resid):
+def doxy_range_check(doxy, verbose=True):
+    outside_range = np.logical_or(doxy < -5, doxy > 600)
+    if verbose:
+        sys.stdout.write('{} valyes found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
+    out_doxy = copy.deepcopy(doxy)
+
+    out_doxy[outside_range] = np.nan
+
+    return out_doxy
+
+def aic(data, resid):
     '''
     Function to calculate the Akiake Information Criteria (AIC) as a metric
     for assessing the appropriate number of breakpoints in the calculation of
@@ -1279,7 +1289,7 @@ def aic(data,resid):
     return aic_value
 
 
-def bic(data,resid):
+def bic(data, resid):
     '''
     Function to calculate the Bayesian Information Criteria (BIC) as a metric
     for assessing the appropriate number of breakpoints in the calculation of
