@@ -13,7 +13,7 @@ the cycle to the distributed audit gain calculated presumably using SAGE-O2
 code, if not exactly the GUI distributed by SOCCOM, using analogous code.
 
 The latest DOXY audit contained 5399 profiles and gains. Of these comparisons
-made, 2086 (1560) gains were within 0.01 of one another (effectively identical, as
+made, 3086 (1560) gains were within 0.01 of one another (effectively identical, as
 the DOXY audit gains have a precision of 0.01), 1237 (2333) were greater than or
 equal 0.01 but less than 0.05, 360 (514) were between 0.05 and 0.2, and 81 (136) were
 greater than 0.2. There were also 9 (225) gains that were NaN valued (NaN returned
