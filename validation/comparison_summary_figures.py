@@ -11,15 +11,16 @@ import seaborn as sns
 from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200919.csv')
+fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200920.csv')
 df = pd.read_csv(fn)
-df['diffGAIN'] = df.pyGAIN - df.sageGAIN
+df['absdiffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
+df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
 
 # make new dataframe with categories depending on absolute deviation
-counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.diffGAIN < 0.01].shape[0],
-                            df[np.logical_and(df.diffGAIN >= 0.01, df.diffGAIN < 0.05)].shape[0],
-                            df[np.logical_and(df.diffGAIN >= 0.05, df.diffGAIN < 0.2)].shape[0],
-                            df[df.diffGAIN >= 0.2].shape[0],
+counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.absdiffGAIN < 0.01].shape[0],
+                            df[np.logical_and(df.absdiffGAIN >= 0.01, df.absdiffGAIN < 0.05)].shape[0],
+                            df[np.logical_and(df.absdiffGAIN >= 0.05, df.absdiffGAIN < 0.2)].shape[0],
+                            df[df.absdiffGAIN >= 0.2].shape[0],
                             np.sum(df.pyGAIN.isna()),
                             np.sum(np.logical_and(np.isinf(df.pyGAIN), np.isinf(df.sageGAIN)))]),
                         name=np.array(['Total', 'AD < 0.01', '0.01 <= AD < 0.05',
