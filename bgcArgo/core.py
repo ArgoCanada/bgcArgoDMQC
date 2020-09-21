@@ -1217,7 +1217,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
             ref_o2sat = woa_surf[i]
             # subset_o2sat = surf_o2sat[grid_cycle == c]
             subset_o2sat = surf_o2sat[grid_time == t] # uncomment when ready
-            mean_float_data[i,0] = c
+            mean_float_data[i,0] = cycle[i]
             mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
             mean_float_data[i,2] = np.nanmean(subset_o2sat)
             mean_float_data[i,3] = np.nanstd(subset_o2sat)

@@ -8,10 +8,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import seaborn as sns
-# from pywaffle import Waffle
+from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200730.csv')
+fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200919.csv')
 df = pd.read_csv(fn)
 df['diffGAIN'] = df.pyGAIN - df.sageGAIN
 
@@ -25,7 +25,7 @@ counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.diffGAIN < 0.01].shape[
                         name=np.array(['Total', 'AD < 0.01', '0.01 <= AD < 0.05',
                                         '0.05 <= AD < 0.2', 'AD >= 0.2',
                                         'NaN valued', 'Both inf valued',])))
-"""
+
 # calculate percent
 counts[' '] = counts.N/counts.N.iloc[0]*100
 # don't need total now
@@ -41,23 +41,23 @@ ax.set_aspect(10)
 ax.set_title('$N={:d}$'.format(df.shape[0]), loc='left')
 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_20200730.png', bbox_inches='tight', dpi=250)
+plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_20200919.png', bbox_inches='tight', dpi=250)
 plt.close()
 
 waf = plt.figure(FigureClass=Waffle, rows=5, values=counts[' '].values, labels=list(counts.name), colors=tuple(palette), 
     icons=['check-circle', 'check-circle', 'exclamation-triangle', 'times-circle', 'question-circle', 'infinity'], icon_legend=True, icon_size=10,
     title={'label': 'Absolute Deviation (AD) between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, legend={'loc': 3, 'bbox_to_anchor': (-0.02, -0.5), 'ncol': 3, 'fontsize': 10})
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_pct_20200730.png', bbox_inches='tight', dpi=250)
-plt.close()
+# plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_pct_20200730.png', bbox_inches='tight', dpi=250)
+# plt.close()
 
 waf = plt.figure(FigureClass=Waffle, rows=50, values=counts['N'].values, labels=list(counts.name), colors=tuple(palette), 
     icons=['check-circle', 'check-circle', 'exclamation-triangle', 'times-circle', 'question-circle', 'infinity'], icon_legend=True, icon_size=5,
     title={'label': 'Absolute Deviation (AD) between python and SAGE-O2 gains\nfrom DOXY audit performed by Josh Plant, $N={:d}$'.format(df.shape[0]), 'loc': 'left'}, 
     legend={'loc': 3, 'bbox_to_anchor': (-0.01, -0.135), 'ncol': 3, 'fontsize': 10})
 plt.gcf().set_size_inches(10,10)
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_20200730.png', bbox_inches='tight', dpi=250)
-plt.close()
-"""
+# plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_waffle_20200919.png', bbox_inches='tight', dpi=250)
+# plt.close()
+
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
@@ -80,7 +80,7 @@ axes[1].set_xlabel('$\Delta$G')
 w, h = fig.get_figwidth(), fig.get_figheight()
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_fulllims.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_fulllims_20200919.png'), bbox_inches='tight', dpi=250)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
@@ -99,7 +99,7 @@ axes[1].set_xlabel('$\Delta$G')
 
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_medlims.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_medlims_20200919.png'), bbox_inches='tight', dpi=250)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
@@ -118,6 +118,6 @@ axes[1].set_xlabel('$\Delta$G')
 
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_smalllims.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_smalllims_20200919.png'), bbox_inches='tight', dpi=250)
 
 plt.close('all')
