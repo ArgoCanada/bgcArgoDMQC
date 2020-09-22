@@ -544,7 +544,7 @@ def apply_gain(DOXY, G):
 
 def calc_doxy_error(DOXY, G, eG):
 
-    return 1
+    return None
 
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
     local_path = Path(local_path)
@@ -1212,10 +1212,8 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
 
         mean_float_data = np.nan*np.ones((woa_surf.shape[0],4))
         g = np.nan*np.ones((woa_surf.shape[0],))
-        for i,t in enumerate(time): # uncomment when ready
-        # for i,c in enumerate(cycle):
+        for i,t in enumerate(time):
             ref_o2sat = woa_surf[i]
-            # subset_o2sat = surf_o2sat[grid_cycle == c]
             subset_o2sat = surf_o2sat[grid_time == t] # uncomment when ready
             mean_float_data[i,0] = cycle[i]
             mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
@@ -1227,6 +1225,42 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
         g[g == 0] = np.nan
 
         return g, mean_float_data, woa_surf
+
+def calc_gain_with_carryover():
+    '''
+    Derive the O2 slope including a correction for 'carry-over' effect, to
+    account for the observation that optode in-air data do not represent pure
+    air but show a bias by in-water O2 saturation excess/deficiency (Bittig 
+    and Kortzinger 2015). Johnson et al. (2015) confirm the 'carry-over' effect
+    for optodes close to the surface (~20cm). 
+
+    Carry-over effect is recommended to be account for Argo floats using in-air
+    measurements, if enough surfacings are available (N > 20). It both removes
+    an identified bias (which is most relevant for cases with strong 
+    super-/undersaturation and/or carry-overs) and reduces uncertainty on the
+    O2 slope factor. The equation for linear regression is as follows (see,
+    e.g., Bittig et al., 2018):
+
+    m*pO2^{optode}_{surf in-air} - pO2^{reference}_{in-air} 
+        = c*(m*pO2^{optode}_{surf in-water} - pO2^{reference}_{in-air})
+
+    where: 
+    - m is the O2 slope factor: m = pO2_adjusted / pO2
+    - pO2^{optode}_{surf in-air} is the oxygen partial pressure observed by
+    the optode in-air (i.e., close to the water surface), e.g., MC = X+11
+    - pO2^{reference}_{in-air} is the reference oxygen partial pressure in-air,
+    e.g., from re-analysis data
+    - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
+    the optode at the water surface (in-water), e.g., MC = X+10 or profile 
+    MC = X–10
+    - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
+    the observed optode in-air data.
+
+    Above equation can be used for linear regression to obtain m and c from
+    data of the partial pressures (from several cycles together).
+    '''
+
+    return None
 
 def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
 
