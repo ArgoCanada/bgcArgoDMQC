@@ -1257,7 +1257,10 @@ def calc_gain_with_carryover():
     the observed optode in-air data.
 
     Above equation can be used for linear regression to obtain m and c from
-    data of the partial pressures (from several cycles together).
+    data of the partial pressures (from several cycles together). See 
+    Thierry Virginie, Bittig Henry, The Argo-Bgc Team (2018). Argo quality 
+    control manual for dissolved oxygen concentration. 
+    https://doi.org/10.13155/46542
     '''
 
     return None
