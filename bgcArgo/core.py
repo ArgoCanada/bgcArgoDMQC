@@ -33,7 +33,6 @@ from . import interp
 from . import unit
 from . import util
 from . import fplt
-from . import diagnostic
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
@@ -1226,7 +1225,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
 
         return g, mean_float_data, woa_surf
 
-def calc_gain_with_carryover():
+def calc_gain_with_carryover(m, pO2_opt_air, pO2_ref_air, pO2_opt_water):
     '''
     Derive the O2 slope including a correction for 'carry-over' effect, to
     account for the observation that optode in-air data do not represent pure
