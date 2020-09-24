@@ -9,6 +9,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -1262,7 +1263,18 @@ def calc_gain_with_carryover(m, pO2_opt_air, pO2_ref_air, pO2_opt_water):
     https://doi.org/10.13155/46542
     '''
 
-    return None
+    # inputs
+    # m
+    # pO2_opt_air
+    # pO2_ref_air
+    # pO2_opt_water
+
+    y = m*pO2_opt_air - pO2_ref_air
+    x = m*pO2_opt_water - pO2_ref_air
+
+    carry_over_factor, intercept, r, p, stderr = linregress(x, y)
+
+    return carry_over_factor
 
 def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
 
