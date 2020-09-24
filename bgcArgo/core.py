@@ -1226,7 +1226,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
 
         return g, mean_float_data, woa_surf
 
-def calc_gain_with_carryover(m, pO2_opt_air, pO2_ref_air, pO2_opt_water):
+def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
     '''
     Derive the O2 slope including a correction for 'carry-over' effect, to
     account for the observation that optode in-air data do not represent pure
@@ -1264,17 +1264,18 @@ def calc_gain_with_carryover(m, pO2_opt_air, pO2_ref_air, pO2_opt_water):
     '''
 
     # inputs
-    # m
     # pO2_opt_air
     # pO2_ref_air
     # pO2_opt_water
 
-    y = m*pO2_opt_air - pO2_ref_air
-    x = m*pO2_opt_water - pO2_ref_air
+    x1 = pO2_opt_air - pO2_ref_air
+    y1 = pO2_opt_water - pO2_ref_air
 
-    carry_over_factor, intercept, r, p, stderr = linregress(x, y)
+    x1 = x1[:,np.newaxis]
 
-    return carry_over_factor
+    carry_over, resid, _, _ = np.linalg.lstsq(x1, y1, rcond=None)
+
+    return carry_over, gain
 
 def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
 
