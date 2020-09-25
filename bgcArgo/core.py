@@ -1314,7 +1314,7 @@ def doxy_range_check(floatdict, verbose=True, adjusted=False):
     doxy = floatdict[key]
     outside_range = np.logical_or(doxy < -5, doxy > 600)
     if verbose:
-        sys.stdout.write('{} valyes found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
+        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
 
     doxy[outside_range] = np.nan
     cleandict[key] = doxy
