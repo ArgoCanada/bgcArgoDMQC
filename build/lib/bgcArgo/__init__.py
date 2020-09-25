@@ -35,4 +35,7 @@ __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 __version__ = '0.2.1'
 
 # check age of index file, or if it exists
-io.check_index()
+if io.index_exists():
+    io.check_index()
+else:
+    io.update_index()
