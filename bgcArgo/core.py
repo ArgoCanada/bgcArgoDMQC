@@ -1274,8 +1274,12 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
     x1 = x1[:,np.newaxis]
 
     carry_over, resid, _, _ = np.linalg.lstsq(x1, y1, rcond=None)
+    c = carry_over
 
-    return carry_over, gain
+    gain = ((1-c)*pO2_ref_air)/(pO2_opt_air - c*pO2_opt_water)
+
+    return gain, carry_over
+
 
 def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
 
