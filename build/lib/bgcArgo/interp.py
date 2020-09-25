@@ -93,7 +93,7 @@ def interp_ncep_data(track, ncep_track, data):
 
     return ncep_interp, xwt
 
-def interp_woa_data(track, woa_track, data, verbose=False):
+def interp_woa_data(track, woa_track, data, verbose=True):
     '''
     Function to interpolate WOA18 climatological data along the provided 
     track (t, lat, lon).
@@ -161,9 +161,16 @@ def interp_woa_data(track, woa_track, data, verbose=False):
 
         lat_ix1 = np.where(lat < track[i,1])[0][-1]
         lat_ix2 = lat_ix1 + 1
-        dx1 = lat[lat_ix2] - lat[lat_ix1]
-        dx2 = track[i,1] - lat[lat_ix1]
-        lat_wt = (dx1 - dx2) / dx1
+        if lat_ix2 == lat.shape[0]:
+            if verbose:
+                sys.stdout.write('NOTE: latitude is unbounded, giving all averaging weight to nearest observation\n')
+            lat_ix1 -= 1
+            lat_ix2 -= 1
+            lat_wt = 0
+        else:
+            dx1 = lat[lat_ix2] - lat[lat_ix1]
+            dx2 = track[i,1] - lat[lat_ix1]
+            lat_wt = (dx1 - dx2) / dx1
 
         xwt[1].append(lat_wt)
 

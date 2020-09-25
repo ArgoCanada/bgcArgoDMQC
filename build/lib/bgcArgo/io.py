@@ -61,24 +61,28 @@ def update_index(ftype=None):
     synth = 'argo_synthetic-profile_index.txt.gz'
 
     local_meta = index_path / meta
-    lf = open(local_meta, 'wb')
     if ftype is None or ftype == 'meta':
+        lf = open(local_meta, 'wb')
         ftp.retrbinary('RETR ' + meta, lf.write)
+        lf.close()
 
     local_index = index_path / index
-    lf = open(local_index, 'wb')
     if ftype is None or ftype =='profile' or ftype == 'C':
+        lf = open(local_index, 'wb')
         ftp.retrbinary('RETR ' + index, lf.write)
+        lf.close()
 
     local_bgc = index_path / bgc
-    lf = open(local_bgc, 'wb')
     if ftype is None or ftype =='bgc' or ftype == 'B':
+        lf = open(local_bgc, 'wb')
         ftp.retrbinary('RETR ' + bgc, lf.write)
+        lf.close()
 
     local_synth = index_path / synth
-    lf = open(local_synth, 'wb')
     if ftype is None or ftype =='synthetic' or ftype == 'S':
+        lf = open(local_synth, 'wb')
         ftp.retrbinary('RETR ' + synth, lf.write)
+        lf.close()
 
     return ftp
 
@@ -147,8 +151,11 @@ def check_index(mode=None):
 
             # get time since last update
             curr_time   = time()
+            curr_time   = time()
             meta_delta  = curr_time - meta_mtime
             index_delta = curr_time - index_mtime
+            bgc_delta   = curr_time - bgc_mtime
+            synth_delta = curr_time - synth_mtime
 
             if meta_delta / 60 / 60 / 24 > 7:
                 d = meta_delta / 60 / 60 / 24
@@ -221,13 +228,13 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
 
     for fn in ftp.nlst():
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             print(local_file)
             # open the local file
             lf = open(local_file, 'wb')
             # retrieve the file on FTP server,
             ftp.retrbinary('RETR ' + fn, lf.write)
-
+            lf.close()
 
     return ftp
 
@@ -273,12 +280,13 @@ def get_ncep(varname, local_path='./', overwrite=False):
             fn = 'pres.sfc.gauss.{}.nc'.format(yr)
             local_file = local_path / fn
 
-            if not local_file.exists() | overwrite:
+            if not local_file.exists() or overwrite:
                 print(local_file)
                 # open the local file
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
+                lf.close()
 
     elif varname == 'rhum':
 
@@ -291,12 +299,13 @@ def get_ncep(varname, local_path='./', overwrite=False):
         for yr in range(2010, 2021):
             fn = 'rhum.sig995.{}.nc'.format(yr)
             local_file = local_path / fn
-            if not local_file.exists() | overwrite:
+            if not local_file.exists() or overwrite:
                 print(local_file)
                 # open the local file
                 lf = open(local_file, 'wb')
                 # retrieve the file on FTP server,
                 ftp.retrbinary('RETR ' + fn, lf.write)
+                lf.close()
 
     elif varname == 'land':
 
@@ -307,16 +316,18 @@ def get_ncep(varname, local_path='./', overwrite=False):
         ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
         fn = 'land.sfc.gauss.nc'
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
+            lf.close()
 
         ftp.cwd('../../ncep.reanalysis/surface/')
         fn = 'land.nc'
         local_file = local_path / fn
-        if not local_file.exists() | overwrite:
+        if not local_file.exists() or overwrite:
             lf = open(local_file, 'wb')
             ftp.retrbinary('RETR ' + fn, lf.write)
+            lf.close()
 
     else:
         raise ValueError('Invalid varname input')
@@ -395,12 +406,13 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     # define the local file to have the same name as on the FTP server
                     wmo_file = wmo_path / fn
                     # only download the file if it doesn't already exist locally
-                    if not wmo_file.exists() | overwrite:
+                    if not wmo_file.exists() or overwrite:
                         print(wmo_file)
                         # open the local file
                         lf = open(wmo_file, 'wb')
                         # retrieve the file on FTP server,
                         ftp.retrbinary('RETR ' + fn, lf.write)
+                        lf.close()
 
                 # repeat as above
                 if 'profiles' in ftp.nlst() and ftype != 'summary':
@@ -441,11 +453,11 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
                     for fn in files:
                         profile_file = profile_path / fn
-                        if not profile_file.exists() | overwrite:
+                        if not profile_file.exists() or overwrite:
                             print(profile_file)
                             lf = open(profile_file, 'wb')
                             ftp.retrbinary('RETR ' + fn, lf.write)
-
+                            lf.close()
 
     elif len(args) > 1:
         local_path = Path(local_path)
@@ -479,12 +491,13 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 # define the local file to have the same name as on the FTP server
                 wmo_file = wmo_path / fn
                 # only download the file if it doesn't already exist locally
-                if not wmo_file.exists() | overwrite:
+                if not wmo_file.exists() or overwrite:
                     print(wmo_file)
                     # open the local file
                     lf = open(wmo_file, 'wb')
                     # retrieve the file on FTP server,
                     ftp.retrbinary('RETR ' + fn, lf.write)
+                    lf.close()
 
             # ------------------------ INDIVIDUAL PROFILE FILES -------------------
             # repeat as above
@@ -498,10 +511,11 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
                 for fn in files:
                     profile_file = profile_path / fn
-                    if not profile_file.exists() | overwrite:
+                    if not profile_file.exists() or overwrite:
                         print(profile_file)
                         lf = open(profile_file, 'wb')
                         ftp.retrbinary('RETR ' + fn, lf.write)
+                        lf.close()
 
                 # back to parent directory
                 ftp.cwd('../../')
@@ -511,7 +525,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
     return ftp
 
-def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=False):
+def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     '''
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).

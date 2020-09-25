@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: bgcArgo
-Version: 0.2.6
+Version: 0.2.7
 Summary: A python library for quality control of BGC-Argo data
 Home-page: https://github.com/ArgoCanada/BGC-QC
 Author-email: chris.gordon@dfo-mpo.gc.ca
@@ -9,19 +9,23 @@ Description: # Argo Canada BGC Quality Control
         
         ## disclaimer
         
-        [![codecov](https://codecov.io/gh/ArgoCanada/BGC-QC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/BGC-QC)
+        [![Build Status](https://travis-ci.com/ArgoCanada/BGC-QC.svg?branch=master)](https://travis-ci.com/ArgoCanada/BGC-QC) [![codecov](https://codecov.io/gh/ArgoCanada/BGC-QC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/BGC-QC)
         
         This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
         
         ## installation
         
-        Available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
+        The recommended install is through the conda-forge channel, via the command: 
+        
+        ```bash
+        conda install -c conda-forge bgcargo
+        ```
+        
+        The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
         
         ```bash
         pip install bgcArgo
         ```
-        
-        Working on building install via conda, but not available yet.
         
         ## general description
         
@@ -74,6 +78,8 @@ Description: # Argo Canada BGC Quality Control
         0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient
         
         0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe
+        
+        0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well 
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3.4

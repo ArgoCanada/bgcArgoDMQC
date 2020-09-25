@@ -9,6 +9,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -33,7 +34,6 @@ from . import interp
 from . import unit
 from . import util
 from . import fplt
-from . import diagnostic
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
@@ -44,6 +44,8 @@ WOA_PATH  = None
 NCEP_PATH = None
 
 __bgcindex__ = io.read_index()
+global REF_PATH
+REF_PATH = Path(__file__).parent.absolute() / 'ref'
 
 def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
 
@@ -169,14 +171,19 @@ class sprof:
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
 
-    def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
+    def clean(self, bad_flags=None):
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
+
+    def check_doxy_range(self):
+        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
+        self.__floatdict__ = self.__doxyrangedict__
+        self.assign(self.__doxyrangedict__)
     
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -294,6 +301,14 @@ class sprof:
 
         return g
 
+
+    def describe(self):
+
+        if not hasattr(self, 'df'):
+            self.to_dataframe()    
+        
+        print(self.df.describe())
+
 class profiles:
 
     set_dirs = set_dirs
@@ -343,7 +358,10 @@ class profiles:
             self.PSAL    = floatdict['PSAL']
             self.PSAL_QC = floatdict['PSAL_QC']
             # potential density
-            self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
+            if flagSA:
+                self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
+            else:
+                self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -382,14 +400,19 @@ class profiles:
         self.__floatdict__ = self.__nofillvaluefloatdict__
         self.assign(self.__nofillvaluefloatdict__)
 
-    def clean(self):
-        self.__cleanfloatdict__ = dict_clean(self.__rawfloatdict__)
+    def clean(self, bad_flags=None):
+        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
+
+    def check_doxy_range(self):
+        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
+        self.__floatdict__ = self.__doxyrangedict__
+        self.assign(self.__doxyrangedict__)
              
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -503,6 +526,12 @@ class profiles:
 
         return
 
+    def describe(self):
+
+        if not hasattr(self, 'df'):
+            self.to_dataframe()
+        
+        print(self.df.describe())
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
@@ -515,9 +544,9 @@ def apply_gain(DOXY, G):
 
 def calc_doxy_error(DOXY, G, eG):
 
-    return 1
+    return None
 
-def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=False):
+def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
     local_path = Path(local_path)
 
     if mission == 'B':
@@ -595,7 +624,7 @@ def get_worst_flag(*args):
         
     return out_flags
 
-def load_argo(local_path, wmo, grid=False, verbose=False):
+def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
     and Sprof files
@@ -863,6 +892,7 @@ def load_profiles(files):
                 floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
     for fn,cn in zip(files,core_files):
+        print(fn, cn)
         # try to load the profile as absolute path or relative path
         try:
             nc = Dataset(fn, 'r')
@@ -932,7 +962,7 @@ def load_profiles(files):
             if v_adj in common_variables:
                 floatData[v_adj] = np.append(floatData[v_adj], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v_adj][:].data.flatten()))
 
-        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data, nc.variables['PRES'][:].data)
+        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
 
         for v in floatData.keys():
             v_qc = v + '_QC'
@@ -947,44 +977,61 @@ def load_profiles(files):
 
 def read_history_qctest(nc):
 
-    QC_ACTION = nc.variables['HISTORY_QCACTION'][:].data
+    QC_ACTION = np.squeeze(nc.variables['HISTORY_ACTION'][:].data)
     actions = []
     for row in QC_ACTION:
         rval = ''
         for let in row:
             rval = rval + let.decode('UTF-8')
-        actions.append(rval)
+        actions.append(rval.strip())
     actions = np.array(actions)
 
-    QC_TESTS  = nc.variables['HISTORY_QCTEST'][:].data
+    QC_TESTS  = np.squeeze(nc.variables['HISTORY_QCTEST'][:].data)
     tests = []
-    for row in QC_ACTION:
+    for row in QC_TESTS:
         rval = ''
         for let in row:
             rval = rval + let.decode('UTF-8')
-        tests.append(rval)
+        tests.append(rval.strip())
     tests = np.array(tests)
 
-    QCP, QCF = tests[actions == 'QCP'], tests[actions == 'QCF']
+    qcp_index = np.logical_or(actions == 'QCP', actions == 'QCP$')
+    qcf_index = np.logical_or(actions == 'QCF', actions == 'QCF$')
+    QCP, QCF = tests[qcp_index][0], tests[qcf_index][0]
 
     return QCP, QCF
 
-def dict_clean(float_data):
+def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
     qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
 
-    for qc_key in qc_flags:
-        data_key   = qc_key.replace('_QC','')
-        good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
-        bad_index  = np.invert(good_index)
+    if bad_flags is None:
+        for qc_key in qc_flags:
+            data_key   = qc_key.replace('_QC','')
+            good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+            bad_index  = np.invert(good_index)
 
-        if data_key == 'POSITION':
-            for dk in ['LATITUDE', 'LONGITUDE']:
-                clean_float_data[dk][bad_index] = np.nan
-        else:
-            clean_float_data[data_key][bad_index] = np.nan
+            if data_key == 'POSITION':
+                for dk in ['LATITUDE', 'LONGITUDE']:
+                    clean_float_data[dk][bad_index] = np.nan
+            else:
+                clean_float_data[data_key][bad_index] = np.nan
+    else:
+        if type(bad_flags) is int:
+            bad_flags = [bad_flags]
+        
+        for flag in bad_flags:
+            for qc_key in qc_flags:
+                data_key = qc_key.replace('_QC','')
+                bad_index = clean_float_data[qc_key] == flag
 
+                if data_key == 'POSITION':
+                    for dk in ['LATITUDE', 'LONGITUDE']:
+                        clean_float_data[dk][bad_index] = np.nan
+                else:
+                    clean_float_data[data_key][bad_index] = np.nan
+        
     return clean_float_data
 
 def dict_fillvalue_clean(float_data):
@@ -1088,7 +1135,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     return ncep_interp, wt
 
 
-def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
+def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     '''
     Calculate the gain for each profile by comparing float oxygen data to a
     reference data set, either NCEP for in-air or WOA surface data if in-air
@@ -1152,7 +1199,9 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         surf_ix = data['PRES'] <= zlim
         surf_o2sat = data['O2Sat'][surf_ix]
         grid_cycle = data['CYCLE_GRID'][surf_ix]
+        grid_time  = data['SDN_GRID'][surf_ix]
         cycle = data['CYCLES']
+        time  = data['SDN']
 
         z_woa = ref['z']
         woa_data = ref['WOA']
@@ -1163,10 +1212,10 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
 
         mean_float_data = np.nan*np.ones((woa_surf.shape[0],4))
         g = np.nan*np.ones((woa_surf.shape[0],))
-        for i,c in enumerate(cycle):
+        for i,t in enumerate(time):
             ref_o2sat = woa_surf[i]
-            subset_o2sat = surf_o2sat[grid_cycle == c]
-            mean_float_data[i,0] = c
+            subset_o2sat = surf_o2sat[grid_time == t] # uncomment when ready
+            mean_float_data[i,0] = cycle[i]
             mean_float_data[i,1] = np.sum(~np.isnan(subset_o2sat))
             mean_float_data[i,2] = np.nanmean(subset_o2sat)
             mean_float_data[i,3] = np.nanstd(subset_o2sat)
@@ -1176,6 +1225,65 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=False):
         g[g == 0] = np.nan
 
         return g, mean_float_data, woa_surf
+
+def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
+    '''
+    Derive the O2 slope including a correction for 'carry-over' effect, to
+    account for the observation that optode in-air data do not represent pure
+    air but show a bias by in-water O2 saturation excess/deficiency (Bittig 
+    and Kortzinger 2015). Johnson et al. (2015) confirm the 'carry-over' effect
+    for optodes close to the surface (~20cm). 
+
+    Carry-over effect is recommended to be account for Argo floats using in-air
+    measurements, if enough surfacings are available (N > 20). It both removes
+    an identified bias (which is most relevant for cases with strong 
+    super-/undersaturation and/or carry-overs) and reduces uncertainty on the
+    O2 slope factor. The equation for linear regression is as follows (see,
+    e.g., Bittig et al., 2018):
+
+    m*pO2^{optode}_{surf in-air} - pO2^{reference}_{in-air} 
+        = c*(m*pO2^{optode}_{surf in-water} - pO2^{reference}_{in-air})
+
+    where: 
+    - m is the O2 slope factor: m = pO2_adjusted / pO2
+    - pO2^{optode}_{surf in-air} is the oxygen partial pressure observed by
+    the optode in-air (i.e., close to the water surface), e.g., MC = X+11
+    - pO2^{reference}_{in-air} is the reference oxygen partial pressure in-air,
+    e.g., from re-analysis data
+    - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
+    the optode at the water surface (in-water), e.g., MC = X+10 or profile 
+    MC = X–10
+    - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
+    the observed optode in-air data.
+
+    Above equation can be used for linear regression to obtain m and c from
+    data of the partial pressures (from several cycles together). See 
+    Thierry Virginie, Bittig Henry, The Argo-Bgc Team (2018). Argo quality 
+    control manual for dissolved oxygen concentration. 
+    https://doi.org/10.13155/46542
+    '''
+
+    # inputs
+    # pO2_opt_air
+    # pO2_ref_air
+    # pO2_opt_water
+
+    x1 = pO2_opt_air - pO2_ref_air
+    y1 = pO2_opt_water - pO2_ref_air
+
+    x1 = x1[:,np.newaxis]
+
+    carry_over, resid, _, _ = np.linalg.lstsq(x1, y1, rcond=None)
+    c = carry_over
+
+    gains = ((1-c)*pO2_ref_air)/(pO2_opt_air - c*pO2_opt_water)
+
+    return gains, carry_over
+
+
+def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
+
+    return gV
 
 def vertically_align(P1, P2, V2):
 
@@ -1197,7 +1305,23 @@ def delta_pres(P1, P2):
 
 	return dpres
 
-def aic(data,resid):
+def doxy_range_check(floatdict, verbose=True, adjusted=False):
+    cleandict = copy.deepcopy(floatdict)
+    if adjusted:
+        key = 'DOXY_ADJUSTED'
+    else:
+        key = 'DOXY'
+    doxy = floatdict[key]
+    outside_range = np.logical_or(doxy < -5, doxy > 600)
+    if verbose:
+        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
+
+    doxy[outside_range] = np.nan
+    cleandict[key] = doxy
+
+    return cleandict
+
+def aic(data, resid):
     '''
     Function to calculate the Akiake Information Criteria (AIC) as a metric
     for assessing the appropriate number of breakpoints in the calculation of
@@ -1238,7 +1362,7 @@ def aic(data,resid):
     return aic_value
 
 
-def bic(data,resid):
+def bic(data, resid):
     '''
     Function to calculate the Bayesian Information Criteria (BIC) as a metric
     for assessing the appropriate number of breakpoints in the calculation of
@@ -1281,7 +1405,7 @@ def bic(data,resid):
 def get_var_by(v1, v2, float_data):
     '''
     Function to calculate the mean of one variable (v1) indexed by a second
-    variable (v2) in a float_data dictionary (output of sagepy.argo), though
+    variable (v2) in a float_data dictionary (output of load_argo), though
     it would work with any python dict
     
     INPUT:
@@ -1333,7 +1457,7 @@ def correct_response_time(t, DO, T, thickness):
 
     # load temperature, boundary layer thickness, and tau matrix from 
     # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_data = np.loadtxt(Path('LUT/T_lL_tau_3830_4330.dat'))
+    lut_data = np.loadtxt(REF_PATH / 'T_lL_tau_3830_4330.dat')
     lut_lL = lut_data[0,1:]
     lut_T  = lut_data[1:,0]
     tau100 = lut_data[1:,1:]
@@ -1341,7 +1465,7 @@ def correct_response_time(t, DO, T, thickness):
 
     # translate boundary layer thickness to temperature dependent tau
     f_thickness = RectBivariateSpline(lut_T, lut_lL, tau100, kx=1, ky=1)
-    tau_T = np.squeeze(f_thickness(thickness[0], mean_temp))
+    tau_T = np.squeeze(f_thickness(thickness, mean_temp, grid=False))
 
     # loop through oxygen data
     for i in range(N-1):
@@ -1351,7 +1475,7 @@ def correct_response_time(t, DO, T, thickness):
         mean_oxy[i]  = (1/(2*oxy_b(dt, tau_T[i])))*(DO[i+1] - oxy_a(dt, tau_T[i])*DO[i])
     
     # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_falue='extrapolate')
+    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
     DO_out = f(t_sec)
 
     return DO_out
@@ -1375,7 +1499,7 @@ def correct_response_time_Tconst(t, DO, tau):
         mean_time[i] = t_sec[i] + dt/2
     
     # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_falue='extrapolate')
+    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
     DO_out = f(t_sec)
 
     return DO_out

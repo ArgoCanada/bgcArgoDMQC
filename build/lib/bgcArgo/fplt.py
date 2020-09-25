@@ -299,6 +299,4 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
     g.fig  = fig
     g.axes = axes
 
-    plt.show()
-
     return g
