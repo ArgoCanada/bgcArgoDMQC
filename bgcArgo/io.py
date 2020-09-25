@@ -20,6 +20,19 @@ index_path = Path(__file__).parent.absolute() / 'ref'
 if not index_path.exists():
     index_path.mkdir()
 
+def index_exists():
+
+    meta  = 'ar_index_global_meta.txt.gz'
+    index = 'ar_index_global_prof.txt.gz'
+    bgc   = 'argo_bio-profile_index.txt.gz'
+    synth = 'argo_synthetic-profile_index.txt.gz'
+    local_meta  = index_path / meta
+    local_index = index_path / index
+    local_bgc   = index_path / bgc
+    local_synth = index_path / synth
+
+    return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
+
 def read_index(mission='B'):
     '''
     Function to read and extract information from Argo global index,
