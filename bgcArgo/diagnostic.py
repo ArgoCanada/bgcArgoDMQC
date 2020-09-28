@@ -3,7 +3,7 @@
 from pathlib import Path
 import sys
 
-from .core import sprof
+from .core import sprof, get_dac
 from . import io
 from . import interp
 from . import unit
@@ -13,7 +13,7 @@ from . import fplt
 def simple_test(argo_path=None, ncep_path=None, woa_path=None):
 
     if any([argo_path is None, ncep_path is None, woa_path is None]):
-        sys.stdout.write('You will be prompted to specify where you would like to store Argo, NCEP, and\nWOA data - please write relative or absolute paths as unix-like paths (i.e.\nusing ''/'' not ''\\'')\n')
+        sys.stdout.write('You will be prompted to specify where you would like to store Argo, NCEP, and\nWOA data - please write relative or absolute paths as unix-like paths (i.e.\nusing ""/"" not ""\\"")\n')
 
     if all([argo_path is None, ncep_path is None, woa_path is None]):
         data_path = input('If you would like to store all data in a single location, enter it here, or\nleave blank to specify each path individually: ')
@@ -22,7 +22,7 @@ def simple_test(argo_path=None, ncep_path=None, woa_path=None):
         if argo_path is None:
             argo_path = Path(input('Where would you like to store Argo data?: '))
         if ncep_path is None:
-            woa_path = Path(input('Where would you like to store NCEP data?: '))
+            ncep_path = Path(input('Where would you like to store NCEP data?: '))
         if woa_path is None:
             woa_path = Path(input('Where would you like to store WOA data?: '))
     else:
@@ -34,8 +34,16 @@ def simple_test(argo_path=None, ncep_path=None, woa_path=None):
     for p in [argo_path, ncep_path, woa_path]:
         if not p.exists():
             p.mkdir()
+    
+    wmo = 4902480
+    io.get_argo('/ifremer/argo/dac/{}/{}'.format(get_dac(wmo), wmo), local_path=argo_path, ftype='summary')
+    io.get_ncep('pres', local_path=ncep_path, years=[2019, 2020])
+    io.get_ncep('land', local_path=ncep_path, years=[2019, 2020])
+    io.get_woa('O2sat', local_path=woa_path)
 
     sprof.set_dirs(argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path)
-    syn = sprof(4902480)
+    syn = sprof()
+
+    syn.describe()
 
     return syn
