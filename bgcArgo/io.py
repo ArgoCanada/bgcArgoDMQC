@@ -251,7 +251,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
 
     return ftp
 
-def get_ncep(varname, local_path='./', overwrite=False):
+def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
     '''
     Function to download NCEP reanalysis gaussian gridded surface air
     pressure data
@@ -280,8 +280,17 @@ def get_ncep(varname, local_path='./', overwrite=False):
     local_path = Path(local_path)
     url = 'ftp.cdc.noaa.gov'
 
-    ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
+    ftp = ftplib.FTP(url, 'anonymous')
 
+    if type(years) is int:
+        yearlist = [years]
+    elif len(years) == 1:
+        yearlist = years
+    elif len(years) == 2:
+        yearlist = range(years[0], years[1]+1)
+    elif len(years > 2):
+        yearlist = years
+    
     if varname == 'pres':
         ftp.cwd('Datasets/ncep.reanalysis2/gaussian_grid/')
 
@@ -289,7 +298,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         if not local_path.is_dir():
             local_path.mkdir()
 
-        for yr in range(2010, 2021):
+        for yr in yearlist:
             fn = 'pres.sfc.gauss.{}.nc'.format(yr)
             local_file = local_path / fn
 
@@ -309,7 +318,7 @@ def get_ncep(varname, local_path='./', overwrite=False):
         if not local_path.is_dir():
             local_path.mkdir()
 
-        for yr in range(2010, 2021):
+        for yr in yearlist:
             fn = 'rhum.sig995.{}.nc'.format(yr)
             local_file = local_path / fn
             if not local_file.exists() or overwrite:
