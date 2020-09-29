@@ -95,4 +95,6 @@ The above code would produce the following plots:
 
 0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe
 
-0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well 
+0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well
+
+0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock
