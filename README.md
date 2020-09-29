@@ -82,9 +82,9 @@ g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Ncycle=10, Nprof=10, 
 
 The above code would produce the following plots:
 
-![colorscale plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png | width=200)
+![colorscale plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png&s=200)
 
-![profiles plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png | width=200)
+![profiles plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png&s=200)
 
 ## version history
 
