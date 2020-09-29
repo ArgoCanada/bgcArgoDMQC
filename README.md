@@ -2,13 +2,13 @@
 
 ## disclaimer
 
-[![Build Status](https://travis-ci.com/ArgoCanada/BGC-QC.svg?branch=master)](https://travis-ci.com/ArgoCanada/BGC-QC) [![codecov](https://codecov.io/gh/ArgoCanada/BGC-QC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/BGC-QC)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://conda.anaconda.org/conda-forge) [![Build Status](https://travis-ci.com/ArgoCanada/BGC-QC.svg?branch=master)](https://travis-ci.com/ArgoCanada/BGC-QC) [![codecov](https://codecov.io/gh/ArgoCanada/BGC-QC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/BGC-QC)
 
 This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
 
 ## installation
 
-The recommended install is through the conda-forge channel, via the command: 
+The recommended install is through the conda-forge channel, via the command:
 
 ```bash
 conda install -c conda-forge bgcargo
@@ -77,8 +77,14 @@ syn = bgc.sprof(4902480)
 g1 = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
 # plot the first 10 profiles for temperature, practical salinity,
 # and adjusted oxygen
-g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Nprof=10)
+g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Ncycle=10, Nprof=10, ylim=(0,500))
 ```
+
+The above code would produce the following plots:
+
+![colorscale plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png)
+
+![profiles plot](https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png)
 
 ## version history
 
