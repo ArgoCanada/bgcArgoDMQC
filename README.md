@@ -82,8 +82,8 @@ g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Ncycle=10, Nprof=10, 
 
 The above code would produce the following plots:
 
-<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png" width="500">
-<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png" width="500">
+<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png" width="800">
+<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png" width="600">
 
 ## version history
 
