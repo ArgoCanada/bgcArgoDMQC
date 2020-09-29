@@ -142,7 +142,7 @@ def gainplot(sdn, float_data, ref_data, gainvals, ref):
 
     return g
 
-def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=None, **kwargs):
+def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=None, vmin=None, vmax=None, **kwargs):
     # define colormaps
     if cmocean_flag:
         color_maps = dict(
@@ -194,7 +194,6 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
 
     if cmap is None:
         cmap = color_maps[varname]
-
     
     if ax is None:
         fig, ax = plt.subplots()
@@ -203,7 +202,13 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
 
     df = df.loc[df.PRES < ylim[1]+50]
 
-    im = ax.scatter(df.SDN, df.PRES, c=df[varname], s=50, cmap=cmap, vmin=1.05*df[varname].min(), vmax=0.95*df[varname].max(), **kwargs)
+    if vmin is None:
+        vmin = 1.05*df[varname].min()
+
+    if vmax is None:
+        vmax = 0.95*df[varname].max()
+
+    im = ax.scatter(df.SDN, df.PRES, c=df[varname], s=50, cmap=cmap, vmin=vmin, vmax=vmax, **kwargs)
     cb = plt.colorbar(im, ax=ax)
     cb.set_label(clabel)
     ax.set_ylim(ylim)
