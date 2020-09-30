@@ -394,13 +394,40 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
             if a[-2:] == 'nc':
                 # if its a profile file
                 if 'profiles' in a:
-                    ftp_wmo_path = ''.join(a.split('/')[:-2])
+                    ftp_wmo_path = '/'.join(a.split('/')[:-2])
                     wmo = ftp_wmo_path.split('/')[-1]
                     dac = ftp_wmo_path.split('/')[-2]
                     ftp.cwd(ftp_wmo_path)
+                    ftp.cwd('profiles')
+                    fn = a.split('/')[-1]
+
+                    # define local location to save file
+                    dac_path = local_path / dac
+                    wmo_path = local_path / dac / wmo
+                    profile_path = wmo_path / 'profiles'
+
+                    # make the directory if it doesn't exist
+                    if not dac_path.is_dir():
+                        dac_path.mkdir()
+                    if not wmo_path.is_dir():
+                        wmo_path.mkdir()
+                    if not profile_path.is_dir():
+                        profile_path.mkdir()
+
+                    # define the local file to have the same name as on the FTP server
+                    wmo_file = profile_path / fn
+                    # only download the file if it doesn't already exist locally
+                    if not wmo_file.exists() or overwrite:
+                        print(wmo_file)
+                        # open the local file
+                        lf = open(wmo_file, 'wb')
+                        # retrieve the file on FTP server,
+                        ftp.retrbinary('RETR ' + fn, lf.write)
+                        lf.close()
+
                 # if not - so Sprof, Mprof, BRtraj or meta
                 else:
-                    ftp_wmo_path = ''.join(a.split('/')[:-1])
+                    ftp_wmo_path = '/'.join(a.split('/')[:-1])
                     wmo = ftp_wmo_path.split('/')[-1]
                     dac = ftp_wmo_path.split('/')[-2]
                     ftp.cwd(ftp_wmo_path)
@@ -422,6 +449,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     dac_path.mkdir()
                 if not wmo_path.is_dir():
                     wmo_path.mkdir()
+                
 
                 # download the files
                 for fn in files:
