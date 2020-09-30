@@ -7,4 +7,5 @@ sagepy/__pycache__/
 *checkpoint*
 /owc_plots/
 /tmp/
+/dmqc/
 .DS_Store
