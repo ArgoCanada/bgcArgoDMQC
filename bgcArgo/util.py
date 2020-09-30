@@ -2,6 +2,7 @@
 
 import sys
 import numpy as np
+from netCDF4 import Dataset
 
 def decode_woa_var(varname):
     '''take WOA variable name input and output relevant info'''
@@ -174,7 +175,9 @@ def utf_decode(nc_arr, verbose=True):
 
     return dlist
 
-def read_gain_value(nc):
+def read_gain_value(fn):
+
+    nc = Dataset(fn, 'r')
 
     eq    = nc.variables['SCIENTIFIC_CALIB_EQUATION']
     coeff = nc.variables['SCIENTIFIC_CALIB_COEFFICIENT']
