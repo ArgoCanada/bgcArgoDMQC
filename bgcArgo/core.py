@@ -180,10 +180,10 @@ class sprof:
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
 
-    def check_doxy_range(self):
-        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
-        self.__floatdict__ = self.__doxyrangedict__
-        self.assign(self.__doxyrangedict__)
+    def check_range(self, key):
+        self.__rangecheckdict__ = range_check(key, self.__floatdict__)
+        self.__floatdict__ = self.__rangecheckdict__
+        self.assign(self.__rangecheckdict__)
     
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -411,10 +411,10 @@ class profiles:
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
 
-    def check_doxy_range(self):
-        self.__doxyrangedict__ = doxy_range_check(self.__floatdict__)
-        self.__floatdict__ = self.__doxyrangedict__
-        self.assign(self.__doxyrangedict__)
+    def check_range(self, key):
+        self.__rangecheckdict__ = range_check(key, self.__floatdict__)
+        self.__floatdict__ = self.__rangecheckdict__
+        self.assign(self.__rangecheckdict__)
              
     def to_dict(self):
         return copy.deepcopy(self.__floatdict__)
@@ -1307,19 +1307,26 @@ def delta_pres(P1, P2):
 
 	return dpres
 
-def doxy_range_check(floatdict, verbose=True, adjusted=False):
+def range_check(key, floatdict, verbose=True):
+    if 'range_dict' not in globals:
+        global range_dict
+        range_dict = dict(
+            PRES=(-5, np.inf),
+            TEMP=(-2.5, 40),
+            PSAL=(2, 41),
+            DOXY=(-5, 600),
+        )
+
     cleandict = copy.deepcopy(floatdict)
-    if adjusted:
-        key = 'DOXY_ADJUSTED'
-    else:
-        key = 'DOXY'
-    doxy = floatdict[key]
-    outside_range = np.logical_or(doxy < -5, doxy > 600)
+
+    argo_var = floatdict[key]
+    r = range_dict[key.replace('_ADJUSTED','')]
+    outside_range = np.logical_or(argo_var < r[0], argo_var > r[1])
     if verbose:
         sys.stdout.write('{} values found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
 
-    doxy[outside_range] = np.nan
-    cleandict[key] = doxy
+    argo_var[outside_range] = np.nan
+    cleandict[key] = argo_var
 
     return cleandict
 
