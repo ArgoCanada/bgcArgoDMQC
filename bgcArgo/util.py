@@ -247,5 +247,14 @@ def decode_file_gain(G):
     for c in [';', ':', '!', ',']:
         G = G.replace(c, '')
 
-    G_out = float(G.split('=')[-1].strip())
+    G_split = G.split('=')
+    N = len(G_split % 2 + 1)
+    G_out = np.array(N*[np.nan])
+    if len(G_split) > 2:
+        for i in range(N):
+            G_out[i] = float(G_split[2*i+1].strip())
+    
+    else:
+        G_out = np.array([float(G.split('=')[-1].strip())])
+   
     return G_out
