@@ -53,7 +53,7 @@ def oxy_sol(S, T, unit='micromole/kg'):
 
     return O2sol
 
-def pH2O(T):
+def pH2O(T, S=0, unit='Pa'):
     '''
     Calculate vapor pressure of water
     
@@ -75,8 +75,12 @@ def pH2O(T):
     # temperature in kelvin
     Tk = T + 273.15
 
-    # from Johnson et al. (2015)
-    vapor_pressure = np.exp(52.57 - (6690.9/Tk) - 4.681*np.log(Tk))
+    if unit == 'Pa':
+        # from Johnson et al. (2015)
+        vapor_pressure = np.exp(52.57 - (6690.9/Tk) - 4.681*np.log(Tk))
+    elif unit == 'mbar':
+        # SCOR WG 142
+        vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk))) - 4.8489*np.log(((Tk/100)) - 0.000544*S))
 
     return vapor_pressure
 
@@ -114,3 +118,102 @@ def atmos_pO2(P, pH2O):
     ppox = (P - pH2O) * XO2
 
     return ppox
+
+# -----------------------------------------------------------------------------
+# Section - conversion code from "SCOR WG 142: Quality Control Procedures for 
+# Oxygen and Other Biogeochemical Sensors on Floats and Gliders". Code
+# adapted from matlab code by Henry Bittig. https://doi.org/10.13155/45915
+# -----------------------------------------------------------------------------
+
+def doxy_to_pO2(O2conc, S, T, P=0):
+    '''
+    convert molar oxygen concentration to oxygen partial pressure
+
+    inputs:
+        O2conc - oxygen concentration in umol L-1
+        T      - temperature in deg C
+        S      - salinity (PSS-78)
+        P      - hydrostatic pressure in dbar (default: 0 dbar)
+
+    output:
+        pO2    - oxygen partial pressure in mbar
+
+    according to recommendations by SCOR WG 142 "Quality Control Procedures
+    for Oxygen and Other Biogeochemical Sensors on Floats and Gliders"
+
+    Written in matlab by: 
+    Henry Bittig
+    Laboratoire d'Oceanographie de Villefranche-sur-Mer, France
+    bittig@obs-vlfr.fr
+    28.10.2015
+    19.04.2018, v1.1, fixed typo in B2 exponent
+
+    Translated to python by:
+    Chris Gordon
+    Bedford Institute of Oceanography, Fisheries and Oceans Canada
+    chris.gordon@dfo-mpo.gc.ca
+    02.10.2020
+    '''
+
+    Tk      = T + 273.15 # temperature in kelvin
+    xO2     = 0.20946 # mole fraction of O2 in dry air (Glueckauf 1951)
+    pH2Osat = pH2O(T, S=S, unit='mbar') # saturated water vapor in mbar
+    # scaled temperature for use in TCorr and SCorr
+    sca_T   = np.log((298.15 - T)/(Tk))
+    # temperature correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit mL(STP) L-1; and conversion from mL(STP) L-1 to umol L-1
+    Tcorr   = 44.6596 * np.exp(2.00907 + 3.22014*sca_T + 4.05010*sca_T**2 + 4.94457*sca_T**3 - 2.56847e-1*sca_T**4 + 3.88767*sca_T**5)
+    # salinity correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit ml(STP) L-1
+    Scorr   = np.exp(S*(-6.24523e-3 - 7.37614e-3*sca_T - 1.03410e-2*sca_T**2 - 8.17083e-3*sca_T**3) - 4.88682e-7*S**2)
+    Vm      = 0.317 # molar volume of O2 in m3 mol-1 Pa dbar-1 (Enns et al. 1965)
+    R       = 8.314 # universal gas constant in J mol-1 K-1
+
+    pO2 = O2conc*(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
+
+    return pO2
+
+def pO2_to_doxy(pO2, S, T, P=0):
+    '''
+    convert oxygen partial pressure to molar oxygen concentration
+
+    inputs:
+        pO2    - oxygen partial pressure in mbar
+        T      - temperature in deg C
+        S      - salinity (PSS-78)
+        P      - hydrostatic pressure in dbar (default: 0 dbar)
+
+    output:
+        DOXY - oxygen concentration in umol L-1
+
+    according to recommendations by SCOR WG 142 "Quality Control Procedures
+    for Oxygen and Other Biogeochemical Sensors on Floats and Gliders"
+
+
+    Written in matlab by: 
+    Henry Bittig
+    Laboratoire d'Oceanographie de Villefranche-sur-Mer, France
+    bittig@obs-vlfr.fr
+    28.10.2015
+    19.04.2018, v1.1, fixed typo in B2 exponent
+
+    Translated to python by:
+    Chris Gordon
+    Bedford Institute of Oceanography, Fisheries and Oceans Canada
+    chris.gordon@dfo-mpo.gc.ca
+    02.10.2020
+    '''
+
+    Tk      = T + 273.15 # temperature in kelvin
+    xO2     = 0.20946 # mole fraction of O2 in dry air (Glueckauf 1951)
+    pH2Osat = pH2O(T, S=S, unit='mbar') # saturated water vapor in mbar
+    # scaled temperature for use in TCorr and SCorr
+    sca_T   = np.log((298.15 - T)/(Tk))
+    # temperature correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit mL(STP) L-1; and conversion from mL(STP) L-1 to umol L-1
+    Tcorr   = 44.6596 * np.exp(2.00907 + 3.22014*sca_T + 4.05010*sca_T**2 + 4.94457*sca_T**3 - 2.56847e-1*sca_T**4 + 3.88767*sca_T**5)
+    # salinity correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit ml(STP) L-1
+    Scorr   = np.exp(S*(-6.24523e-3 - 7.37614e-3*sca_T - 1.03410e-2*sca_T**2 - 8.17083e-3*sca_T**3) - 4.88682e-7*S**2)
+    Vm      = 0.317 # molar volume of O2 in m3 mol-1 Pa dbar-1 (Enns et al. 1965)
+    R       = 8.314 # universal gas constant in J mol-1 K-1
+
+    O2conc  = pO2/(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
+
+    return O2conc
