@@ -59,9 +59,10 @@ def pH2O(T, S=0, unit='Pa'):
     
     INPUT:
               T: temperature, deg C
+              S: salinity, only necessary for mbar unit
     
     OUTPUT:
-              vapor_pressure: vapor pressure of water, Pa
+              vapor_pressure: vapor pressure of water, Pa or mbar
     
     AUTHOR:   Christopher Gordon
               Fisheries and Oceans Canada
