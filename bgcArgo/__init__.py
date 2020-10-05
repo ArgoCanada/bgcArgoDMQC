@@ -27,6 +27,7 @@ from . import unit
 from . import io
 from . import interp
 from . import diagnostic
+from . import calibration
 
 __all__ = ['fplt', 'unit', 'io', 'interp', 'diagnostic']
 
