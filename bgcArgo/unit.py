@@ -116,9 +116,9 @@ def atmos_pO2(P, pH2O):
     # molar fraction of oxygen in air
     XO2 = 0.20946
     # reference partial pressure of oxygen in air
-    ppox = (P - pH2O) * XO2
+    pO2 = (P - pH2O) * XO2
 
-    return ppox
+    return pO2
 
 # -----------------------------------------------------------------------------
 # Section - conversion code from "SCOR WG 142: Quality Control Procedures for 
@@ -150,7 +150,7 @@ def doxy_to_pO2(O2conc, S, T, P=0):
     19.04.2018, v1.1, fixed typo in B2 exponent
 
     Translated to python by:
-    Chris Gordon
+    Christopher Gordon
     Bedford Institute of Oceanography, Fisheries and Oceans Canada
     chris.gordon@dfo-mpo.gc.ca
     02.10.2020
@@ -183,7 +183,7 @@ def pO2_to_doxy(pO2, S, T, P=0):
         P      - hydrostatic pressure in dbar (default: 0 dbar)
 
     output:
-        DOXY - oxygen concentration in umol L-1
+        DOXY   - oxygen concentration in umol L-1
 
     according to recommendations by SCOR WG 142 "Quality Control Procedures
     for Oxygen and Other Biogeochemical Sensors on Floats and Gliders"
@@ -197,7 +197,7 @@ def pO2_to_doxy(pO2, S, T, P=0):
     19.04.2018, v1.1, fixed typo in B2 exponent
 
     Translated to python by:
-    Chris Gordon
+    Christopher Gordon
     Bedford Institute of Oceanography, Fisheries and Oceans Canada
     chris.gordon@dfo-mpo.gc.ca
     02.10.2020
