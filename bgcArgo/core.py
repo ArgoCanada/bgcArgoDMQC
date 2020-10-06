@@ -367,7 +367,7 @@ class sprof:
         if not hasattr(self, 'df'):
             self.to_dataframe()
         
-        print('Data for synthetic profile file for float {}'.format(syn.WMO))
+        print('Data for synthetic profile file for float {}'.format(self.WMO))
 
         print(self.df.describe())
 

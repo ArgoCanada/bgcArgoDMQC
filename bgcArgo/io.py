@@ -400,9 +400,11 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
         ftp.login()
 
         if type(args[0]) is not list:
-            args[0] = list(args[0])
+            arglist = [args[0]]
+        else:
+            arglist = args[0]
 
-        for init_a in args[0]:
+        for init_a in arglist:
             # if its a float number, build ftp paths to floats
             if type(init_a) is int or type(init_a) is float:
                 if url == 'ftp.ifremer.fr':

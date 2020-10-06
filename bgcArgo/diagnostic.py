@@ -3,7 +3,7 @@
 from pathlib import Path
 import sys
 
-from .core import sprof, get_dac
+from .core import sprof
 from . import io
 from . import interp
 from . import unit
@@ -36,13 +36,13 @@ def simple_test(argo_path=None, ncep_path=None, woa_path=None):
             p.mkdir()
     
     wmo = 4902480
-    io.get_argo('/ifremer/argo/dac/{}/{}'.format(get_dac(wmo), wmo), local_path=argo_path, ftype='summary')
+    io.get_argo(wmo, local_path=argo_path, ftype='summary')
     io.get_ncep('pres', local_path=ncep_path, years=[2019, 2020])
     io.get_ncep('land', local_path=ncep_path, years=[2019, 2020])
-    io.get_woa('O2sat', local_path=woa_path)
+    io.get_woa18('O2sat', local_path=woa_path)
 
     sprof.set_dirs(argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path)
-    syn = sprof()
+    syn = sprof(wmo)
 
     syn.describe()
 
