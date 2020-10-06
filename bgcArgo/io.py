@@ -190,6 +190,16 @@ def check_index(mode=None):
                 sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
                 update_index(ftype='synthetic')
 
+def get_dac(wmo):
+
+    if '__globalindex__' not in globals():
+            global __globalindex__
+            __globalindex__ = read_index(mission='C')
+    
+    dac = __globalindex__[__globalindex__.wmo == wmo].dac.iloc[0]
+
+    return dac
+
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     '''
     Function to download WOA data for a given variable
@@ -389,7 +399,21 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
         ftp = ftplib.FTP(url)
         ftp.login()
 
-        for a in args[0]:
+        if type(args[0]) is not list:
+            args[0] = list(args[0])
+
+        for init_a in args[0]:
+            # if its a float number, build ftp paths to floats
+            if type(init_a) is int or type(init_a) is float:
+                if url == 'ftp.ifremer.fr':
+                    base_path = '/ifremer/argo/dac'
+                elif url == 'usgodae.org':
+                    base_path = '/pub/outgoing/argo/dac'
+
+                a = '{}/{}/{:d}'.format(base_path, get_dac(init_a), init_a)
+            else:
+                a = init_a
+
             # if its a file
             if a[-2:] == 'nc':
                 # if its a profile file
@@ -431,7 +455,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     wmo = ftp_wmo_path.split('/')[-1]
                     dac = ftp_wmo_path.split('/')[-2]
                     ftp.cwd(ftp_wmo_path)
-            # if its a float
+            # if its a float directory
             else:
                 ftp_wmo_path = a
                 wmo = ftp_wmo_path.split('/')[-1]

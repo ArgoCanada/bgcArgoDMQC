@@ -70,16 +70,6 @@ def get_index(index='bgc'):
             __synthindex__ = io.read_index(mission='S')
         return __synthindex__
 
-def get_dac(wmo):
-
-    if '__globalindex__' not in globals():
-            global __globalindex__
-            __globalindex__ = io.read_index(mission='C')
-    
-    dac = __globalindex__[__globalindex__.wmo == wmo].dac.iloc[0]
-
-    return dac
-
 # ----------------------------------------------------------------------------
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
@@ -754,7 +744,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
-    dac = get_dac(wmo)
+    dac = io.get_dac(wmo)
 
     if type(wmo) is not str:
         wmo = str(wmo)
