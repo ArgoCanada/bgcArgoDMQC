@@ -85,10 +85,28 @@ def get_dac(wmo):
 # ----------------------------------------------------------------------------
 
 class sprof:
+    '''
+    Class that loads Argo synthetic profile data for a given float ID number
+    (wmo). Uses locally downloaded files, which should be setup using the `set_dirs` 
+    method: 
 
+    sprof.set_dirs(
+        argo_path='/data/path/Argo', 
+        ncep_path='/data/path/NCEP',
+        woa_path='/data/path/WOA18'
+    )
+
+    Then, load the individual variables into fields in the class, for
+    example:
+
+    syn = sprof(wmo)
+    print(syn.DOXY)
+    '''
+    
     set_dirs = set_dirs
 
     def __init__(self, wmo, keep_fillvalue=False):
+
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
         self.__rawfloatdict__ = self.__floatdict__
 
@@ -102,6 +120,10 @@ class sprof:
             self.rm_fillvalue()
 
     def assign(self, floatdict):
+        '''
+        Assign variables from float dictionary (output of load_argo(...))
+        to synthetic profile sprof() object.
+        '''
 
         # metadata and dimension variables
         self.floatName  = floatdict['floatName']
@@ -167,28 +189,62 @@ class sprof:
             self.O2Sat_QC = floatdict['O2Sat_QC']
 
     def rm_fillvalue(self):
+        '''
+        Remove FillValue from all variables.
+        '''
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
 
     def clean(self, bad_flags=None):
+        '''
+        Remove bad data from all variables, using <PARAM>_QC to determine bad data. 
+        Optional input `bad_flags` can be used to specify which flag values are bad,
+        with a default bad flags set to be 4, 6, 7.
+        '''
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
 
     def reset(self):
+        '''
+        Reset all variables back to original loaded variables. Undoes the effect of
+        clean(), rm_fillvalue(), check_range().
+        '''
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
 
     def check_range(self, key):
-        self.__rangecheckdict__ = range_check(key, self.__floatdict__)
-        self.__floatdict__ = self.__rangecheckdict__
+        '''
+        Performs a range check for variables that have a RTQC range available.
+        Replaces values outside the range with NaN values. Takes string input
+        to do the range check on that variable. Available variables are
+        PRES, TEMP, PSAL, and DOXY. Can also take input 'all' to do the range
+        check on all four variables, or a list of strings to do each of those
+        variables.
+        '''
+        if key == 'all':
+            key = ['PRES', 'TEMP', 'PSAL', 'DOXY']
+        elif type(key) is not list:
+            key = [key]
+        
+        for k in key:
+            self.__rangecheckdict__ = range_check(k, self.__floatdict__)
+            self.__floatdict__ = self.__rangecheckdict__
         self.assign(self.__rangecheckdict__)
     
     def to_dict(self):
+        '''
+        Returns a deepcopy of __floatdict__, which is the currect active
+        dictionary (i.e. subject to the effects of clean(), reset(), etc.)
+        '''
         return copy.deepcopy(self.__floatdict__)
     
     def to_dataframe(self):
+        '''
+        Returns a pandas dataframe containing data from the synthetic oxygen
+        profile file.
+        '''
         import pandas as pd
 
         df = pd.DataFrame()
@@ -224,11 +280,22 @@ class sprof:
         return copy.deepcopy(self.df)
 
     def get_track(self):
+        '''
+        Creates a track array with columns:
+
+        [serial datenum, latitude, longitude]
+
+        the track array is used for the interpolation of reference data along
+        the float track.
+        '''
         self.track = track(self.__floatdict__)
 
         return copy.deepcopy(self.track)
 
     def get_ncep(self):
+        '''
+        Loads NCEP data along the float track
+        '''
 
         if not hasattr(self, 'track'):
             self.get_track()
@@ -238,6 +305,9 @@ class sprof:
         return copy.deepcopy(self.NCEP)
 
     def get_woa(self):
+        '''
+        Loads WOA data along the float track
+        '''
 
         if not hasattr(self, 'track'):
             self.get_track()
