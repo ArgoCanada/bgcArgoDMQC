@@ -1413,6 +1413,32 @@ def range_check(key, floatdict, verbose=True):
 
     return cleandict
 
+def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10, zlim=25):
+    '''
+    Calculate DOXY_ADJUSTED_ERROR for fixed partial pressure of 10 mbar 
+    PPOX_DOXY.
+    '''
+
+    S = floatdict['PSAL']
+    T = floatdict['TEMP']
+    P = floatdict['PRES']
+
+    time_grid = floatdict['SDN_GRID']
+    time = floatdict['SDN']
+
+    ix = P < zlim
+    S = S[ix]
+    T = T[ix]
+
+    error = np.array(time.shape[0]*[np.nan])
+    for i,t in enumerate(time):
+        sub_S = S[time_grid == t]
+        sub_T = T[time_grid == t]
+        sub_P = P[time_grid == t]
+        error[i] = np.nanmean(unit.pO2_to_doxy(np.array(sub_P.shape[0]*[fix_err]), sub_S, sub_T, P=sub_P))
+
+    return error
+
 def aic(data, resid):
     '''
     Function to calculate the Akiake Information Criteria (AIC) as a metric
