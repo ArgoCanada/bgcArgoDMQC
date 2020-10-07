@@ -43,7 +43,6 @@ def decode_woa_var(varname):
 
     return param, ftype, ftpdir
 
-
 def get_lat_index(lat, lat_bounds):
         '''function to pull appropriate WOA latitude values'''
 
