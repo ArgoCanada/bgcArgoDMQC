@@ -758,7 +758,7 @@ def load_ncep_data(track, varname, local_path='./'):
     yrs = (mdates.num2date(np.nanmin(sdn)).year, mdates.num2date(np.nanmax(sdn)).year)
     Nyear = yrs[1]-yrs[0]
 
-    if Nyear == 0:
+    if Nyear == 0 and yrs[0] != mdates.datetime.date.today().year:
         Nyear = 1
 
     # counter index for going across years
