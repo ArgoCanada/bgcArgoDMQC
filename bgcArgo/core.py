@@ -382,7 +382,7 @@ class profiles:
         if type(floats) is int:
             floats = [floats]
 
-        self.__argofiles__ = get_files(ARGO_PATH, floats, cycles=cycles, mission=mission, mode=mode)
+        self.__argofiles__ = organize_files(get_files(ARGO_PATH, floats, cycles=cycles, mission=mission, mode=mode))
         self.__floatdict__ = load_profiles(self.__argofiles__)
         self.__rawfloatdict__ = self.__floatdict__
 
@@ -640,6 +640,21 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
             local_files.pop(ix)
 
     return local_files
+
+def organize_files(files):
+    '''
+    Sort files according to time they were recorded.
+    '''
+    lead_letter = files[0].split('/')[-1][0]
+    if lead_letter == 'R' or lead_letter == 'D':
+        index = get_index('global')
+    else:
+        index = __bgcindex__
+    
+    dates = np.array([index[index.file.str.find(fn.split('/')[-1]) != -1].date.iloc[0] for fn in files])
+    sorted_files = list(np.array(files)[np.argsort(dates)])
+
+    return sorted_files
 
 def get_vars(files):
 
