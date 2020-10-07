@@ -1104,9 +1104,9 @@ def dict_fillvalue_clean(float_data):
     for k in qc_keys:
         data_key   = k.replace('_QC','')
         if data_key == 'POSITION':
-            for dk in ['LATITUDE', 'LONGITUDE']:
+            for dk in ['LATITUDE', 'LONGITUDE', 'LATITUDE_GRID', 'LONGITUDE_GRID']:
                 fillvalue_index = clean_float_data[dk] >= 99999. # use greater than because date fillval is 999999
-            clean_float_data[dk][fillvalue_index] = np.nan
+                clean_float_data[dk][fillvalue_index] = np.nan
         else:
             fillvalue_index = clean_float_data[data_key] >= 99999. # use greater than because date fillval is 999999
             clean_float_data[data_key][fillvalue_index] = np.nan
@@ -1118,6 +1118,9 @@ def dict_fillvalue_clean(float_data):
 
     fillvalue_index = clean_float_data['SDN'] >= 999999.
     clean_float_data['SDN'][fillvalue_index] = np.nan
+
+    fillvalue_index = clean_float_data['SDN_GRID'] >= 999999.
+    clean_float_data['SDN_GRID'][fillvalue_index] = np.nan
 
     return clean_float_data
 
