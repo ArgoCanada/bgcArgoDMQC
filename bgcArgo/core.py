@@ -307,6 +307,10 @@ class sprof:
         return copy.deepcopy(self.WOA)
 
     def calc_gains(self, ref='NCEP', zlim=25.):
+        '''
+        Calculate gain values using NCEP or WOA reference data. Uses function
+        calc_gain(). 
+        '''
 
         if not hasattr(self, 'track'):
             self.get_track()
