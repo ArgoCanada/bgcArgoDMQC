@@ -1195,6 +1195,8 @@ def ncep_to_float_track(varname, track, local_path='./'):
     '''
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
+    if track[0,0] > ncep_track[0][-1] and mdates.num2date(track[0,0]).year == mdates.datetime.date.today().year:
+        raise ValueError('First float date occurs after last NCEP date, NCEP data not available yet, recommend using WOA data to calcualte gain')
     ncep_interp, wt = interp.interp_ncep_data(xtrack, ncep_track, data)
 
     return ncep_interp, wt
