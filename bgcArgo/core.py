@@ -334,6 +334,12 @@ class sprof:
         
         return copy.deepcopy(self.gains)
 
+    def calc_fixed_error(self, fix_err=10, zlim=25.):
+
+        self.error = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err, zlim=zlim)
+
+        return copy.deepcopy(self.error)
+
     def plot(self, kind, **kwargs):
 
         if kind == 'gain':
@@ -568,6 +574,12 @@ class profiles:
             self.gains = self.__WOAgains__
         
         return self.gains
+
+    def calc_fixed_error(self, fix_err=10, zlim=25.):
+
+        self.error = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err, zlim=zlim)
+
+        return copy.deepcopy(self.error)
 
     def adjust_oxygen(self, G, eG):
 
