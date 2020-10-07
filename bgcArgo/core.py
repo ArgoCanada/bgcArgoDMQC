@@ -363,6 +363,9 @@ class sprof:
 
 
     def describe(self):
+        '''
+        Describe the dataframe of data stored in the sprof object.
+        '''
 
         if not hasattr(self, 'df'):
             self.to_dataframe()
