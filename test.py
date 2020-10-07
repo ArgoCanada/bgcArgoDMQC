@@ -25,11 +25,13 @@ class downloadTest(unittest.TestCase):
 
     def test_download_ncep(self):
 
-        bgc.io.get_ncep('pres', local_path='tmp/NCEP', overwrite=True)
+        bgc.io.get_ncep('pres', local_path='tmp/NCEP', overwrite=True, years=[2019, 2020])
         bgc.io.get_ncep('land', local_path='tmp/NCEP', overwrite=True)
-        bgc.io.get_ncep('rhum', local_path='tmp/NCEP', overwrite=True)
+        bgc.io.get_ncep('rhum', local_path='tmp/NCEP', overwrite=True, years=[2019, 2020])
 
-        self.assertTrue(Path('tmp/NCEP/pres/pres.sfc.gauss.2010.nc').exists())
+        self.assertTrue(Path('tmp/NCEP/pres/pres.sfc.gauss.2019.nc').exists())
+        self.assertTrue(Path('tmp/NCEP/land/land.sfc.gauss.nc').exists())
+        self.assertTrue(Path('tmp/NCEP/rhum/rhum.sig995.2019.nc').exists())
 
     def test_download_woa(self):
 
@@ -39,8 +41,7 @@ class downloadTest(unittest.TestCase):
 
     def test_download_argo(self):
 
-        # dac = [bgc.get_dac(w) for w in [wmo-1,wmo]]
-        dac = [bgc.get_dac(w) for w in [wmo]]
+        dac = [bgc.io.get_dac(w) for w in [wmo-1,wmo]]
 
         dacpath = '/ifremer/argo/dac'
         fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
@@ -205,10 +206,10 @@ class otherTest(unittest.TestCase):
         self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
-        nc = Dataset(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_024.nc'), 'r')
-        g, comment = bgc.util.read_gain_value(nc)
+        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_024.nc'))
 
         self.assertIs(type(g[0]), np.str_)
+        self.assertIs(type(eq[0]), np.str_)
         self.assertIs(type(comment[0]), np.str_)
 
     def test_unit_conversion(self):
