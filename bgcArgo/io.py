@@ -813,3 +813,35 @@ def load_ncep_data(track, varname, local_path='./'):
         ncep_track = [ncep_time, lat_sub, lon_sub]
 
     return xtrack, ncep_track, data
+
+def append_variable_to_file(fn, *args):
+    '''
+    Add an arbitrary number of variables (*args) to the existing netcdf file
+    input fn. The input structure for each variable should be a dictionary with
+    fields that can be passed directly to the netCDF file. If the variable
+    name already exists, it will overwrite it with the new information.
+
+    Inputs: 
+
+    fn: string pointing to netcdf (.nc) file to be appended
+
+    *args: arbitrary number of python dicts with all required fields to create
+    or overwrite a new netcdf variable. Example: 
+
+    new_var = dict(
+        name='MY_NEW_VARIABLE',     # variable name, can be new or existing
+        dimensions=('N', 'M'),      # note these dims must already exist in the nc file
+        long_name='The new variable',
+        standard_name='my_new_var',
+        units='degree_celsius',
+        valid_min=0,
+        valid_max=1e9,
+        resolution=0.001,
+        comment='Added by John Doe on Sept 20, 2019'
+    )
+    '''
+
+
+    nc = Dataset(fn, 'a')
+
+    return nc
