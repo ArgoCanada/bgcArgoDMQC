@@ -15,7 +15,6 @@ bgcArgo Documentation
    :caption: Contents:
 
    install
-   usage
 
 Indices and tables
 ==================
