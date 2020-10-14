@@ -13,6 +13,21 @@ bgcArgo Documentation
 .. automodule:: bgcArgo.core
     :members:
 
+.. automodule:: bgcArgo.io
+    :members:
+
+.. automodule:: bgcArgo.interp
+    :members:
+
+.. automodule:: bgcArgo.unit
+    :members:
+
+.. automodule:: bgcArgo.util
+    :members:
+
+.. automodule:: bgcArgo.fplt
+    :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
