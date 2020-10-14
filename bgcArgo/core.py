@@ -587,20 +587,6 @@ class profiles:
 
         return copy.deepcopy(self.DOXY_ADJUSTED_ERROR)
 
-    def adjust_oxygen(self, G, eG):
-
-        self.I_DOXY_ADJUSTED = apply_gain(self.DOXY, G)
-        self.I_DOXY_ADJUSTED_QC = self.DOXY_QC
-        self.I_DOXY_ADJUSTED_ERROR = calc_doxy_error(self.DOXY, G, eG)
-
-        # metadata that needs to be recorded but I don't know where to put it yet
-        SCIENTIFIC_CALIB_DATE = time.strftime('%d %b %Y')
-        SCIENTIFIC_CALIB_COMMENT = 'No additional comment'
-        SCIENTIFIC_CALIB_EQUATION = 'No additional equation'
-        SCIENTIFIC_CALIB_COEFFICIENT = 'No additional coefficient'
-
-        return self.I_DOXY_ADJUSTED
-
     def reassign_flags(self):
 
         return
@@ -701,7 +687,6 @@ def read_qc(flags):
 def get_worst_flag(*args):
     out_flags = np.ones(args[0].shape)
 
-    ### block of code to find the worst flags
     if len(args) == 1:
         out_flags = args[0]
     else:
@@ -713,11 +698,9 @@ def get_worst_flag(*args):
             for i,f in enumerate(flags):
                 if f > out_flags[i] and f <= 4:
                     out_flags[i] = f
-                if f in [5,8] and out_flags[i] == 1:
+                elif f in [5,8] and out_flags[i] <= 2:
                     out_flags[i] = f
-                if f == 4 and out_flags[i] in [5,8]:
-                    out_flags[i] = f
-                if f == 9:
+                elif f == 9:
                     out_flags[i] = 9
         
     return out_flags
