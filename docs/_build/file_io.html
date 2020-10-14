@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File I/O Functions &#8212; bgcArgo 0.2.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File I/O Functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bgcArgo.io">
+<span id="file-i-o-functions"></span><h1>File I/O Functions<a class="headerlink" href="#module-bgcArgo.io" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.io.append_variable_to_file">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">append_variable_to_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.append_variable_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an arbitrary number of variables (<a href="#id1"><span class="problematic" id="id2">*</span></a>args) to the existing netcdf file
+input fn. The input structure for each variable should be a dictionary with
+fields that can be passed directly to the netCDF file. If the variable
+name already exists, it will overwrite it with the new information.</p>
+<p>Inputs:</p>
+<p>fn: string pointing to netcdf (.nc) file to be appended</p>
+<p><a href="#id3"><span class="problematic" id="id4">*</span></a>args: arbitrary number of python dicts with all required fields to create
+or overwrite a new netcdf variable. Example:</p>
+<dl class="simple">
+<dt>new_var = dict(</dt><dd><p>name=’MY_NEW_VARIABLE’,     # variable name, can be new or existing
+dimensions=(‘N’, ‘M’),      # note these dims must already exist in the nc file
+long_name=’The new variable’,
+standard_name=’my_new_var’,
+units=’degree_celsius’,
+valid_min=0,
+valid_max=1e9,
+resolution=0.001,
+comment=’Added by John Doe on Sept 20, 2019’</p>
+</dd>
+</dl>
+<p>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.check_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">check_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.check_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to check age of Argo metadata and profile global index files,
+warn if they have not been updated in more than 1 week. Runs on import.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_argo">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_argo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">url</span><span class="o">=</span><span class="default_value">'ftp.ifremer.fr'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mission</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'RD'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_argo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download all data from a single float, or individual
+profiles</p>
+<dl>
+<dt>INPUT:</dt><dd><p>Inputs may vary depending on desired performance. Multiple
+arguments may be provided to download all files from a certain
+float or argo defined geographical area. A single path to a
+file may be provided to download that file. A list of files
+may be provided as well.</p>
+<dl class="simple">
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_ncep">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_ncep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">years</span><span class="o">=</span><span class="default_value">[2010, 2020]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_ncep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download NCEP reanalysis gaussian gridded surface air
+pressure data</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><dl class="simple">
+<dt>varname: ‘pres’ (pressure) or ‘rhum’ (relative humidity)</dt><dd><p>or ‘land’ (to get land mask)</p>
+</dd>
+<dt>local_path: path to save files to, defaults</dt><dd><p>to current directory</p>
+</dd>
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+<dt>OUTPUT:</dt><dd><p>ftp: the ftplib server object</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_woa18">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_woa18</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">'netcdf'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_woa18" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download WOA data for a given variable</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><dl class="simple">
+<dt>varname: woa18 variable to download data for - one of:</dt><dd><p>T: temperature
+S: salinity
+O2: dissolved oxygen
+O2sat: oxygen percent saturation
+NO3: nitrate
+Si: silicate
+PO4: phosphate</p>
+</dd>
+<dt>local_path: path to save files to (inside variable folder, ex.</dt><dd><p>if local_path = ‘../data/woa’, and varname = ‘T’, files
+will be saved in ../data/woa/temperature/<a href="#id5"><span class="problematic" id="id6">*</span></a>.nc. Defaults
+to current directory</p>
+</dd>
+<dt>ftype: file format to download, defaults to netcdf (.nc):</dt><dd><p>ascii: .dat
+csv: .csv
+netcdf: .nc</p>
+</dd>
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+<dt>OUTPUT:</dt><dd><p>ftp: the ftplib server object</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.load_ncep_data">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">load_ncep_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.load_ncep_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load NCEP reanalysis data for comparison with autonomous
+float in-air data. Data to be interpolated along the provided
+track (t, lat, lon).</p>
+<dl>
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+local_path: local directory where NCEP files are stored, assumes</p>
+<blockquote>
+<div><p>current directory if no input</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 04-05-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.load_woa_data">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">load_woa_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">0, 1000</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.load_woa_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load WOA18 climatological data for comparison with autonomous
+floats. Data to be interpolated along the provided track (t, lat, lon).</p>
+<dl>
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+param: requested variable, valid inputs are</p>
+<blockquote>
+<div><p>T: temperature
+S: salinity
+O2: dissolved oxygen
+O2sat: oxygen percent saturation
+NO3: nitrate
+Si: silicate
+PO4: phosphate</p>
+</div></blockquote>
+<p>zlim: depth bounds (upper, lower), default to (0, 1000)
+local_path: local directory where WOA files are stored, assumes</p>
+<blockquote>
+<div><p>current directory if no input</p>
+</div></blockquote>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>xtrack: same as track input, but adjusted lon if the track</dt><dd><p>crosses the 180/-180 meridian</p>
+</dd>
+</dl>
+<p>woa_track: list with z, lat, and lon arrays of WOA data
+data: gridded array of the input variable (month, z, lat, lon)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+<p>23-04-2020: changed zlim to optional input argument
+29-04-2020: switched file/path handling from os module to pathlib</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.read_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">read_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mission</span><span class="o">=</span><span class="default_value">'B'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.read_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to read and extract information from Argo global index,
+then save it to a dataframe for faster access</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.update_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">update_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.update_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to access FTP server to download Argo metadata and profile global
+index files</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/file_io.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File I/O Functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Christopher Gordon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+  </body>
+</html>

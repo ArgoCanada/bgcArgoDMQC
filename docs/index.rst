@@ -9,30 +9,25 @@ bgcArgo Documentation
 **Getting Started**
 
 * :doc:`install`
-
-.. automodule:: bgcArgo.core
-    :members:
-
-.. automodule:: bgcArgo.io
-    :members:
-
-.. automodule:: bgcArgo.interp
-    :members:
-
-.. automodule:: bgcArgo.unit
-    :members:
-
-.. automodule:: bgcArgo.util
-    :members:
-
-.. automodule:: bgcArgo.fplt
-    :members:
+* :doc:`core_functions`
+* :doc:`file_io`
+* :doc:`interp`
+* :doc:`unit`
+* :doc:`plot`
+* :doc:`other`
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    install
+   core_functions
+   file_io
+   interp
+   unit
+   plot
+   other
+
 
 Indices and tables
 ==================
