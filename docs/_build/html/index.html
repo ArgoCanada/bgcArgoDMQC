@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>bgcArgo Documentation &#8212; bgcArgo 0.2.8 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -15,21 +15,28 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Installation" href="install.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
+    <link rel="next" title="Installation" href="install.html" /> 
   </head><body>
-  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">bgcArgo Documentation</a></li> 
+      </ul>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
-
           <div class="body" role="main">
             
   <div class="section" id="bgcargo-documentation">
@@ -38,6 +45,20 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="install.html"><span class="doc">Installation</span></a></p></li>
 </ul>
+<span class="target" id="module-bgcArgo"></span><p>Argo Canada BGC Quality Control</p>
+<p><cite>python</cite> library of functions for quality controlling dissolved oxygen data. Heavily based on the  SOCCOM BGC Argo QC methods (<a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>) program in <cite>matlab</cite>, uses either NCEP (<a class="reference external" href="https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html">https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html</a>) or  World Ocean Atlas (<a class="reference external" href="https://www.nodc.noaa.gov/OC5/woa18/">https://www.nodc.noaa.gov/OC5/woa18/</a>) data tocalculate oxygen gains (Johnson et al. 2015, <a class="reference external" href="https://doi.org/10.1175/JTECH-D-15-0101.1">https://doi.org/10.1175/JTECH-D-15-0101.1</a>).</p>
+<p>bgcArgo dependencies</p>
+<ul class="simple">
+<li><p>Must run on <cite>python3</cite>, not supported on <cite>python2.x</cite> (uses pathlib (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html">https://docs.python.org/3/library/pathlib.html</a>), introduced in python version 3.4)</p></li>
+<li><p>The seawater (<a class="reference external" href="https://pypi.org/project/seawater/">https://pypi.org/project/seawater/</a>) package</p></li>
+<li><p>netCDF4 (<a class="reference external" href="https://pypi.org/project/netCDF4/">https://pypi.org/project/netCDF4/</a>) module for <cite>.nc</cite> files</p></li>
+<li><p>pandas (<a class="reference external" href="https://pandas.pydata.org/">https://pandas.pydata.org/</a>) and seaborn (<a class="reference external" href="https://seaborn.pydata.org/">https://seaborn.pydata.org/</a>) are recommended but not required, through there will be some reduced (non-essential) functionality without pandas</p></li>
+<li><p>cmocean (<a class="reference external" href="https://matplotlib.org/cmocean/">https://matplotlib.org/cmocean/</a>) is also recommended for nicer plots, but not required</p></li>
+</ul>
+<p>version history</p>
+<p>0.1: April 20, 2020 - Initial creation</p>
+<p>0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class</p>
+<p>0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -60,35 +81,28 @@
 </div>
 
 
+            <div class="clearer"></div>
           </div>
-          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">bgcArgo</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bgcArgo Documentation</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="install.html" title="next chapter">Installation</a></li>
-  </ul></li>
-</ul>
-</div>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
@@ -99,32 +113,29 @@
     </div>
 </div>
 <script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2020, Christopher Gordon.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">bgcArgo Documentation</a></li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Christopher Gordon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
   </body>
 </html>

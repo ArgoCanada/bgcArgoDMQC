@@ -10,6 +10,9 @@ bgcArgo Documentation
 
 * :doc:`install`
 
+.. automodule:: bgcArgo
+    :members:
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
