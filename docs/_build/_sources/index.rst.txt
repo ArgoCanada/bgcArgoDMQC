@@ -10,7 +10,7 @@ bgcArgo Documentation
 
 * :doc:`install`
 
-.. automodule:: bgcArgo
+.. automodule:: bgcArgo.core
     :members:
 
 .. toctree::
