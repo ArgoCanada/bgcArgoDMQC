@@ -7,7 +7,7 @@ tags:
   - observation
 authors:
   - name: Christopher Gordon
-    orcid: 
+    orcid: 0000-0002-1756-422X
     affiliation: 1
 affiliations:
   - name: Bedford Institute of Oceanography, Fisheries and Oceans Canada, Dartmouth, NS
