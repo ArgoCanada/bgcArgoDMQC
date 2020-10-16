@@ -13,9 +13,10 @@ from pywaffle import Waffle
 # summary comparison between bgcArgo and SAGE/DOXY audit
 fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200920.csv')
 df = pd.read_csv(fn)
-df['absdiffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
-df['diffGAIN'] = np.abs(df.pyGAIN - df.sageGAIN)
-
+df['diffGAIN'] = df.pyGAIN - df.sageGAIN
+df['absdiffGAIN'] = np.abs(df.diffGAIN)
+df['pctGAIN'] = 100*(df.pyGAIN - df.sageGAIN)/df.sageGAIN
+df['abspctGAIN'] = np.abs(df.pctGAIN)
 # make new dataframe with categories depending on absolute deviation
 counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.absdiffGAIN < 0.01].shape[0],
                             df[np.logical_and(df.absdiffGAIN >= 0.01, df.absdiffGAIN < 0.05)].shape[0],
@@ -27,8 +28,19 @@ counts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.absdiffGAIN < 0.01].sha
                                         '0.05 <= AD < 0.2', 'AD >= 0.2',
                                         'NaN valued', 'Both inf valued',])))
 
+pctCounts = pd.DataFrame(dict(N=np.array([df.shape[0],df[df.abspctGAIN < 1].shape[0],
+                            df[np.logical_and(df.abspctGAIN >= 1, df.abspctGAIN < 5)].shape[0],
+                            df[np.logical_and(df.abspctGAIN >= 5, df.abspctGAIN < 20)].shape[0],
+                            df[df.abspctGAIN >= 20].shape[0],
+                            np.sum(df.pyGAIN.isna()),
+                            np.sum(np.logical_and(np.isinf(df.pyGAIN), np.isinf(df.sageGAIN)))]),
+                        name=np.array(['Total', '%diff < 1', '1 <= %diff < 5',
+                                        '5 <= %diff < 20', '%diff >= 20',
+                                        'NaN valued', 'Both inf valued',])))
+
 # calculate percent
 counts[' '] = counts.N/counts.N.iloc[0]*100
+pctCounts[' '] = pctCounts.N/pctCounts.N.iloc[0]*100
 # don't need total now
 counts = counts[counts.name != 'Total']
 colors = ['green', 'light green', 'yellow', 'red', 'grey', 'black']
