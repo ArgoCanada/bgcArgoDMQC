@@ -32,11 +32,11 @@ Required dependencies
 - gsw
 - netCDF4
 - pandas
-- seaborn
 
 Optional dependencies
 ^^^^^^^^^^^^^^^^^^^^^
 
+- seaborn
 - cmocean
 
 The **bgcArgo** software is continuously tested with sucess under all OS (Linux, Mac and Windows) and with python versions 3.6, 3.7 and 3.8.
