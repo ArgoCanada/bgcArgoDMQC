@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Core Functions &#8212; bgcArgo 0.2.8 documentation</title>
+    <title>Documentation &#8212; bgcArgo 0.2.8 documentation</title>
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -30,7 +30,7 @@
           <a href="basic_use.html" title="Basic Funcationality"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Core Functions</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Documentation</a></li> 
       </ul>
     </div>  
 
@@ -39,48 +39,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-bgcArgo.core">
-<span id="core-functions"></span><h1>Core Functions<a class="headerlink" href="#module-bgcArgo.core" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="bgcArgo.core.aic">
-<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">aic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.aic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to calculate the Akiake Information Criteria (AIC) as a metric
-for assessing the appropriate number of breakpoints in the calculation of
-drifts in O2 gains.</p>
-<p>INPUT:</p>
-<p>OUTPUT:</p>
-<dl class="simple">
-<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
-<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
-</dd>
-</dl>
-<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
-written by Tanya Maurer &amp; Josh Plant</p>
-<p>LAST UPDATE: 20-04-2020</p>
-<p>CHANGE LOG:</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="bgcArgo.core.bic">
-<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">bic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.bic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to calculate the Bayesian Information Criteria (BIC) as a metric
-for assessing the appropriate number of breakpoints in the calculation of
-drifts in O2 gains.</p>
-<p>INPUT:</p>
-<p>OUTPUT:</p>
-<dl class="simple">
-<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
-<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
-</dd>
-</dl>
-<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
-written by Tanya Maurer &amp; Josh Plant</p>
-<p>LAST UPDATE: 20-04-2020</p>
-<p>CHANGE LOG:</p>
-</dd></dl>
-
+  <div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-bgcArgo.core">
+<span id="core-functions"></span><h2>Core Functions<a class="headerlink" href="#module-bgcArgo.core" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="bgcArgo.core.calc_fixed_doxy_adjusted_error">
 <code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">calc_fixed_doxy_adjusted_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">floatdict</span></em>, <em class="sig-param"><span class="n">fix_err</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">25</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.calc_fixed_doxy_adjusted_error" title="Permalink to this definition">¶</a></dt>
@@ -152,30 +114,6 @@ data of the partial pressures (from several cycles together). See
 Thierry Virginie, Bittig Henry, The Argo-Bgc Team (2018). Argo quality
 control manual for dissolved oxygen concentration.
 <a class="reference external" href="https://doi.org/10.13155/46542">https://doi.org/10.13155/46542</a></p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="bgcArgo.core.get_var_by">
-<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">get_var_by</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v1</span></em>, <em class="sig-param"><span class="n">v2</span></em>, <em class="sig-param"><span class="n">float_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.get_var_by" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to calculate the mean of one variable (v1) indexed by a second
-variable (v2) in a float_data dictionary (output of load_argo), though
-it would work with any python dict</p>
-<dl class="simple">
-<dt>INPUT:</dt><dd><p>v1: string input of a key in float_data
-v2: string input of a key in float_data
-float_data: python dict() object</p>
-</dd>
-<dt>OUTPUT:</dt><dd><p>out_array: 1D numpy array with mean values</p>
-</dd>
-<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
-<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
-</dd>
-</dl>
-<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
-written by Tanya Maurer &amp; Josh Plant</p>
-<p>LAST UPDATE: 20-04-2020</p>
-<p>CHANGE LOG:</p>
 </dd></dl>
 
 <dl class="py function">
@@ -419,7 +357,7 @@ woa_interp: 2D array of requested WOA parameter (depth x time)</p>
 
 </div>
 <div class="section" id="module-bgcArgo.io">
-<span id="file-i-o-functions"></span><h1>File I/O Functions<a class="headerlink" href="#module-bgcArgo.io" title="Permalink to this headline">¶</a></h1>
+<span id="file-i-o-functions"></span><h2>File I/O Functions<a class="headerlink" href="#module-bgcArgo.io" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="bgcArgo.io.append_variable_to_file">
 <code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">append_variable_to_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.append_variable_to_file" title="Permalink to this definition">¶</a></dt>
@@ -627,7 +565,7 @@ index files</p>
 
 </div>
 <div class="section" id="module-bgcArgo.interp">
-<span id="interpolation-functions"></span><h1>Interpolation Functions<a class="headerlink" href="#module-bgcArgo.interp" title="Permalink to this headline">¶</a></h1>
+<span id="interpolation-functions"></span><h2>Interpolation Functions<a class="headerlink" href="#module-bgcArgo.interp" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="bgcArgo.interp.interp_ncep_data">
 <code class="sig-prename descclassname">bgcArgo.interp.</code><code class="sig-name descname">interp_ncep_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">ncep_track</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.interp.interp_ncep_data" title="Permalink to this definition">¶</a></dt>
@@ -676,7 +614,7 @@ written by Tanya Maurer &amp; Josh Plant</p>
 
 </div>
 <div class="section" id="module-bgcArgo.unit">
-<span id="unit-conversion"></span><h1>Unit Conversion<a class="headerlink" href="#module-bgcArgo.unit" title="Permalink to this headline">¶</a></h1>
+<span id="unit-conversion"></span><h2>Unit Conversion<a class="headerlink" href="#module-bgcArgo.unit" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="bgcArgo.unit.doxy_to_pO2">
 <code class="sig-prename descclassname">bgcArgo.unit.</code><code class="sig-name descname">doxy_to_pO2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">O2conc</span></em>, <em class="sig-param"><span class="n">S</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">P</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.unit.doxy_to_pO2" title="Permalink to this definition">¶</a></dt>
@@ -779,10 +717,50 @@ Bedford Institute of Oceanography, Fisheries and Oceans Canada
 
 </div>
 <div class="section" id="module-bgcArgo.fplt">
-<span id="plotting"></span><h1>Plotting<a class="headerlink" href="#module-bgcArgo.fplt" title="Permalink to this headline">¶</a></h1>
+<span id="plotting"></span><h2>Plotting<a class="headerlink" href="#module-bgcArgo.fplt" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-bgcArgo.util">
-<span id="other-functions"></span><h1>Other Functions<a class="headerlink" href="#module-bgcArgo.util" title="Permalink to this headline">¶</a></h1>
+<span id="other-functions"></span><h2>Other Functions<a class="headerlink" href="#module-bgcArgo.util" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="bgcArgo.util.aic">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">aic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.aic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the Akiake Information Criteria (AIC) as a metric
+for assessing the appropriate number of breakpoints in the calculation of
+drifts in O2 gains.</p>
+<p>INPUT:</p>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.util.bic">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">bic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.bic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the Bayesian Information Criteria (BIC) as a metric
+for assessing the appropriate number of breakpoints in the calculation of
+drifts in O2 gains.</p>
+<p>INPUT:</p>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
 <dl class="py function">
 <dt id="bgcArgo.util.decode_woa_var">
 <code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">decode_woa_var</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.decode_woa_var" title="Permalink to this definition">¶</a></dt>
@@ -801,6 +779,31 @@ Bedford Institute of Oceanography, Fisheries and Oceans Canada
 <dd><p>function to pull appropriate WOA longitude values, handles crossing 180</p>
 </dd></dl>
 
+<dl class="py function">
+<dt id="bgcArgo.util.get_var_by">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">get_var_by</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v1</span></em>, <em class="sig-param"><span class="n">v2</span></em>, <em class="sig-param"><span class="n">float_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.get_var_by" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the mean of one variable (v1) indexed by a second
+variable (v2) in a float_data dictionary (output of load_argo), though
+it would work with any python dict</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>v1: string input of a key in float_data
+v2: string input of a key in float_data
+float_data: python dict() object</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>out_array: 1D numpy array with mean values</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -812,12 +815,15 @@ Bedford Institute of Oceanography, Fisheries and Oceans Canada
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Core Functions</a></li>
+<li><a class="reference internal" href="#">Documentation</a><ul>
+<li><a class="reference internal" href="#module-bgcArgo.core">Core Functions</a></li>
 <li><a class="reference internal" href="#module-bgcArgo.io">File I/O Functions</a></li>
 <li><a class="reference internal" href="#module-bgcArgo.interp">Interpolation Functions</a></li>
 <li><a class="reference internal" href="#module-bgcArgo.unit">Unit Conversion</a></li>
 <li><a class="reference internal" href="#module-bgcArgo.fplt">Plotting</a></li>
 <li><a class="reference internal" href="#module-bgcArgo.util">Other Functions</a></li>
+</ul>
+</li>
 </ul>
 
   <h4>Previous topic</h4>
@@ -857,7 +863,7 @@ Bedford Institute of Oceanography, Fisheries and Oceans Canada
           <a href="basic_use.html" title="Basic Funcationality"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Core Functions</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Documentation</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

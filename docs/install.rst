@@ -1,6 +1,27 @@
 Installation
 ============
 
+Instructions
+^^^^^^^^^^^^
+
+Install the last release and dependencies with conda (recommended):
+
+.. code-block:: text
+
+    conda install -c conda-forge bgcArgo
+
+or pip:
+
+.. code-block:: text
+
+    pip install bgcArgo
+
+you can also work with the latest version:
+
+.. code-block:: text
+
+    pip install git+http://github.com/ArgoCanada/bgcArgo.git@master
+
 Required dependencies
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -19,24 +40,3 @@ Optional dependencies
 - cmocean
 
 The **bgcArgo** software is continuously tested with sucess under all OS (Linux, Mac and Windows) and with python versions 3.6, 3.7 and 3.8.
-
-Instructions
-^^^^^^^^^^^^
-
-Install the last release with conda:
-
-.. code-block:: text
-
-    conda install -c conda-forge bgcArgo
-
-or pip:
-
-.. code-block:: text
-
-    pip install bgcArgo
-
-you can also work with the latest version:
-
-.. code-block:: text
-
-    pip install git+http://github.com/ArgoCanada/bgcArgo.git@master

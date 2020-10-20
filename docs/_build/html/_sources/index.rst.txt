@@ -6,7 +6,8 @@
 bgcArgo
 =======
 
-**Getting Started**
+Getting Started
+^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
@@ -14,14 +15,16 @@ bgcArgo
    install
    basic_use
 
-**Documentation**
+Documentation
+^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
 
    docs
 
-**Links**
+External Links
+^^^^^^^^^^^^^^
 
 - `Github <https://github.com/ArgoCanada/bgcArgo>`_
 - `Anaconda <https://anaconda.org/conda-forge/bgcargo>`_
