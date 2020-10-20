@@ -320,7 +320,7 @@ class sprof:
             if not hasattr(self, 'NCEP'):
                 self.get_ncep()
 
-            pH2O = unit.pH2O(get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
+            pH2O = unit.pH2O(util.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
 
             common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
 
@@ -1427,122 +1427,6 @@ def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10, zlim=25):
     error = unit.pO2_to_doxy(np.array(S.shape[0]*[10]), S, T, P=P)
 
     return error
-
-def aic(data, resid):
-    '''
-    Function to calculate the Akiake Information Criteria (AIC) as a metric
-    for assessing the appropriate number of breakpoints in the calculation of
-    drifts in O2 gains.
-    
-    INPUT:
-    
-    OUTPUT:
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    LAST UPDATE: 20-04-2020
-    
-    CHANGE LOG:
-    '''
-
-    # calculate AIC
-    SSE = np.sum(resid**2) # sum square errors
-    n = resid.shape[0]
-    m = data.shape[0] - 1 # do not include first cycle
-    K = 2*m + 2
-
-    # valid data parameters? see Jones & Day (1995)
-    is_valid = n/4 - 1
-    if m > is_valid:
-        aic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate AIC, setting AIC = NaN')
-    else:
-        # formula ref. Jones & Day (1995), Owens & Wong (2009)
-        aic_value = np.log(SSE/n) + (n+K)/(n-K-2)
-
-    return aic_value
-
-
-def bic(data, resid):
-    '''
-    Function to calculate the Bayesian Information Criteria (BIC) as a metric
-    for assessing the appropriate number of breakpoints in the calculation of
-    drifts in O2 gains.
-    
-    INPUT:
-    
-    OUTPUT:
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    LAST UPDATE: 20-04-2020
-    
-    CHANGE LOG:
-    '''
-
-    # calculate BIC
-    errorlim = 0 # cap on residuals, useful for noisy pH and nitrate data
-    SSE = np.sum(resid**2) # sum square errors
-    n = resid.shape[0]
-    m = data.shape[0] - 1 # do not include first cycle
-    K = 2*m + 2
-
-    # valid data parameters? see Jones & Day (1995)
-    is_valid = n/4 - 1
-    if m > is_valid:
-        bic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate BIC, setting BIC = NaN')
-    else:
-        bic_value = np.log(1/(n*SSE) + errorlim**2) + K*np.log(n)/n
-
-    return bic_value
-
-def get_var_by(v1, v2, float_data):
-    '''
-    Function to calculate the mean of one variable (v1) indexed by a second
-    variable (v2) in a float_data dictionary (output of load_argo), though
-    it would work with any python dict
-    
-    INPUT:
-              v1: string input of a key in float_data
-              v2: string input of a key in float_data
-              float_data: python dict() object
-    
-    OUTPUT:
-              out_array: 1D numpy array with mean values
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    LAST UPDATE: 20-04-2020
-    
-    CHANGE LOG:
-    '''
-
-    
-    index = np.unique(float_data[v2])
-    out_array = np.nan*np.ones((len(index)))
-    for i,v in enumerate(index):
-        out_array[i] = np.nanmean(float_data[v1][float_data[v2] == v])
-    
-    return out_array
 
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)
