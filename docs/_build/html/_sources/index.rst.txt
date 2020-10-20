@@ -6,24 +6,32 @@
 bgcArgo
 =======
 
+**Getting Started**
+
 .. toctree::
+   :hidden:
    :maxdepth: 2
-   :caption: **Getting Started**:
+   :caption: Getting Started
 
    install
    basic_use
 
+**Documentation**
+
 .. toctree::
+   :hidden:
    :maxdepth: 2
-   :caption: **Documentation**:
+   :caption: Documentation
 
    docs
 
 **Links**
 
-`github <https://github.com/ArgoCanada/bgcArgo>`
-`anaconda <https://anaconda.org/conda-forge/bgcargo>`
-`PyPI <https://pypi.org/project/bgcArgo/>`
+`github <https://github.com/ArgoCanada/bgcArgo>`_
+
+`anaconda <https://anaconda.org/conda-forge/bgcargo>`_
+
+`PyPI <https://pypi.org/project/bgcArgo/>`_
 
 Indices and tables
 ==================
