@@ -1,0 +1,868 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Core Functions &#8212; bgcArgo 0.2.8 documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Basic Funcationality" href="basic_use.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="basic_use.html" title="Basic Funcationality"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Core Functions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-bgcArgo.core">
+<span id="core-functions"></span><h1>Core Functions<a class="headerlink" href="#module-bgcArgo.core" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.core.aic">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">aic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.aic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the Akiake Information Criteria (AIC) as a metric
+for assessing the appropriate number of breakpoints in the calculation of
+drifts in O2 gains.</p>
+<p>INPUT:</p>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.bic">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">bic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">resid</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.bic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the Bayesian Information Criteria (BIC) as a metric
+for assessing the appropriate number of breakpoints in the calculation of
+drifts in O2 gains.</p>
+<p>INPUT:</p>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.calc_fixed_doxy_adjusted_error">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">calc_fixed_doxy_adjusted_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">floatdict</span></em>, <em class="sig-param"><span class="n">fix_err</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">25</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.calc_fixed_doxy_adjusted_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate DOXY_ADJUSTED_ERROR for fixed partial pressure of 10 mbar
+PPOX_DOXY.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.calc_gain">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">calc_gain</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">ref</span></em>, <em class="sig-param"><span class="n">inair</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">25.0</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.calc_gain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the gain for each profile by comparing float oxygen data to a
+reference data set, either NCEP for in-air or WOA surface data if in-air
+comparison is not available.</p>
+<dl>
+<dt>INPUT:</dt><dd><p>data: float data dict object, output from load_argo_data()
+ref: reference data set, either NCEP pO2 or WOA O2sat
+inair: boolean flag to indicate if comparison to NCEP in-air</p>
+<blockquote>
+<div><p>data or WOA surface data should be done, default to
+in-air, but function also performs check</p>
+</div></blockquote>
+<dl class="simple">
+<dt>zlim: lower limit to define as ‘surface’ and take mean within,</dt><dd><p>default value 25 dbar, for use only when inair is False</p>
+</dd>
+</dl>
+</dd>
+<dt>OUTPUT:</dt><dd><p>g: vector of gains
+surf_data: array of float surface stats (cycle, N, mean, std)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 23-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.calc_gain_with_carryover">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">calc_gain_with_carryover</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pO2_opt_air</span></em>, <em class="sig-param"><span class="n">pO2_ref_air</span></em>, <em class="sig-param"><span class="n">pO2_opt_water</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.calc_gain_with_carryover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive the O2 slope including a correction for ‘carry-over’ effect, to
+account for the observation that optode in-air data do not represent pure
+air but show a bias by in-water O2 saturation excess/deficiency (Bittig
+and Kortzinger 2015). Johnson et al. (2015) confirm the ‘carry-over’ effect
+for optodes close to the surface (~20cm).</p>
+<p>Carry-over effect is recommended to be account for Argo floats using in-air
+measurements, if enough surfacings are available (N &gt; 20). It both removes
+an identified bias (which is most relevant for cases with strong
+super-/undersaturation and/or carry-overs) and reduces uncertainty on the
+O2 slope factor. The equation for linear regression is as follows (see,
+e.g., Bittig et al., 2018):</p>
+<dl class="simple">
+<dt>m*pO2^{optode}_{surf in-air} - pO2^{reference}_{in-air}</dt><dd><p>= c*(m*pO2^{optode}_{surf in-water} - pO2^{reference}_{in-air})</p>
+</dd>
+</dl>
+<p>where:
+- m is the O2 slope factor: m = pO2_adjusted / pO2
+- pO2^{optode}_{surf in-air} is the oxygen partial pressure observed by
+the optode in-air (i.e., close to the water surface), e.g., MC = X+11
+- pO2^{reference}_{in-air} is the reference oxygen partial pressure in-air,
+e.g., from re-analysis data
+- pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by
+the optode at the water surface (in-water), e.g., MC = X+10 or profile
+MC = X–10
+- c is the slope of the ‘carry-over’ effect, i.e., the water-fraction of
+the observed optode in-air data.</p>
+<p>Above equation can be used for linear regression to obtain m and c from
+data of the partial pressures (from several cycles together). See
+Thierry Virginie, Bittig Henry, The Argo-Bgc Team (2018). Argo quality
+control manual for dissolved oxygen concentration.
+<a class="reference external" href="https://doi.org/10.13155/46542">https://doi.org/10.13155/46542</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.get_var_by">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">get_var_by</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v1</span></em>, <em class="sig-param"><span class="n">v2</span></em>, <em class="sig-param"><span class="n">float_data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.get_var_by" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate the mean of one variable (v1) indexed by a second
+variable (v2) in a float_data dictionary (output of load_argo), though
+it would work with any python dict</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>v1: string input of a key in float_data
+v2: string input of a key in float_data
+float_data: python dict() object</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>out_array: 1D numpy array with mean values</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 20-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.load_argo">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">load_argo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">local_path</span></em>, <em class="sig-param"><span class="n">wmo</span></em>, <em class="sig-param"><span class="n">grid</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.load_argo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load in all data from a single float, using BRtraj, meta,
+and Sprof files</p>
+<dl>
+<dt>INPUT:</dt><dd><p>local_path: local path of float data
+wmo: float ID number</p>
+</dd>
+<dt>OUTPUT:</dt><dd><dl>
+<dt>floatData: python dict() object with the following fields</dt><dd><p>floatName: WMO number, from input
+floatType: Kind of float (APEX, ARVOR, etc.)
+N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
+N_CYCLES: Number of profiles, Argo dimension N_PROF
+CYCLES: Array from 1 to N_CYCLES
+LATITUDE: Latitude (-90, 90) for each profile
+LONGITUDE: Longitude (-180, 180) for each profile
+SDN: Serial Date Number for each profile
+PRES: Pressure (dbar), compressed to vector (1D array)
+TEMP: Temperature (deg C)
+PSAL: Salinity (psu)</p>
+</dd>
+<dt>if the variables are available, it will also contain:</dt><dd><p>DOXY: Dissolved Oxygen (micromole/kg)
+O2sat: Oxygen percent saturation (%)
+PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
+TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
+inair: Boolean to indicate if in-air data exists</p>
+</dd>
+<dt>for all the variables listen above, there will also exist</dt><dd><p>&lt;PARAM&gt;_QC fields for quality flags, and &lt;PARAM&gt;_ADJUSTED
+fields if they exist</p>
+<p><strong>* CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE *</strong>
+<strong>*     ANALOGOUS &lt;VAR&gt;_GRID FIELDS THAT MATCH THE     *</strong>
+<strong>*   DIMENSION OF PRES, TEMP, PSAL, DOXY, AND O2SAT   *</strong></p>
+</dd>
+</dl>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+<p>22-04-2020: updated so that pressure mask determines all variables - need
+to add all quality flags to output</p>
+<p>29-04-2020: switched file/path handling from os module to pathlib</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.load_profile">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">load_profile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.load_profile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load a singe Argo profile file into a dict() object
+NOTE: Deprecated, use load_profiles instead, which can handle multiple
+profile files at once, but produces the same result for just one.</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+<p>22-04-2020: updated so that pressure mask determines all variables - need
+to add all quality flags to output</p>
+<p>29-04-2020: switched file/path handling from os module to pathlib</p>
+<p>24-06-2020: deprecated, re-wrote as load_profiles()</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.ncep_to_float_track">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">ncep_to_float_track</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.ncep_to_float_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load NCEP reanalysis data for comparison with autonomous
+floats. Data to be interpolated along the provided track (t, lat, lon).
+Combines function load_ncep_data() and interp_ncep_data() for convenience,
+see documentation for those funcions for more detail.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>varname: either ‘pres’ (pressure) or ‘rhum’ (relative humidity)
+track: array with the columns (SDN, lat, lon)</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>z: WOA depth array
+woa_interp: 2D array of requested WOA parameter (depth x time)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.organize_files">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">organize_files</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.organize_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort files according to time they were recorded.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="bgcArgo.core.sprof">
+<em class="property">class </em><code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">sprof</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wmo</span></em>, <em class="sig-param"><span class="n">keep_fillvalue</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that loads Argo synthetic profile data for a given float ID number
+(wmo). Uses locally downloaded files, which should be setup using the <cite>set_dirs</cite>
+method:</p>
+<dl class="simple">
+<dt>sprof.set_dirs(</dt><dd><p>argo_path=’/data/path/Argo’,
+ncep_path=’/data/path/NCEP’,
+woa_path=’/data/path/WOA18’</p>
+</dd>
+</dl>
+<p>)</p>
+<p>Then, load the individual variables into fields in the class, for
+example:</p>
+<p>syn = sprof(wmo)
+print(syn.DOXY)</p>
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.assign">
+<code class="sig-name descname">assign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">floatdict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.assign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign variables from float dictionary (output of load_argo(…))
+to synthetic profile sprof() object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.calc_gains">
+<code class="sig-name descname">calc_gains</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ref</span><span class="o">=</span><span class="default_value">'NCEP'</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">25.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.calc_gains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate gain values using NCEP or WOA reference data. Uses function
+calc_gain().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.check_range">
+<code class="sig-name descname">check_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.check_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a range check for variables that have a RTQC range available.
+Replaces values outside the range with NaN values. Takes string input
+to do the range check on that variable. Available variables are
+PRES, TEMP, PSAL, and DOXY. Can also take input ‘all’ to do the range
+check on all four variables, or a list of strings to do each of those
+variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.clean">
+<code class="sig-name descname">clean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bad_flags</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove bad data from all variables, using &lt;PARAM&gt;_QC to determine bad data.
+Optional input <cite>bad_flags</cite> can be used to specify which flag values are bad,
+with a default bad flags set to be 4, 6, 7.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.describe">
+<code class="sig-name descname">describe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.describe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Describe the dataframe of data stored in the sprof object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.get_ncep">
+<code class="sig-name descname">get_ncep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.get_ncep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads NCEP data along the float track</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.get_track">
+<code class="sig-name descname">get_track</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.get_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a track array with columns:</p>
+<p>[serial datenum, latitude, longitude]</p>
+<p>the track array is used for the interpolation of reference data along
+the float track.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.get_woa">
+<code class="sig-name descname">get_woa</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.get_woa" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads WOA data along the float track</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all variables back to original loaded variables. Undoes the effect of
+clean(), rm_fillvalue(), check_range().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.rm_fillvalue">
+<code class="sig-name descname">rm_fillvalue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.rm_fillvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove FillValue from all variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.to_dataframe">
+<code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a pandas dataframe containing data from the synthetic oxygen
+profile file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="bgcArgo.core.sprof.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a deepcopy of __floatdict__, which is the currect active
+dictionary (i.e. subject to the effects of clean(), reset(), etc.)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.core.woa_to_float_track">
+<code class="sig-prename descclassname">bgcArgo.core.</code><code class="sig-name descname">woa_to_float_track</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">0, 1000</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.woa_to_float_track" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load WOA18 climatological data for comparison with autonomous
+floats. Data to be interpolated along the provided track (t, lat, lon).
+Combines function load_woa_data() and interp_woa_data() for convenience,
+see documentation for those funcions for more detail.</p>
+<dl>
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+param: requested variable, valid inputs are</p>
+<blockquote>
+<div><p>T: temperature
+S: salinity
+O2: dissolved oxygen
+O2sat: oxygen percent saturation
+NO3: nitrate
+Si: silicate
+PO4: phosphate</p>
+</div></blockquote>
+<p>zlim: depth bounds (upper, lower), default to (0, 1000)
+local_path: local directory where WOA files are stored, assumes</p>
+<blockquote>
+<div><p>current directory if no input</p>
+</div></blockquote>
+</dd>
+<dt>OUTPUT:</dt><dd><p>z: WOA depth array
+woa_interp: 2D array of requested WOA parameter (depth x time)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 23-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bgcArgo.io">
+<span id="file-i-o-functions"></span><h1>File I/O Functions<a class="headerlink" href="#module-bgcArgo.io" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.io.append_variable_to_file">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">append_variable_to_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fn</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.append_variable_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an arbitrary number of variables (<a href="#id1"><span class="problematic" id="id2">*</span></a>args) to the existing netcdf file
+input fn. The input structure for each variable should be a dictionary with
+fields that can be passed directly to the netCDF file. If the variable
+name already exists, it will overwrite it with the new information.</p>
+<p>Inputs:</p>
+<p>fn: string pointing to netcdf (.nc) file to be appended</p>
+<p><a href="#id3"><span class="problematic" id="id4">*</span></a>args: arbitrary number of python dicts with all required fields to create
+or overwrite a new netcdf variable. Example:</p>
+<dl class="simple">
+<dt>new_var = dict(</dt><dd><p>name=’MY_NEW_VARIABLE’,     # variable name, can be new or existing
+dimensions=(‘N’, ‘M’),      # note these dims must already exist in the nc file
+long_name=’The new variable’,
+standard_name=’my_new_var’,
+units=’degree_celsius’,
+valid_min=0,
+valid_max=1e9,
+resolution=0.001,
+comment=’Added by John Doe on Sept 20, 2019’</p>
+</dd>
+</dl>
+<p>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.check_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">check_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.check_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to check age of Argo metadata and profile global index files,
+warn if they have not been updated in more than 1 week. Runs on import.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_argo">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_argo</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">url</span><span class="o">=</span><span class="default_value">'ftp.ifremer.fr'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mission</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'RD'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_argo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download all data from a single float, or individual
+profiles</p>
+<dl>
+<dt>INPUT:</dt><dd><p>Inputs may vary depending on desired performance. Multiple
+arguments may be provided to download all files from a certain
+float or argo defined geographical area. A single path to a
+file may be provided to download that file. A list of files
+may be provided as well.</p>
+<dl class="simple">
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_ncep">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_ncep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">years</span><span class="o">=</span><span class="default_value">[2010, 2020]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_ncep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download NCEP reanalysis gaussian gridded surface air
+pressure data</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><dl class="simple">
+<dt>varname: ‘pres’ (pressure) or ‘rhum’ (relative humidity)</dt><dd><p>or ‘land’ (to get land mask)</p>
+</dd>
+<dt>local_path: path to save files to, defaults</dt><dd><p>to current directory</p>
+</dd>
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+<dt>OUTPUT:</dt><dd><p>ftp: the ftplib server object</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.get_woa18">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">get_woa18</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">'netcdf'</span></em>, <em class="sig-param"><span class="n">overwrite</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.get_woa18" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to download WOA data for a given variable</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><dl class="simple">
+<dt>varname: woa18 variable to download data for - one of:</dt><dd><p>T: temperature
+S: salinity
+O2: dissolved oxygen
+O2sat: oxygen percent saturation
+NO3: nitrate
+Si: silicate
+PO4: phosphate</p>
+</dd>
+<dt>local_path: path to save files to (inside variable folder, ex.</dt><dd><p>if local_path = ‘../data/woa’, and varname = ‘T’, files
+will be saved in ../data/woa/temperature/<a href="#id5"><span class="problematic" id="id6">*</span></a>.nc. Defaults
+to current directory</p>
+</dd>
+<dt>ftype: file format to download, defaults to netcdf (.nc):</dt><dd><p>ascii: .dat
+csv: .csv
+netcdf: .nc</p>
+</dd>
+<dt>overwrite: boolean flag, if False, does not re-download</dt><dd><p>existing files, if true, will download no matter what,
+defaults to False</p>
+</dd>
+</dl>
+</dd>
+<dt>OUTPUT:</dt><dd><p>ftp: the ftplib server object</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.load_ncep_data">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">load_ncep_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">varname</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.load_ncep_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load NCEP reanalysis data for comparison with autonomous
+float in-air data. Data to be interpolated along the provided
+track (t, lat, lon).</p>
+<dl>
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+local_path: local directory where NCEP files are stored, assumes</p>
+<blockquote>
+<div><p>current directory if no input</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<dl class="simple">
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 04-05-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.load_woa_data">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">load_woa_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">zlim</span><span class="o">=</span><span class="default_value">0, 1000</span></em>, <em class="sig-param"><span class="n">local_path</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.load_woa_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to load WOA18 climatological data for comparison with autonomous
+floats. Data to be interpolated along the provided track (t, lat, lon).</p>
+<dl>
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+param: requested variable, valid inputs are</p>
+<blockquote>
+<div><p>T: temperature
+S: salinity
+O2: dissolved oxygen
+O2sat: oxygen percent saturation
+NO3: nitrate
+Si: silicate
+PO4: phosphate</p>
+</div></blockquote>
+<p>zlim: depth bounds (upper, lower), default to (0, 1000)
+local_path: local directory where WOA files are stored, assumes</p>
+<blockquote>
+<div><p>current directory if no input</p>
+</div></blockquote>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>xtrack: same as track input, but adjusted lon if the track</dt><dd><p>crosses the 180/-180 meridian</p>
+</dd>
+</dl>
+<p>woa_track: list with z, lat, and lon arrays of WOA data
+data: gridded array of the input variable (month, z, lat, lon)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 29-04-2020</p>
+<p>CHANGE LOG:</p>
+<p>23-04-2020: changed zlim to optional input argument
+29-04-2020: switched file/path handling from os module to pathlib</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.read_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">read_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mission</span><span class="o">=</span><span class="default_value">'B'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.read_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to read and extract information from Argo global index,
+then save it to a dataframe for faster access</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.io.update_index">
+<code class="sig-prename descclassname">bgcArgo.io.</code><code class="sig-name descname">update_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ftype</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.io.update_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to access FTP server to download Argo metadata and profile global
+index files</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bgcArgo.interp">
+<span id="interpolation-functions"></span><h1>Interpolation Functions<a class="headerlink" href="#module-bgcArgo.interp" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.interp.interp_ncep_data">
+<code class="sig-prename descclassname">bgcArgo.interp.</code><code class="sig-name descname">interp_ncep_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">ncep_track</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.interp.interp_ncep_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to interpolate NCEP reanalysios data along the provided
+track (t, lat, lon).</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+ncep_track: tuple with NCEP time, lat, lon arrays
+data: output array from load_ncep_data()</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>ncep_interp: 2D array of requested WOA parameter (depth x time)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 23-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.interp.interp_woa_data">
+<code class="sig-prename descclassname">bgcArgo.interp.</code><code class="sig-name descname">interp_woa_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">woa_track</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.interp.interp_woa_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to interpolate WOA18 climatological data along the provided
+track (t, lat, lon).</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>track: array with the columns (SDN, lat, lon)
+woa_track: tuple with WOA time, lat, lon arrays
+data: output array from load_woa_data()</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>woa_interp: 2D array of requested WOA parameter (depth x time)</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Tanya Maurer &amp; Josh Plant</p>
+<p>LAST UPDATE: 23-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bgcArgo.unit">
+<span id="unit-conversion"></span><h1>Unit Conversion<a class="headerlink" href="#module-bgcArgo.unit" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.unit.doxy_to_pO2">
+<code class="sig-prename descclassname">bgcArgo.unit.</code><code class="sig-name descname">doxy_to_pO2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">O2conc</span></em>, <em class="sig-param"><span class="n">S</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">P</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.unit.doxy_to_pO2" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert molar oxygen concentration to oxygen partial pressure</p>
+<dl class="simple">
+<dt>inputs:</dt><dd><p>O2conc - oxygen concentration in umol L-1
+T      - temperature in deg C
+S      - salinity (PSS-78)
+P      - hydrostatic pressure in dbar (default: 0 dbar)</p>
+</dd>
+<dt>output:</dt><dd><p>pO2    - oxygen partial pressure in mbar</p>
+</dd>
+</dl>
+<p>according to recommendations by SCOR WG 142 “Quality Control Procedures
+for Oxygen and Other Biogeochemical Sensors on Floats and Gliders”</p>
+<p>Written in matlab by:
+Henry Bittig
+Laboratoire d’Oceanographie de Villefranche-sur-Mer, France
+<a class="reference external" href="mailto:bittig&#37;&#52;&#48;obs-vlfr&#46;fr">bittig<span>&#64;</span>obs-vlfr<span>&#46;</span>fr</a>
+28.10.2015
+19.04.2018, v1.1, fixed typo in B2 exponent</p>
+<p>Translated to python by:
+Christopher Gordon
+Bedford Institute of Oceanography, Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a>
+02.10.2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.unit.oxy_sol">
+<code class="sig-prename descclassname">bgcArgo.unit.</code><code class="sig-name descname">oxy_sol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">S</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'micromole/kg'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.unit.oxy_sol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate oxygen saturation concentration in seawater as a function of
+S &amp; T, in equilibrium with standard coponsition moist air at 1atm total
+pressure. From Garcia &amp; Gordon (1992) eq. 8 (p. 1310) using coefficients
+of Benson &amp; Krause in table 1, as used in Sarmiento &amp; Gruber’s “Ocean
+Biogeochemical Dynamics” ch. 3, p. 81, table 3.2.4.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>S: salinity, psu
+T: temperature, deg C
+unit: micromole/kg or millimole/m3, default if micromole/kg</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>O2sol: oxygen solubility, unit same as input unit</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+code, available via <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING</a>,
+written by Josh Plant</p>
+<p>LAST UPDATE: 21-04-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.unit.pH2O">
+<code class="sig-prename descclassname">bgcArgo.unit.</code><code class="sig-name descname">pH2O</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">S</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">'Pa'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.unit.pH2O" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate vapor pressure of water</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>T: temperature, deg C
+S: salinity, only necessary for mbar unit</p>
+</dd>
+<dt>OUTPUT:</dt><dd><p>vapor_pressure: vapor pressure of water, Pa or mbar</p>
+</dd>
+<dt>AUTHOR:   Christopher Gordon</dt><dd><p>Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a></p>
+</dd>
+</dl>
+<p>LAST UPDATE: 06-05-2020</p>
+<p>CHANGE LOG:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.unit.pO2_to_doxy">
+<code class="sig-prename descclassname">bgcArgo.unit.</code><code class="sig-name descname">pO2_to_doxy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pO2</span></em>, <em class="sig-param"><span class="n">S</span></em>, <em class="sig-param"><span class="n">T</span></em>, <em class="sig-param"><span class="n">P</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.unit.pO2_to_doxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert oxygen partial pressure to molar oxygen concentration</p>
+<dl class="simple">
+<dt>inputs:</dt><dd><p>pO2    - oxygen partial pressure in mbar
+T      - temperature in deg C
+S      - salinity (PSS-78)
+P      - hydrostatic pressure in dbar (default: 0 dbar)</p>
+</dd>
+<dt>output:</dt><dd><p>DOXY   - oxygen concentration in umol L-1</p>
+</dd>
+</dl>
+<p>according to recommendations by SCOR WG 142 “Quality Control Procedures
+for Oxygen and Other Biogeochemical Sensors on Floats and Gliders”</p>
+<p>Written in matlab by:
+Henry Bittig
+Laboratoire d’Oceanographie de Villefranche-sur-Mer, France
+<a class="reference external" href="mailto:bittig&#37;&#52;&#48;obs-vlfr&#46;fr">bittig<span>&#64;</span>obs-vlfr<span>&#46;</span>fr</a>
+28.10.2015
+19.04.2018, v1.1, fixed typo in B2 exponent</p>
+<p>Translated to python by:
+Christopher Gordon
+Bedford Institute of Oceanography, Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a>
+02.10.2020</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-bgcArgo.fplt">
+<span id="plotting"></span><h1>Plotting<a class="headerlink" href="#module-bgcArgo.fplt" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="module-bgcArgo.util">
+<span id="other-functions"></span><h1>Other Functions<a class="headerlink" href="#module-bgcArgo.util" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="bgcArgo.util.decode_woa_var">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">decode_woa_var</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">varname</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.decode_woa_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>take WOA variable name input and output relevant info</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.util.get_lat_index">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">get_lat_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lat</span></em>, <em class="sig-param"><span class="n">lat_bounds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.get_lat_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to pull appropriate WOA latitude values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="bgcArgo.util.get_lon_index">
+<code class="sig-prename descclassname">bgcArgo.util.</code><code class="sig-name descname">get_lon_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">lon_bounds</span></em>, <em class="sig-param"><span class="n">cross180</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.util.get_lon_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to pull appropriate WOA longitude values, handles crossing 180</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Core Functions</a></li>
+<li><a class="reference internal" href="#module-bgcArgo.io">File I/O Functions</a></li>
+<li><a class="reference internal" href="#module-bgcArgo.interp">Interpolation Functions</a></li>
+<li><a class="reference internal" href="#module-bgcArgo.unit">Unit Conversion</a></li>
+<li><a class="reference internal" href="#module-bgcArgo.fplt">Plotting</a></li>
+<li><a class="reference internal" href="#module-bgcArgo.util">Other Functions</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="basic_use.html"
+                        title="previous chapter">Basic Funcationality</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/docs.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="basic_use.html" title="Basic Funcationality"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">bgcArgo 0.2.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Core Functions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Christopher Gordon.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+  </body>
+</html>
