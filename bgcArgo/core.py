@@ -1349,11 +1349,6 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
     https://doi.org/10.13155/46542
     '''
 
-    # inputs
-    # pO2_opt_air
-    # pO2_ref_air
-    # pO2_opt_water
-
     x1 = pO2_opt_air - pO2_ref_air
     y1 = pO2_opt_water - pO2_ref_air
 
