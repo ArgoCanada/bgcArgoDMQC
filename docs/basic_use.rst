@@ -1,11 +1,15 @@
 Basic Funcationality
 ====================
 
-`bgcArgo` is a python library of functions for quality controlling dissolved oxygen data. Heavily based on the <SOCCOM BGC Argo QC https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING>_ methods program in matlab, it uses either <NCEP https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html>_ or <World Ocean Atlas https://www.nodc.noaa.gov/OC5/woa18/>_ data to calculate oxygen gains (<Johnson et al. 2015 https://doi.org/10.1175/JTECH-D-15-0101.1>_).
+`bgcArgo` is a python library of functions for quality controlling dissolved oxygen data. Heavily based on the <SOCCOM BGC Argo QC https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING>_ methods program in matlab, it uses either NCEP_ or `World Ocean Atlas`_ data to calculate oxygen gains (`Johnson et al. 2015`_).
+
+.. _NCEP: https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html
+.. _`World Ocean Atlas`: https://www.nodc.noaa.gov/OC5/woa18/
+.. _`Johnson et al. 2015`: https://doi.org/10.1175/JTECH-D-15-0101.1
 
 Although functions in the `bgcArgo` module may be of use in other situations, the majority of the functionality is lies within two classes, `profiles` for typical profile files and `sprof` for synthetic profiles.
 
-.. code:: python
+.. code-block:: python
     import bgcArgo as bgc
 
     # setup for your system - these directories need to already exist!
