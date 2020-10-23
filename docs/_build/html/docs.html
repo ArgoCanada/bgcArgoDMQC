@@ -221,14 +221,14 @@ woa_interp: 2D array of requested WOA parameter (depth x time)</p>
 <p>Uses locally downloaded files, which should be setup using the <cite>set_dirs</cite>
 method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="n">sprof</span><span class="o">.</span><span class="n">set_dirs</span><span class="p">(</span>
+    <span class="n">argo_path</span><span class="o">=</span><span class="s1">&#39;/data/path/Argo&#39;</span><span class="p">,</span>
+    <span class="n">ncep_path</span><span class="o">=</span><span class="s1">&#39;/data/path/NCEP&#39;</span><span class="p">,</span>
+    <span class="n">woa_path</span><span class="o">=</span><span class="s1">&#39;/data/path/WOA18&#39;</span>
+<span class="p">)</span>
+<span class="p">}</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt>sprof.set_dirs(</dt><dd><p>argo_path=’/data/path/Argo’,
-ncep_path=’/data/path/NCEP’,
-woa_path=’/data/path/WOA18’</p>
-</dd>
-</dl>
 <p>Then, load the individual variables into fields in the class, for
 example:</p>
 <p>{syn = sprof(wmo)
