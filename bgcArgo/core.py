@@ -82,19 +82,17 @@ class sprof:
     Uses locally downloaded files, which should be setup using the `set_dirs` 
     method::
 
-        {
         sprof.set_dirs(
             argo_path='/data/path/Argo', 
             ncep_path='/data/path/NCEP',
             woa_path='/data/path/WOA18'
         )
-        }
 
     Then, load the individual variables into fields in the class, for
-    example:
+    example::
 
-    {syn = sprof(wmo)
-    print(syn.DOXY)}
+        syn = sprof(wmo)
+        print(syn.DOXY)
     '''
 
     

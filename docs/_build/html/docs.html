@@ -220,19 +220,19 @@ woa_interp: 2D array of requested WOA parameter (depth x time)</p>
 (wmo).</p>
 <p>Uses locally downloaded files, which should be setup using the <cite>set_dirs</cite>
 method:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="n">sprof</span><span class="o">.</span><span class="n">set_dirs</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sprof</span><span class="o">.</span><span class="n">set_dirs</span><span class="p">(</span>
     <span class="n">argo_path</span><span class="o">=</span><span class="s1">&#39;/data/path/Argo&#39;</span><span class="p">,</span>
     <span class="n">ncep_path</span><span class="o">=</span><span class="s1">&#39;/data/path/NCEP&#39;</span><span class="p">,</span>
     <span class="n">woa_path</span><span class="o">=</span><span class="s1">&#39;/data/path/WOA18&#39;</span>
 <span class="p">)</span>
-<span class="p">}</span>
 </pre></div>
 </div>
 <p>Then, load the individual variables into fields in the class, for
 example:</p>
-<p>{syn = sprof(wmo)
-print(syn.DOXY)}</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">syn</span> <span class="o">=</span> <span class="n">sprof</span><span class="p">(</span><span class="n">wmo</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">syn</span><span class="o">.</span><span class="n">DOXY</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt id="bgcArgo.core.sprof.assign">
 <code class="sig-name descname">assign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">floatdict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgo.core.sprof.assign" title="Permalink to this definition">¶</a></dt>
