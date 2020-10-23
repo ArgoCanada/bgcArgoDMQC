@@ -77,20 +77,22 @@ def get_index(index='bgc'):
 class sprof:
     '''
     Class that loads Argo synthetic profile data for a given float ID number
-    (wmo). Uses locally downloaded files, which should be setup using the `set_dirs` 
+    (wmo). 
+    
+    Uses locally downloaded files, which should be setup using the `set_dirs` 
     method: 
 
-    sprof.set_dirs(
+    {sprof.set_dirs(
         argo_path='/data/path/Argo', 
         ncep_path='/data/path/NCEP',
         woa_path='/data/path/WOA18'
-    )
+    )}
 
     Then, load the individual variables into fields in the class, for
     example:
 
-    syn = sprof(wmo)
-    print(syn.DOXY)
+    {syn = sprof(wmo)
+    print(syn.DOXY)}
     '''
     
     set_dirs = set_dirs

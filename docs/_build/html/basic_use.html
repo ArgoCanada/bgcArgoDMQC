@@ -15,7 +15,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Core Functions" href="docs.html" />
+    <link rel="next" title="Documentation" href="docs.html" />
     <link rel="prev" title="Installation" href="install.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="docs.html" title="Core Functions"
+          <a href="docs.html" title="Documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="install.html" title="Installation"
@@ -45,6 +45,55 @@
             
   <div class="section" id="basic-funcationality">
 <h1>Basic Funcationality<a class="headerlink" href="#basic-funcationality" title="Permalink to this headline">¶</a></h1>
+<p><cite>bgcArgo</cite> is a python library of functions for quality controlling dissolved oxygen data. Heavily based on the <a class="reference external" href="https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING">SOCCOM BGC Argo QC</a> methods program in matlab, it uses either <a class="reference external" href="https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html">NCEP</a> or <a class="reference external" href="https://www.nodc.noaa.gov/OC5/woa18/">World Ocean Atlas</a> data to calculate oxygen gains (<a class="reference external" href="https://doi.org/10.1175/JTECH-D-15-0101.1">Johnson et al. 2015</a>).</p>
+<p>Although functions in the <cite>bgcArgo</cite> module may be of use in other situations, the majority of the functionality is lies within two classes, <cite>profiles</cite> for typical profile files and <cite>sprof</cite> for synthetic profiles.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bgcArgo</span> <span class="k">as</span> <span class="nn">bgc</span>
+
+<span class="c1"># setup for your system - these directories need to already exist!</span>
+<span class="n">argo_path</span> <span class="o">=</span> <span class="s1">&#39;your/argo/data/path&#39;</span> <span class="c1"># where to save Argo data</span>
+<span class="n">ncep_path</span> <span class="o">=</span> <span class="s1">&#39;your/ncep/data/path&#39;</span> <span class="c1"># where to save NCEP reanalysis data</span>
+<span class="n">woa_path</span>  <span class="o">=</span> <span class="s1">&#39;your/woa18/data/path&#39;</span> <span class="c1"># where to save WOA data</span>
+
+<span class="c1"># download the data - this can take some time depending on connection</span>
+<span class="c1"># Argo</span>
+<span class="n">wmos</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4902480</span><span class="p">,</span> <span class="mi">6902905</span><span class="p">]</span>
+<span class="n">dacs</span> <span class="o">=</span> <span class="p">[</span><span class="n">bgc</span><span class="o">.</span><span class="n">get_dac</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">wmos</span><span class="p">]</span>
+<span class="n">dacpath</span> <span class="o">=</span> <span class="s1">&#39;/ifremer/argo/dac&#39;</span>
+<span class="n">fltpath</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dacpath</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dacs</span><span class="p">,</span> <span class="n">wmos</span><span class="p">)]</span>
+<span class="c1"># NCEP</span>
+<span class="n">bgc</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">get_ncep</span><span class="p">(</span><span class="s1">&#39;pres&#39;</span><span class="p">,</span> <span class="n">local_path</span><span class="o">=</span><span class="n">ncep_path</span><span class="p">)</span>
+<span class="n">bgc</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">get_ncep</span><span class="p">(</span><span class="s1">&#39;land&#39;</span><span class="p">,</span> <span class="n">local_path</span><span class="o">=</span><span class="n">ncep_path</span><span class="p">)</span>
+<span class="c1"># WOA</span>
+<span class="n">bgc</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">get_woa18</span><span class="p">(</span><span class="s1">&#39;O2sat&#39;</span><span class="p">,</span> <span class="n">local_path</span><span class="o">=</span><span class="n">woa_path</span><span class="p">)</span>
+
+<span class="c1"># tell the package where to look for data</span>
+<span class="n">bgc</span><span class="o">.</span><span class="n">set_dirs</span><span class="p">(</span><span class="n">argo_path</span><span class="o">=</span><span class="n">argo_path</span><span class="p">,</span> <span class="n">ncep_path</span><span class="o">=</span><span class="n">ncep_path</span><span class="p">,</span> <span class="n">woa_path</span><span class="o">=</span><span class="n">woa_path</span><span class="p">)</span>
+<span class="c1"># load data from profiles for two floats</span>
+<span class="n">flts</span> <span class="o">=</span> <span class="n">bgc</span><span class="o">.</span><span class="n">profiles</span><span class="p">(</span><span class="n">wmos</span><span class="p">)</span>
+<span class="c1"># calculate the dissolved oxygen gains</span>
+<span class="n">gains</span> <span class="o">=</span> <span class="n">flts</span><span class="o">.</span><span class="n">calc_gains</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">gains</span><span class="p">)</span>
+
+<span class="c1"># load a synthetic profile</span>
+<span class="n">syn</span> <span class="o">=</span> <span class="n">bgc</span><span class="o">.</span><span class="n">sprof</span><span class="p">(</span><span class="mi">4902480</span><span class="p">)</span>
+<span class="c1"># plot a time vs. depth section for the top 500m</span>
+<span class="n">g1</span> <span class="o">=</span> <span class="n">syn</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;cscatter&#39;</span><span class="p">,</span> <span class="n">varname</span><span class="o">=</span><span class="s1">&#39;DOXY&#39;</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">500</span><span class="p">))</span>
+<span class="c1"># plot the first 10 profiles for temperature, practical salinity,</span>
+<span class="c1"># and adjusted oxygen</span>
+<span class="n">g2</span> <span class="o">=</span> <span class="n">syn</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="s1">&#39;profiles&#39;</span><span class="p">,</span> <span class="n">varlist</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;TEMP&#39;</span><span class="p">,</span><span class="s1">&#39;PSAL&#39;</span><span class="p">,</span> <span class="s1">&#39;DOXY&#39;</span><span class="p">],</span> <span class="n">Ncycle</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">Nprof</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">500</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="version-history">
+<h2>Version History<a class="headerlink" href="#version-history" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>0.1: April 20, 2020 - Initial creation</p></li>
+<li><p>0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class</p></li>
+<li><p>0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient</p></li>
+<li><p>0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe</p></li>
+<li><p>0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well</p></li>
+<li><p>0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock</p></li>
+</ul>
+</div>
 </div>
 
 
@@ -54,12 +103,20 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Basic Funcationality</a><ul>
+<li><a class="reference internal" href="#version-history">Version History</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="install.html"
                         title="previous chapter">Installation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="docs.html"
-                        title="next chapter">Core Functions</a></p>
+                        title="next chapter">Documentation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -91,7 +148,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="docs.html" title="Core Functions"
+          <a href="docs.html" title="Documentation"
              >next</a> |</li>
         <li class="right" >
           <a href="install.html" title="Installation"
