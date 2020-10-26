@@ -48,6 +48,14 @@ global REF_PATH
 REF_PATH = Path(__file__).parent.absolute() / 'ref'
 
 def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
+    '''
+    Set local directories to look for Argo, WOA, and NCEP data.
+
+    Args:
+        argo_path (str or path-like): location of local Argo data
+        woa_path (str or path-like): location of local World Ocean Atlas data
+        ncep_data (str or path-like): location of local NCEP data
+    '''
 
     global ARGO_PATH
     ARGO_PATH = argo_path
@@ -57,6 +65,12 @@ def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
     NCEP_PATH = ncep_path
 
 def get_index(index='bgc'):
+    '''
+    Get the global, biogeochemical, synthetic, or metadata Argo index. 
+
+    Args:
+        index (str): 
+    '''
     if index == 'bgc':
         return __bgcindex__
     elif index == 'global':
@@ -274,9 +288,9 @@ class sprof:
 
     def get_track(self):
         '''
-        Creates a track array with columns:
+        Creates a track array with columns::
 
-        [serial datenum, latitude, longitude]
+            [serial datenum, latitude, longitude]
 
         the track array is used for the interpolation of reference data along
         the float track.
@@ -713,55 +727,53 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     Function to load in all data from a single float, using BRtraj, meta,
     and Sprof files
     
-    INPUT:
-            local_path: local path of float data
-            wmo: float ID number
+    Args:
+        local_path: local path of float data
+        wmo: float ID number
     
-    OUTPUT:
-            floatData: python dict() object with the following fields
-                floatName: WMO number, from input
-                floatType: Kind of float (APEX, ARVOR, etc.)
-                N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
-                N_CYCLES: Number of profiles, Argo dimension N_PROF
-                CYCLES: Array from 1 to N_CYCLES
-                LATITUDE: Latitude (-90, 90) for each profile
-                LONGITUDE: Longitude (-180, 180) for each profile
-                SDN: Serial Date Number for each profile
-                PRES: Pressure (dbar), compressed to vector (1D array)
-                TEMP: Temperature (deg C)
-                PSAL: Salinity (psu)
-
-            if the variables are available, it will also contain:
-                DOXY: Dissolved Oxygen (micromole/kg)
-                O2sat: Oxygen percent saturation (%)
-                PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
-                TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
-                inair: Boolean to indicate if in-air data exists
+    Returns:
+        floatData: python dict() object with the following fields
+            - floatName: WMO number, from input
+            - floatType: Kind of float (APEX, ARVOR, etc.)
+            - N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
+            - N_CYCLES: Number of profiles, Argo dimension N_PROF
+            - CYCLES: Array from 1 to N_CYCLES
+            - LATITUDE: Latitude (-90, 90) for each profile
+            - LONGITUDE: Longitude (-180, 180) for each profile
+            - SDN: Serial Date Number for each profile
+            - PRES: Pressure (dbar), compressed to vector (1D array)
+            - TEMP: Temperature (deg C)
+            - PSAL: Salinity (psu)
+        if the variables are available, it will also contain:
+            - DOXY: Dissolved Oxygen (micromole/kg)
+            - O2sat: Oxygen percent saturation (%)
+            - PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
+            - TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
+            - inair: Boolean to indicate if in-air data exists
             
-            for all the variables listen above, there will also exist
-                <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
-                fields if they exist
+        for all the variables listen above, there will also exist
+        <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
+        fields if they exist
     
-                *** CYCLES, LATITUDE, LONGITUDE, AND SDN ALL ALSO HAVE ***
-                ***     ANALOGOUS <VAR>_GRID FIELDS THAT MATCH THE     ***
-                ***   DIMENSION OF PRES, TEMP, PSAL, DOXY, AND O2SAT   ***
+        CYCLES, LATITUDE, LONGITUDE, and SDN all also have
+        analogous <VAR>_GRID fields that match the    
+        dimension of PRES, TEMP, PSAL, DOXY, and O2SAT  
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        
+        Fisheries and Oceans Canada
+        
+        chris.gordon@dfo-mpo.gc.ca
     
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
     code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
     written by Tanya Maurer & Josh Plant
     
-    LAST UPDATE: 29-04-2020
+    Change log:
     
-    CHANGE LOG:
-    
-    22-04-2020: updated so that pressure mask determines all variables - need
-    to add all quality flags to output
-    
-    29-04-2020: switched file/path handling from os module to pathlib
+        - 22-04-2020: updated so that pressure mask determines all variables - need to add all quality flags to output
+        - 29-04-2020: switched file/path handling from os module to pathlib
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -884,20 +896,22 @@ def load_profile(fn):
     NOTE: Deprecated, use load_profiles instead, which can handle multiple
     profile files at once, but produces the same result for just one. 
 
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        
+        Fisheries and Oceans Canada
+        
+        chris.gordon@dfo-mpo.gc.ca
     
-    LAST UPDATE: 29-04-2020
+    Last update: 29-04-2020
     
-    CHANGE LOG:
+    Change log:
     
-    22-04-2020: updated so that pressure mask determines all variables - need
-    to add all quality flags to output
+        - 22-04-2020: updated so that pressure mask determines all variables - need to add all quality flags to output
     
-    29-04-2020: switched file/path handling from os module to pathlib
+        - 29-04-2020: switched file/path handling from os module to pathlib
 
-    24-06-2020: deprecated, re-wrote as load_profiles()
+        - 24-06-2020: deprecated, re-wrote as load_profiles()
     '''
 
     # # try to load the profile as absolute path or relative path

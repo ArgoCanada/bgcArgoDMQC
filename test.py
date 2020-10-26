@@ -168,13 +168,13 @@ class coreTest(unittest.TestCase):
         # aic and bic
         data  = np.random.randn(30)
         resid = np.random.randn(20)
-        aic = bgc.aic(data, resid)
+        aic = bgc.util.bic(data, resid)
 
         self.assertIs(type(aic), np.float)
 
         data  = np.random.randn(30)
         resid = np.random.randn(20)
-        bic = bgc.bic(data, resid)
+        bic = bgc.util.bic(data, resid)
 
         self.assertIs(type(bic), np.float)   
 
@@ -194,7 +194,7 @@ class coreTest(unittest.TestCase):
     def test_get_var_by(self):
         # get var by
         dv = dict(a=np.random.randn(20), b=np.random.randn(20))
-        v = bgc.get_var_by('a', 'b', dv)
+        v = bgc.util.get_var_by('a', 'b', dv)
 
         self.assertIs(type(v), np.ndarray)
 
