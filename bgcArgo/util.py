@@ -240,45 +240,29 @@ def read_gain_value(fn, verbose=True):
 
     return G, equation, comment
 
-def decode_file_gain(G):
-
-    # clean up any possible characters that shouldn't be there
-    for c in [';', ':', '!', ',']:
-        G = G.replace(c, '')
-
-    G_split = G.split('=')
-    N = len(G_split % 2 + 1)
-    G_out = np.array(N*[np.nan])
-    if len(G_split) > 2:
-        for i in range(N):
-            G_out[i] = float(G_split[2*i+1].strip())
-    
-    else:
-        G_out = np.array([float(G.split('=')[-1].strip())])
-   
-    return G_out
-
 def aic(data, resid):
     '''
     Function to calculate the Akiake Information Criteria (AIC) as a metric
     for assessing the appropriate number of breakpoints in the calculation of
     drifts in O2 gains.
     
-    INPUT:
+    Args:
     
-    OUTPUT:
+    Returns:
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
     
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
     code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
     written by Tanya Maurer & Josh Plant
     
-    LAST UPDATE: 20-04-2020
+    Last update: 2020-10-27
     
-    CHANGE LOG:
+    Change log:
+        - 2020-10-27: fixed print output
     '''
 
     # calculate AIC
@@ -291,7 +275,7 @@ def aic(data, resid):
     is_valid = n/4 - 1
     if m > is_valid:
         aic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate AIC, setting AIC = NaN')
+        sys.stdout.write('n >> K, cannot caclculate AIC, setting AIC = NaN\n')
     else:
         # formula ref. Jones & Day (1995), Owens & Wong (2009)
         aic_value = np.log(SSE/n) + (n+K)/(n-K-2)
@@ -305,21 +289,24 @@ def bic(data, resid):
     for assessing the appropriate number of breakpoints in the calculation of
     drifts in O2 gains.
     
-    INPUT:
+    Args:
     
-    OUTPUT:
+    Returns:
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
     
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
+    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
     code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
     written by Tanya Maurer & Josh Plant
     
-    LAST UPDATE: 20-04-2020
+    Last update: 2020-10-27
     
-    CHANGE LOG:
+    Change log:
+        - 2020-10-27: fixed print output
+
     '''
 
     # calculate BIC
@@ -333,7 +320,7 @@ def bic(data, resid):
     is_valid = n/4 - 1
     if m > is_valid:
         bic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate BIC, setting BIC = NaN')
+        sys.stdout.write('n >> K, cannot caclculate BIC, setting BIC = NaN\n')
     else:
         bic_value = np.log(1/(n*SSE) + errorlim**2) + K*np.log(n)/n
 

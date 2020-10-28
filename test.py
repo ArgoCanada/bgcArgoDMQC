@@ -15,28 +15,25 @@ import bgcArgo as bgc
 global wmo
 wmo = 4902481
 
+global data_path
+data_path = Path('/Users/gordonc/Documents/data')
+
 bgc.set_dirs(
-    argo_path='tmp/Argo',
-    ncep_path='tmp/NCEP',
-    woa_path='tmp/WOA18'
+    argo_path=data_path / 'Argo',
+    ncep_path=data_path / 'NCEP',
+    woa_path=data_path / 'WOA18'
 )
 
 class downloadTest(unittest.TestCase):
 
-    def test_download_ncep(self):
+    def test_download_refdata(self):
 
-        bgc.io.get_ncep('pres', local_path='tmp/NCEP', overwrite=True, years=[2019, 2020])
-        bgc.io.get_ncep('land', local_path='tmp/NCEP', overwrite=True)
+        bgc.diagnostic.simple_test(data_path='tmp')
         bgc.io.get_ncep('rhum', local_path='tmp/NCEP', overwrite=True, years=[2019, 2020])
 
         self.assertTrue(Path('tmp/NCEP/pres/pres.sfc.gauss.2019.nc').exists())
         self.assertTrue(Path('tmp/NCEP/land/land.sfc.gauss.nc').exists())
         self.assertTrue(Path('tmp/NCEP/rhum/rhum.sig995.2019.nc').exists())
-
-    def test_download_woa(self):
-
-        bgc.io.get_woa18('O2sat', local_path='tmp/WOA18', overwrite=True)
-
         self.assertTrue(Path('tmp/WOA18/o2sat/woa18_all_O00_01.nc').exists())
 
     def test_download_argo(self):
@@ -45,8 +42,8 @@ class downloadTest(unittest.TestCase):
 
         dacpath = '/ifremer/argo/dac'
         fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dac, [wmo-1,wmo])]
-        bgc.io.get_argo(fltpath, local_path='tmp/Argo', overwrite=True)
-        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407, 4900345], local_path='tmp/Argo/aoml', overwrite=True)
+        bgc.io.get_argo(fltpath, local_path='tmp/Argo', overwrite=True, nfiles=2)
+        bgc.io.get_argo('/ifremer/argo/dac/aoml', [3900407, 4900345], local_path='tmp/Argo/aoml', overwrite=True, nfiles=2)
 
         self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo-1)).exists())
         self.assertTrue(Path('tmp/Argo/{}/{}'.format('meds',wmo)).exists())
@@ -55,6 +52,12 @@ class downloadTest(unittest.TestCase):
 
 class sprofTest(unittest.TestCase):
 
+    bgc.set_dirs(
+        argo_path=data_path / 'Argo',
+        ncep_path=data_path / 'NCEP',
+        woa_path=data_path / 'WOA18'
+    )
+
     def test_sprof(self):
         sprof = bgc.sprof(wmo)
         sprof.clean()
@@ -62,6 +65,8 @@ class sprofTest(unittest.TestCase):
         sprof.clean(bad_flags=[3,4])
         df = sprof.to_dataframe()
         sprof.reset()
+
+        sprof.describe()
 
         self.assertIsInstance(sprof, bgc.sprof)
         self.assertIs(type(df), pd.core.frame.DataFrame)
@@ -75,6 +80,12 @@ class sprofTest(unittest.TestCase):
         self.assertIs(type(woa_gains), np.ndarray)
 
 class profilesTest(unittest.TestCase):
+
+    bgc.set_dirs(
+        argo_path=data_path / 'Argo',
+        ncep_path=data_path / 'NCEP',
+        woa_path=data_path / 'WOA18'
+    )
 
     def test_profiles(self):
         prof = bgc.profiles(wmo)
@@ -101,6 +112,12 @@ class profilesTest(unittest.TestCase):
         self.assertIs(type(woa_gains), np.ndarray)
 
 class plottingTest(unittest.TestCase):
+
+    bgc.set_dirs(
+        argo_path=data_path / 'Argo',
+        ncep_path=data_path / 'NCEP',
+        woa_path=data_path / 'WOA18'
+    )
 
     def test_gain_plot(self):
 
@@ -140,6 +157,12 @@ class plottingTest(unittest.TestCase):
 
 class coreTest(unittest.TestCase):
 
+    bgc.set_dirs(
+        argo_path=data_path / 'Argo',
+        ncep_path=data_path / 'NCEP',
+        woa_path=data_path / 'WOA18'
+    )
+
     bgc.io.check_index(mode='install')
     bgc.io.check_index()
 
@@ -157,7 +180,7 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         # read QC test
-        nc = Dataset(Path('tmp/Argo/aoml/3900407/profiles/D3900407_188.nc'))
+        nc = Dataset(Path('tmp/Argo/aoml/3900407/profiles/D3900407_001.nc'))
         qcp, qcf = bgc.read_history_qctest(nc)
         bgc.util.display_qctests(qcp, qcf)
 
@@ -168,7 +191,7 @@ class coreTest(unittest.TestCase):
         # aic and bic
         data  = np.random.randn(30)
         resid = np.random.randn(20)
-        aic = bgc.util.bic(data, resid)
+        aic = bgc.util.aic(data, resid)
 
         self.assertIs(type(aic), np.float)
 
@@ -200,13 +223,19 @@ class coreTest(unittest.TestCase):
 
 class otherTest(unittest.TestCase):
 
+    bgc.set_dirs(
+        argo_path=data_path / 'Argo',
+        ncep_path=data_path / 'NCEP',
+        woa_path=data_path / 'WOA18'
+    )
+
     def test_pO2(self):
         syn = bgc.sprof(4902480)
         pO2 = bgc.unit.pO2(syn.DOXY, syn.PSAL, syn.TEMP)
         self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_024.nc'))
+        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_001.nc'))
 
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(eq[0]), np.str_)
@@ -223,11 +252,25 @@ class otherTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             sol = bgc.unit.oxy_sol(S, T, unit='deg C')
 
+    def test_SCOR_conversion(self):
+        doxy = 150 + 50*np.random.rand(30)
+        S = 35 + 1.5*np.random.rand(30)
+        T = 15 + 5*np.random.rand(30)
+        pO2 = bgc.unit.doxy_to_pO2(doxy, S, T)
+        doxy_back = bgc.unit.pO2_to_doxy(pO2, S, T)
+
+        self.assertIs(type(pO2), np.ndarray)
+        self.assertIs(type(doxy_back), np.ndarray)
+
 if __name__ == '__main__':
     if not Path('tmp').exists():
         Path('tmp').mkdir()
     if not Path('tmp/Argo').exists():
         Path('tmp/Argo').mkdir()
+    if not Path('tmp/Argo/aoml').exists():
+        Path('tmp/Argo/aoml').mkdir()
+    if not Path('tmp/Argo/meds').exists():
+        Path('tmp/Argo/meds').mkdir()
     if not Path('tmp/NCEP').exists():
         Path('tmp/NCEP').mkdir()
     if not Path('tmp/NCEP/pres').exists():

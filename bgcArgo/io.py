@@ -200,7 +200,7 @@ def get_dac(wmo):
 
     return dac
 
-def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
+def get_woa18(varname, local_path='./', ftype='netcdf', nfiles=None, overwrite=False):
     '''
     Function to download WOA data for a given variable
 
@@ -249,7 +249,11 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False):
     if not local_path.is_dir():
         local_path.mkdir()
 
-    for fn in ftp.nlst():
+    file_list = ftp.nlst()
+    if nfiles is not None and nfiles< len(file_list):
+        file_list = file_list[:nfiles]
+
+    for fn in file_list:
         local_file = local_path / fn
         if not local_file.exists() or overwrite:
             print(local_file)
@@ -366,12 +370,12 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission=None, mode='RD'):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission=None, mode='RD', nfiles=None):
     '''
     Function to download all data from a single float, or individual
     profiles
 
-    INPUT:
+    Args:
               Inputs may vary depending on desired performance. Multiple
               arguments may be provided to download all files from a certain
               float or argo defined geographical area. A single path to a
@@ -382,15 +386,18 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                   existing files, if true, will download no matter what,
                   defaults to False
 
-    OUTPUT:
+    Returns:
 
-    AUTHOR:   Christopher Gordon
+    Author:   Christopher Gordon
               Fisheries and Oceans Canada
               chris.gordon@dfo-mpo.gc.ca
 
-    LAST UPDATE: 29-04-2020
+    Last update: 29-04-2020
 
-    CHANGE LOG:
+    Change log:
+
+    2020-10-27: add nfiles parameter to limit number of files downloaded,
+    helpful to speed up testing/coverage runs
     '''
 
     if len(args) == 1:
@@ -523,6 +530,9 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                         elif mode == 'D':
                             files = ftp.nlst('BD*.nc')
 
+
+                    if nfiles is not None and nfiles < len(files):
+                        files = files[:nfiles]
                     profile_path = wmo_path / 'profiles'
                     if not profile_path.exists():
                         profile_path.mkdir()
@@ -580,6 +590,9 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
             if 'profiles' in ftp.nlst() and ftype != 'summary':
                 ftp.cwd('profiles')
                 files = ftp.nlst('*.nc')
+
+                if nfiles is not None and nfiles < len(files):
+                    files = files[:nfiles]
 
                 profile_path = wmo_path / 'profiles'
                 if not profile_path.exists():

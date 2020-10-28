@@ -725,7 +725,7 @@ def get_worst_flag(*args):
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
-    and Sprof files
+    and Sprof files.
     
     Args:
         local_path: local path of float data
@@ -753,7 +753,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             
         for all the variables listen above, there will also exist
         <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
-        fields if they exist
+        fields if they exist.
     
         CYCLES, LATITUDE, LONGITUDE, and SDN all also have
         analogous <VAR>_GRID fields that match the    
@@ -761,9 +761,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     
     Author:   
         Christopher Gordon
-        
         Fisheries and Oceans Canada
-        
         chris.gordon@dfo-mpo.gc.ca
     
     Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
@@ -890,29 +888,29 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta
 
-def load_profile(fn):
-    '''
-    Function to load a singe Argo profile file into a dict() object
-    NOTE: Deprecated, use load_profiles instead, which can handle multiple
-    profile files at once, but produces the same result for just one. 
+# def load_profile(fn):
+#     '''
+#     Function to load a singe Argo profile file into a dict() object
+#     NOTE: Deprecated, use load_profiles instead, which can handle multiple
+#     profile files at once, but produces the same result for just one. 
 
-    Author:   
-        Christopher Gordon
+#     Author:   
+#         Christopher Gordon
         
-        Fisheries and Oceans Canada
+#         Fisheries and Oceans Canada
         
-        chris.gordon@dfo-mpo.gc.ca
+#         chris.gordon@dfo-mpo.gc.ca
     
-    Last update: 29-04-2020
+#     Last update: 29-04-2020
     
-    Change log:
+#     Change log:
     
-        - 22-04-2020: updated so that pressure mask determines all variables - need to add all quality flags to output
+#         - 22-04-2020: updated so that pressure mask determines all variables - need to add all quality flags to output
     
-        - 29-04-2020: switched file/path handling from os module to pathlib
+#         - 29-04-2020: switched file/path handling from os module to pathlib
 
-        - 24-06-2020: deprecated, re-wrote as load_profiles()
-    '''
+#         - 24-06-2020: deprecated, re-wrote as load_profiles()
+#     '''
 
     # # try to load the profile as absolute path or relative path
     # try:
