@@ -1,6 +1,19 @@
-#!/usr/bin/python
+import warnings
 
 import numpy as np
+
+# soft attempt to load gsw, but allow for seawater as well
+try: 
+    import gsw
+    flagSA = True
+except:
+    try:
+        # if this also fails, just load gsw to throw the error
+        from seawater import pden
+        flagSA = False
+        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater is deprecated in favour of gsw-python, see https://teos-10.github.io/GSW-Python/\n')
+    except:
+        import gsw
 
 def oxy_sol(S, T, unit='micromole/kg'):
     '''
@@ -218,3 +231,33 @@ def pO2_to_doxy(pO2, S, T, P=0):
     O2conc  = pO2/(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
 
     return O2conc
+
+def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
+    '''
+    Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.
+
+    Args:
+        doxy (float or array-like): dissolved oxygen in umol kg-1
+        S (float or array-like): salinity, array of same length as `doxy` or single value
+        T (float or array-like): temperature (deg C), array of same length  as `doxy` or single value
+        P (float or array-like): pressure (dbar), array of same length  as `doxy` or single value
+        Pref (optional, float): reference pressure (dbar) for potential density calculation, default 0
+        lat (optional, float or array-like): latitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+        lon (optional, float or array-like): longitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+
+    Returns:
+        mmol_L_conc (float or array-like): dissolved oxygen concentration in mmol L-1
+    '''
+
+    if flagSA:
+        if lat is None and lon is None:
+            pot_density = gsw.pot_rho_t_exact(S, T, P)
+            warnings.warn('No coordinate information required, proceeding with calculation using practical salinity instead of absolute salinity')
+        else:
+            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P)
+    else:
+        pot_density = pden(S, T, P)
+
+    mmol_L_conc = 1000*doxy / pot_density
+
+    return mmol_L_conc
