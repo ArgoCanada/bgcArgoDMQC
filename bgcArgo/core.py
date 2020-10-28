@@ -1171,31 +1171,32 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     Combines function load_woa_data() and interp_woa_data() for convenience,
     see documentation for those funcions for more detail.
     
-    INPUT:
-              track: array with the columns (SDN, lat, lon)
-              param: requested variable, valid inputs are
-                  T: temperature
-                  S: salinity
-                  O2: dissolved oxygen
-                  O2sat: oxygen percent saturation
-                  NO3: nitrate
-                  Si: silicate
-                  PO4: phosphate
-              zlim: depth bounds (upper, lower), default to (0, 1000)
-              local_path: local directory where WOA files are stored, assumes
-                          current directory if no input
+    Args:
+        track: array with the columns (SDN, lat, lon)
+        param: requested variable, valid inputs are
+            - T: temperature
+            - S: salinity
+            - O2: dissolved oxygen
+            - O2sat: oxygen percent saturation
+            - NO3: nitrate
+            - Si: silicate
+            - PO4: phosphate
+        zlim: depth bounds (upper, lower), default to (0, 1000)
+        local_path: local directory where WOA files are stored, assumes
+                    current directory if no input
     
-    OUTPUT:
-              z: WOA depth array
-              woa_interp: 2D array of requested WOA parameter (depth x time)
+    Returns:
+        z: WOA depth array
+        woa_interp: 2D array of requested WOA parameter (depth x time)
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
     
-    LAST UPDATE: 23-04-2020
+    Last update: 2020-04-23
     
-    CHANGE LOG:
+    Change log:
     '''
 
     xtrack, woa_track, woa_data = io.load_woa_data(track, param, zlim=zlim, local_path=local_path)
@@ -1211,21 +1212,22 @@ def ncep_to_float_track(varname, track, local_path='./'):
     Combines function load_ncep_data() and interp_ncep_data() for convenience,
     see documentation for those funcions for more detail.
     
-    INPUT:
-              varname: either 'pres' (pressure) or 'rhum' (relative humidity)
-              track: array with the columns (SDN, lat, lon)
+    Args:
+        varname: either 'pres' (pressure) or 'rhum' (relative humidity)
+        track: array with the columns (SDN, lat, lon)
     
-    OUTPUT:
-              z: WOA depth array
-              woa_interp: 2D array of requested WOA parameter (depth x time)
+    Returns:
+        z: WOA depth array
+        woa_interp: 2D array of requested WOA parameter (depth x time)
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
     
-    LAST UPDATE: 29-04-2020
+    Last update: 2020-04-29
     
-    CHANGE LOG:
+    Change log:
     '''
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
@@ -1242,26 +1244,27 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     reference data set, either NCEP for in-air or WOA surface data if in-air
     comparison is not available.
     
-    INPUT:
-              data: float data dict object, output from load_argo_data()
-              ref: reference data set, either NCEP pO2 or WOA O2sat
-              inair: boolean flag to indicate if comparison to NCEP in-air
-                  data or WOA surface data should be done, default to
-                  in-air, but function also performs check
-              zlim: lower limit to define as 'surface' and take mean within,
-                    default value 25 dbar, for use only when inair is False
+    Args:
+        data: float data dict object, output from load_argo_data()
+        ref: reference data set, either NCEP pO2 or WOA O2sat
+        inair: boolean flag to indicate if comparison to NCEP in-air
+            data or WOA surface data should be done, default to
+            in-air, but function also performs check
+        zlim: lower limit to define as 'surface' and take mean within,
+            default value 25 dbar, for use only when inair is False
     
-    OUTPUT:
-              g: vector of gains
-              surf_data: array of float surface stats (cycle, N, mean, std)
+    Returns:
+        g: vector of gains
+        surf_data: array of float surface stats (cycle, N, mean, std)
     
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
     
-    LAST UPDATE: 23-04-2020
+    Last update: 2020-04-23
     
-    CHANGE LOG:
+    Change log:
     '''
 
     # check which reference data to use
@@ -1329,6 +1332,16 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
 
 def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
     '''
+    Calculate gain with carryover parameter, following Bittig et al. (2018).
+
+    Args:
+        pO2_opt_air (array-like): partial pressure measured by the oxygen optode in-air
+        pO2_ref_air (array-like): partial pressure in-air from a reference dataset such as NCEP
+        pO2_opt_water (array-like): partial pressure of oxygen measured by the optode just below the surface
+
+    Returns:
+        *need to run this by Henry and see if I'm doing it right*
+
     Derive the O2 slope including a correction for 'carry-over' effect, to
     account for the observation that optode in-air data do not represent pure
     air but show a bias by in-water O2 saturation excess/deficiency (Bittig 
@@ -1346,16 +1359,16 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
         = c*(m*pO2^{optode}_{surf in-water} - pO2^{reference}_{in-air})
 
     where: 
-    - m is the O2 slope factor: m = pO2_adjusted / pO2
-    - pO2^{optode}_{surf in-air} is the oxygen partial pressure observed by
-    the optode in-air (i.e., close to the water surface), e.g., MC = X+11
-    - pO2^{reference}_{in-air} is the reference oxygen partial pressure in-air,
-    e.g., from re-analysis data
-    - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
-    the optode at the water surface (in-water), e.g., MC = X+10 or profile 
-    MC = X–10
-    - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
-    the observed optode in-air data.
+        - m is the O2 slope factor: m = pO2_adjusted / pO2
+        - pO2^{optode}_{surf in-air} is the oxygen partial pressure observed by
+        the optode in-air (i.e., close to the water surface), e.g., MC = X+11
+        - pO2^{reference}_{in-air} is the reference oxygen partial pressure in-air,
+        e.g., from re-analysis data
+        - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
+        the optode at the water surface (in-water), e.g., MC = X+10 or profile 
+        MC = X–10
+        - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
+        the observed optode in-air data.
 
     Above equation can be used for linear regression to obtain m and c from
     data of the partial pressures (from several cycles together). See 
