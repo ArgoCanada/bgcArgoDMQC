@@ -1,6 +1,4 @@
-#!/usr/bin/python
-
-import os, sys
+import sys
 
 import numpy as np
 

@@ -33,9 +33,8 @@ from . import util
 from . import io
 from . import interp
 from . import diagnostic
-from . import calibration
 
-__all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic', 'calibration']
+__all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 

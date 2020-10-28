@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 import sys
 import copy
 import warnings
@@ -159,7 +157,7 @@ class sprof:
         self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
         if flagSA:
-            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
+            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP) - 1000
         else:
             self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
 
@@ -770,8 +768,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     
     Change log:
     
-        - 22-04-2020: updated so that pressure mask determines all variables - need to add all quality flags to output
-        - 29-04-2020: switched file/path handling from os module to pathlib
+        - 2020-04-22: updated so that pressure mask determines all variables - need to add all quality flags to output
+        - 2020-04-29: switched file/path handling from os module to pathlib
+        - 2020-10-28: read variable DOXY from BRtraj file and convert to PPOX_DOXY if PPOX_DOXY not in file
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -795,7 +794,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             sys.stdout.write('Continuing without BRtraj file\n')
     elif BRtraj.exists():
         BRtraj_nc = Dataset(BRtraj, 'r')
-        if 'PPOX_DOXY' not in BRtraj_nc.variables.keys():
+        if 'PPOX_DOXY' not in BRtraj_nc.variables.keys() and 'DOXY' not in BRtraj_nc.variables.keys():
             BRtraj_flag = False
             if verbose:
                 sys.stdout.write('BRtraj file exists, but no in-air data exists, continuing without using BRtraj file\n')
@@ -879,7 +878,11 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     if BRtraj_flag:
-        floatData['PPOX_DOXY']  = BRtraj_nc.variables['PPOX_DOXY'][:].data.flatten()
+        if 'PPOX_DOXY' in BRtraj_nc.variables.keys():
+            floatData['PPOX_DOXY']  = BRtraj_nc.variables['PPOX_DOXY'][:].data.flatten()
+        elif 'DOXY' in BRtraj_nc.variables.keys():
+            # this is wrong units right now!!!!!!!!!!!!
+            floatData['PPOX_DOXY'] = BRtraj_nc.variables['DOXY'][:].data.flatten()
         floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
         floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
         floatData['inair']      = True

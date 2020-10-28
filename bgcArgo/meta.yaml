@@ -1,5 +1,5 @@
 {% set name = "bgcArgo" %}
-{% set version = "0.2.6" %}
+{% set version = "0.2.8" %}
 
 
 package:
