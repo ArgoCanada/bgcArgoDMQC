@@ -881,8 +881,13 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         if 'PPOX_DOXY' in BRtraj_nc.variables.keys():
             floatData['PPOX_DOXY']  = BRtraj_nc.variables['PPOX_DOXY'][:].data.flatten()
         elif 'DOXY' in BRtraj_nc.variables.keys():
-            # this is wrong units right now!!!!!!!!!!!!
-            floatData['PPOX_DOXY'] = BRtraj_nc.variables['DOXY'][:].data.flatten()
+            #  unit conversion from umol kg-1 to pO2, some shaky S and P assumptions?
+            floatData['PPOX_DOXY'] = unit.doxy_to_pO2(unit.umol_per_sw_to_mmol_per_L(
+                BRtraj_nc.variables['DOXY'][:].data.flatten(),
+                0, # salinity is 0 in air???
+                BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten(),
+                0 # pressure is 0 in air???
+            ), 0, BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten())
         floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
         floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
         floatData['inair']      = True
