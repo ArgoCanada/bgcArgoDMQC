@@ -54,8 +54,8 @@ woa_path  = 'your/woa18/data/path' # where to save WOA data
 # download the data - this can take some time depending on connection
 # Argo
 wmos = [4902480, 6902905]
-dacs = [bgc.get_dac(w) for w in wmos]
-dacpath = '/ifremer/argo/dac'
+for w in wmos: 
+  bgc.io.get_argo(w, local_path=argo_path)
 fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dacs, wmos)]
 # NCEP
 bgc.io.get_ncep('pres', local_path=ncep_path)
