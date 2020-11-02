@@ -251,10 +251,10 @@ def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
 
     if flagSA:
         if lat is None and lon is None:
-            pot_density = gsw.pot_rho_t_exact(S, T, P)
+            pot_density = gsw.pot_rho_t_exact(S, T, P, 0)
             warnings.warn('No coordinate information required, proceeding with calculation using practical salinity instead of absolute salinity')
         else:
-            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P)
+            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, 0)
     else:
         pot_density = pden(S, T, P)
 
