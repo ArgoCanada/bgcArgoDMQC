@@ -67,7 +67,7 @@ def get_index(index='bgc'):
     Get the global, biogeochemical, synthetic, or metadata Argo index. 
 
     Args:
-        index (str): 
+        index (str): *bgc* for the biogeochemical Argo index, *global* for the core index, *synthetic* for the synthetic index, or *meta* for the metadata index
     '''
     if index == 'bgc':
         return __bgcindex__
@@ -81,6 +81,13 @@ def get_index(index='bgc'):
             global __synthindex__
             __synthindex__ = io.read_index(mission='S')
         return __synthindex__
+    elif index == 'synthetic':
+        if '__synthindex__' not in globals():
+            global __metaindex__
+            __metaindex__ = io.read_index(mission='M')
+        return __metaindex__
+    else:
+        raise ValueError('Input "{}" is unrecognized'.format(index))
 
 # ----------------------------------------------------------------------------
 # FLOAT CLASS

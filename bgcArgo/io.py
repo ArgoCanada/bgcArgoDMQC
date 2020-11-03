@@ -34,7 +34,10 @@ def index_exists():
 def read_index(mission='B'):
     '''
     Function to read and extract information from Argo global index,
-    then save it to a dataframe for faster access
+    then save it to a dataframe for faster access.
+
+    Args:
+        mission (str): *B*, *C*, *S*, or *M* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
     '''
 
     if mission == 'B':
@@ -43,6 +46,10 @@ def read_index(mission='B'):
         filename = index_path / 'ar_index_global_prof.txt.gz'
     elif mission == 'S':
         filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+    elif mission == 'M':
+        filename = index_path / 'ar_index_global_meta.txt.gz'
+    else:
+        raise ValueError('Input {} not recognized'.format(mission))
 
     if not Path(filename).exists():
         sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
@@ -198,7 +205,7 @@ def get_dac(wmo):
 
     return dac
 
-def get_woa18(varname, local_path='./', ftype='netcdf', nfiles=None, overwrite=False):
+def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, __nfiles__=None):
     '''
     Function to download WOA data for a given variable
 
@@ -248,8 +255,8 @@ def get_woa18(varname, local_path='./', ftype='netcdf', nfiles=None, overwrite=F
         local_path.mkdir()
 
     file_list = ftp.nlst()
-    if nfiles is not None and nfiles< len(file_list):
-        file_list = file_list[:nfiles]
+    if __nfiles__ is not None and __nfiles__< len(file_list):
+        file_list = file_list[:__nfiles__]
 
     for fn in file_list:
         local_file = local_path / fn
@@ -368,22 +375,20 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission=None, mode='RD', nfiles=None):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission='CB', mode='RD', __nfiles__=None):
     '''
     Function to download all data from a single float, or individual
     profiles
 
     Args:
-              Inputs may vary depending on desired performance. Multiple
-              arguments may be provided to download all files from a certain
-              float or argo defined geographical area. A single path to a
-              file may be provided to download that file. A list of files
-              may be provided as well.
-
-              overwrite: boolean flag, if False, does not re-download
-                  existing files, if true, will download no matter what,
-                  defaults to False
-
+        *args: list of files, floats, or directories
+        local_path (optional, str or Path): local directory to save float data, defaults to current directory
+        url (optional, str): url of the GDAC to connect to, defaults to ifremer
+        overwrite (optional, bool): whether to overwrite existing local files, default *False*
+        ftype (optional, str): can be 'summary' if the user wishes to only download Sprof, traj, meta files, default is *None*
+        mission (optional, str): Argo mission, can be 'B' for biogeochemical or 'C' for core, or 'CB' for both, default is 'CB'
+        mode (optional, str): Download real-time ('R') or delayed-mode ('D') or all ('RD') data, default 'RD'
+        
     Returns:
 
     Author:   Christopher Gordon
@@ -411,7 +416,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
         for init_a in arglist:
             # if its a float number, build ftp paths to floats
-            if type(init_a) is int or type(init_a) is float:
+            if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
                 if url == 'ftp.ifremer.fr':
                     base_path = '/ifremer/argo/dac'
                 elif url == 'usgodae.org':
@@ -447,7 +452,9 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
 
                     # define the local file to have the same name as on the FTP server
                     wmo_file = profile_path / fn
-                    # only download the file if it doesn't already exist locally
+                    # only download the file if 
+                    # local_path (str or Path): local directory to save float data
+                    # url (str): it doesn't already exist locally
                     if not wmo_file.exists() or overwrite:
                         print(wmo_file)
                         # open the local file
@@ -529,8 +536,8 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                             files = ftp.nlst('BD*.nc')
 
 
-                    if nfiles is not None and nfiles < len(files):
-                        files = files[:nfiles]
+                    if __nfiles__ is not None and __nfiles__ < len(files):
+                        files = files[:__nfiles__]
                     profile_path = wmo_path / 'profiles'
                     if not profile_path.exists():
                         profile_path.mkdir()
@@ -589,8 +596,8 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 ftp.cwd('profiles')
                 files = ftp.nlst('*.nc')
 
-                if nfiles is not None and nfiles < len(files):
-                    files = files[:nfiles]
+                if __nfiles__ is not None and __nfiles__ < len(files):
+                    files = files[:__nfiles__]
 
                 profile_path = wmo_path / 'profiles'
                 if not profile_path.exists():
