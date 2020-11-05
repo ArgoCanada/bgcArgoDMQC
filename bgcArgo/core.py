@@ -11,6 +11,7 @@ from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import datetime
 
 # soft attempt to load gsw, but allow for seawater as well
 try: 
@@ -406,6 +407,67 @@ class sprof:
         print('Data for synthetic profile file for float {}'.format(self.WMO))
 
         print(self.df.describe())
+
+    def add_independent_data(self, date=None, data_dict=None, label=None, **kwargs):
+        '''
+        Add independent data in order to easily plot and compare.
+
+        Args:
+            date (optional, str, float, or date):
+                Date as a string ('YYYY-MM-DD'), serial datenumber, or python
+                date object. 
+            data_dict(optional, dict): 
+                Dictionary containing variables to be added, key names should
+                match the naming convention to Argo variables
+            label (optional, str):
+                Label or name of the dataset being added, important when adding
+                more than one source of independent data
+            **kwargs:
+                Argo variable names and their values, essentailly the same as
+                inputting a dictionary without having to actually build one
+
+        Returns:
+            None
+        
+        Example::
+            syn = sprof(wmo_number)
+            df = pd.read_csv('my_winkler_data.csv')
+
+            syn.add_independent_data(
+                date='2020-10-04', # metadata arguments, optional, if no date matches to first profile
+                label='Winkler' # label to classify the data - for if you have more than one source
+                PRES=df.pressure, # data arguments, match naming to Argo variables
+                DOXY=df.dissolved_oxygen,
+                LATITUDE=df.lat, LONGITUDE=df.lon, # again, optional
+            )
+
+            data = dict(PRES=df.PRES, DOXY=df.DOXY)
+            syn.add_independent_data(data_dict=data, date='2020-10-04')
+        '''
+
+        if type(date) is str:
+            date = mdates.datestr2num(date)
+        if type(date) is datetime.datetime:
+            date = mdates.date2num(date)
+
+        if data_dict is None:
+            data_dict = dict(**kwargs)
+        elif data_dict is not None and len(kwargs) > 0:
+            # apppend kwargs to dict
+            for k in kwargs.keys():
+                data_dict[k] = kwargs[k]
+
+        # default label value        
+        if label is None:
+            label = ' '
+        # if there isn't already independent data, make a dict for it
+        if not hasattr(self, '__indepdict__'):
+            self.__indepdict__ = {label:data_dict}
+            self.__indeptime__ = {label:date}
+        # if there is one already, append to it
+        else:
+            self.__indepdict__[label] = data_dict
+            self.__indeptime__[label] = date
 
 class profiles:
 
