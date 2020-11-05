@@ -87,16 +87,26 @@ woa_gains = syn.calc_gains(ref='WOA') # using %-saturation
 - Compare to independent data:
 
 ```python
-df = pd.read_csv('my_winkler_data.csv')
->>> df.head()
+df1 = pd.read_csv('my_winkler_data.csv')
+>>> df1.head()
 
 syn.add_independent_data(
-    PRES=df.pressure, # data arguments, match naming to Argo variables
-    DOXY=df.dissolved_oxygen,
-    date=date, lat=lat, lon=lon # metadata arguments, optional
+    PRES=df1.pressure, # data arguments, match naming to Argo variables
+    DOXY=df1.dissolved_oxygen,
+    date='2020-10-04', # metadata arguments, optional, if no date matches to first profile
+    LATITUDE=df1.lat, LONGITUDE=df1.lon, # again, optional
+    label='Winkler' # label to classify the data - for if you have more than one source
+)
+
+df2 = pd.read_csv('my_CTD_data.csv')
+syn.add_independent_data(
+  PRES=df2.PRES, DOXY=df2.DOXY, TEMP=df2.TEMP, PSAL=df2.PSAL,
+  date='2020-10-04',
+  label='Shipboard CTD'
 )
 
 >>> syn.compare_independent_data()
+>>> syn.compare_independent_data(data='Winkler')
 ```
 
 - Other features:
@@ -110,3 +120,10 @@ syn.add_independent_data(
 ## Future Work
 
 ## Outreach and Feedback
+
+At the moment, this package is almost exclusively concerned with QC of oxygen
+measurements, but long term we would like to add in methods for all BGC-Argo
+variables. If you're interested in collaborating as (1) and alpha user/tester,
+(2) contributing to a python tool for another variable or (3) generally helping
+with development of the package, please get in touch!! My email is
+<chris.gordon@dfo.mpo.gc.ca>.
