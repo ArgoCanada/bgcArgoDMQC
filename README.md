@@ -1,6 +1,9 @@
 # Argo Canada BGC Quality Control
 
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargo) [![Build Status](https://travis-ci.com/ArgoCanada/bgcArgo.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgo) [![codecov](https://codecov.io/gh/ArgoCanada/bgcArgo/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgo)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargo) 
+[![Build Status](https://travis-ci.com/ArgoCanada/bgcArgo.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgo) 
+[![Documentation Status](https://readthedocs.org/projects/bgcargo/badge/?version=latest)](https://bgcargo.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/ArgoCanada/bgcArgo/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgo)
 
 ## disclaimer
 
