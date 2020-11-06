@@ -56,10 +56,9 @@ woa_path  = 'your/woa18/data/path' # where to save WOA data
 
 # download the data - this can take some time depending on connection
 # Argo
-wmos = [4902480, 6902905]
-for w in wmos: 
+wmos = [4902481, 6902905]
+for w in wmos:
   bgc.io.get_argo(w, local_path=argo_path)
-fltpath = ['{}/{}/{}'.format(dacpath, d, w) for d, w in zip(dacs, wmos)]
 # NCEP
 bgc.io.get_ncep('pres', local_path=ncep_path)
 bgc.io.get_ncep('land', local_path=ncep_path)
@@ -68,25 +67,48 @@ bgc.io.get_woa18('O2sat', local_path=woa_path)
 
 # tell the package where to look for data
 bgc.set_dirs(argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path)
-# load data from profiles for two floats
-flts = bgc.profiles(wmos)
-# calculate the dissolved oxygen gains
-gains = flts.calc_gains()
-print(gains)
+# load data  for the first 10 profiles for two floats
+flts = bgc.profiles(wmos, cycles=list(range(1,11)))
+df = flts.to_dataframe()
+>>> print(df)
 
 # load a synthetic profile
-syn = bgc.sprof(4902480)
+syn = bgc.sprof(4902481)
 # plot a time vs. depth section for the top 500m
 g1 = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
-# plot the first 10 profiles for temperature, practical salinity,
-# and adjusted oxygen
-g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Ncycle=10, Nprof=10, ylim=(0,500))
+# plot the first 10 profiles for temperature, practical salinity, oxygen
+g2 = syn.plot('profiles', varlist=['TEMP','PSAL', 'DOXY'], Ncycle=1, Nprof=10, ylim=(0,500))
+
+# calculate gains in-air and using saturation data
+inair_g = syn.calc_gains()
+surf_g  = syn.calc_gains(ref='WOA')
+
+>>> print(f'Mean in-air gain: {np.nanmean(inair_g):.2f}')
+>>> print(f'Mean in-water gain: {np.nanmean(surf_g):.2f}')
 ```
 
-The above code would produce the following plots:
+The above code would produce the following output and plots:
 
-<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p1.png" width="800">
-<img src="https://raw.githubusercontent.com/ArgoCanada/BGC-QC/master/figures/example_p2.png" width="600">
+```text
+       CYCLE           SDN      WMO   LATITUDE  ...  DOXY_ADJUSTED  DOXY_ADJUSTED_QC      O2Sat  O2Sat_QC
+0        1.0  17921.627083  6902905 -52.503939  ...            NaN               4.0        NaN       4.0
+1        1.0  17921.627083  6902905 -52.503939  ...            NaN               4.0        NaN       4.0
+2        1.0  17921.627083  6902905 -52.503939  ...            NaN               4.0        NaN       4.0
+3        1.0  17921.627083  6902905 -52.503939  ...            NaN               4.0        NaN       4.0
+4        1.0  17921.627083  6902905 -52.503939  ...            NaN               4.0        NaN       4.0
+...      ...           ...      ...        ...  ...            ...               ...        ...       ...
+30545   10.0  18151.225694  4902481  55.530190  ...            NaN               4.0  82.866123       3.0
+30546   10.0  18151.225694  4902481  55.530190  ...            NaN               4.0  82.660113       3.0
+30547   10.0  18151.225694  4902481  55.530190  ...            NaN               4.0  82.495289       3.0
+30548   10.0  18151.225694  4902481  55.530190  ...            NaN               4.0  82.368619       3.0
+30549   10.0  18151.225694  4902481  55.530190  ...            NaN               4.0  82.078116       3.0
+
+Mean in-air gain: 1.31
+Mean in-water gain: 1.04
+```
+
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_p1.png" width="800">
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_p2.png" width="600">
 
 ## version history
 
