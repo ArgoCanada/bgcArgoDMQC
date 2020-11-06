@@ -118,7 +118,7 @@ class sprof:
     
     set_dirs = set_dirs
 
-    def __init__(self, wmo, keep_fillvalue=False):
+    def __init__(self, wmo, keep_fillvalue=False, rcheck=True):
 
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
         self.__rawfloatdict__ = self.__floatdict__
@@ -131,6 +131,9 @@ class sprof:
         self.assign(self.__floatdict__)
         if not keep_fillvalue:
             self.rm_fillvalue()
+
+        if rcheck:
+            self.check_range('DOXY')
 
     def assign(self, floatdict):
         '''
@@ -244,6 +247,11 @@ class sprof:
         for k in key:
             self.__rangecheckdict__ = range_check(k, self.__floatdict__)
             self.__floatdict__ = self.__rangecheckdict__
+
+        # recalculate O2sat if its DOXY
+        if k == 'DOXY':
+            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+
         self.assign(self.__rangecheckdict__)
     
     def to_dict(self):
@@ -406,7 +414,10 @@ class sprof:
         
         print('Data for synthetic profile file for float {}'.format(self.WMO))
 
-        print(self.df.describe())
+        sys.stdout.write('Variables:\n')
+        for k in self.__floatdict__.keys():
+            sys.stdout.write('{}\n'.format(k))
+        sys.stdout.write('\n')
 
     def add_independent_data(self, date=None, data_dict=None, label=None, **kwargs):
         '''
@@ -473,7 +484,7 @@ class profiles:
 
     set_dirs = set_dirs
 
-    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False):
+    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False, rcheck=True):
         if type(floats) is int:
             floats = [floats]
 
@@ -489,6 +500,9 @@ class profiles:
         self.assign(self.__floatdict__)
         if not keep_fillvalue:
             self.rm_fillvalue()
+
+        if rcheck:
+            self.check_range('DOXY')
 
     def assign(self, floatdict):
 
@@ -570,8 +584,27 @@ class profiles:
         self.assign(self.__rawfloatdict__)
 
     def check_range(self, key):
-        self.__rangecheckdict__ = range_check(key, self.__floatdict__)
-        self.__floatdict__ = self.__rangecheckdict__
+        '''
+        Performs a range check for variables that have a RTQC range available.
+        Replaces values outside the range with NaN values. Takes string input
+        to do the range check on that variable. Available variables are
+        PRES, TEMP, PSAL, and DOXY. Can also take input 'all' to do the range
+        check on all four variables, or a list of strings to do each of those
+        variables.
+        '''
+        if key == 'all':
+            key = ['PRES', 'TEMP', 'PSAL', 'DOXY']
+        elif type(key) is not list:
+            key = [key]
+        
+        for k in key:
+            self.__rangecheckdict__ = range_check(k, self.__floatdict__)
+            self.__floatdict__ = self.__rangecheckdict__
+
+        # recalculate O2sat if its DOXY
+        if k == 'DOXY':
+            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+
         self.assign(self.__rangecheckdict__)
              
     def to_dict(self):
@@ -683,8 +716,18 @@ class profiles:
 
         if not hasattr(self, 'df'):
             self.to_dataframe()
+
+        sys.stdout.write('Data for profile files for floats ')
+        for i,w in enumerate(self.df.WMO.unique()):
+            if i > 0:
+                sys.stdout.write(', ')
+            sys.stdout.write('{}'.format(int(WMO)))
+        sys.stdout.write('\n')
         
-        print(self.df.describe())
+        sys.stdout.write('Variables:\n')
+        for k in self.__floatdict__.keys():
+            sys.stdout.write('{}\n'.format(k))
+        sys.stdout.write('\n')
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
@@ -1492,7 +1535,7 @@ def delta_pres(P1, P2):
 	return dpres
 
 def range_check(key, floatdict, verbose=True):
-    if 'range_dict' not in globals:
+    if 'range_dict' not in globals():
         global range_dict
         range_dict = dict(
             PRES=(-5, np.inf),
