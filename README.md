@@ -107,8 +107,8 @@ Mean in-air gain: 1.31
 Mean in-water gain: 1.04
 ```
 
-<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_p1.png" width="800">
-<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_p2.png" width="600">
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_1.png" width="800">
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_2.png" width="600">
 
 ## version history
 
