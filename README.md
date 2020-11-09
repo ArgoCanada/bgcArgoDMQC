@@ -1,9 +1,9 @@
 # Argo Canada BGC Quality Control
 
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargo) 
-[![Build Status](https://travis-ci.com/ArgoCanada/bgcArgo.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgo) 
-[![Documentation Status](https://readthedocs.org/projects/bgcargo/badge/?version=latest)](https://bgcargo.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/ArgoCanada/bgcArgo/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgo)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargodmqc)
+[![Build Status](https://travis-ci.com/ArgoCanada/bgcArgoDMQC.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgoDMQC)
+[![Documentation Status](https://readthedocs.org/projects/bgcargodmqc/badge/?version=latest)](https://bgcargodmqc.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC)
 
 ## disclaimer
 
@@ -14,13 +14,13 @@ This code is in _very_ active development. Use of this code is available (encour
 The recommended install is through the conda-forge channel, via the command:
 
 ```bash
-conda install -c conda-forge bgcargo
+conda install -c conda-forge bgcArgoDMQC
 ```
 
 The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
 
 ```bash
-pip install bgcArgo
+pip install bgcArgoDMQC
 ```
 
 ## general description
@@ -107,8 +107,8 @@ Mean in-air gain: 1.31
 Mean in-water gain: 1.04
 ```
 
-<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_1.png" width="800">
-<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_2.png" width="600">
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgoDMQC/master/figures/example_1.png" width="800">
+<img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgoDMQC/master/figures/example_2.png" width="600">
 
 ## version history
 
@@ -123,3 +123,5 @@ Mean in-water gain: 1.04
 0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well
 
 0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock
+
+0.2.9: November 9, 2020 - name change to bgcArgoDMQC, various other updates over the past month

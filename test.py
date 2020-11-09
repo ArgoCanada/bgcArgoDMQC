@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import unittest
 import numpy as np
 import pandas as pd
-import bgcArgo as bgc
+import bgcArgoDMQC as bgc
 
 global wmo
 wmo = 4902481
