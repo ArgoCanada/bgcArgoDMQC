@@ -480,6 +480,24 @@ class sprof:
             self.__indepdict__[label] = data_dict
             self.__indeptime__[label] = date
 
+    def compare_independent_data(self, fmt='*', **kwargs):
+
+        if not hasattr(self, 'df'):
+            self.df = self.to_dataframe()
+
+        plot_dict = copy.deepcopy(self.__indepdict__)
+        
+        for label in plot_dict.keys():
+            pres = plot_dict[label].pop('PRES')
+
+            varlist = list(plot_dict.keys())
+            g = fplt.profiles(self.df, varlist=varlist)
+
+            for v, ax in zip(varlist, g.axes):
+                ax.plot(plot_dict[label][v], pres, fmt=fmt, label=label)
+
+        return g
+
 class profiles:
 
     set_dirs = set_dirs
