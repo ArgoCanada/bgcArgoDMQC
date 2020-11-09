@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+gsw
+netCDF4
+pandas
+seaborn
+cmocean
