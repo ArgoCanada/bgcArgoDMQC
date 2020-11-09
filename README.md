@@ -17,7 +17,7 @@ The recommended install is through the conda-forge channel, via the command:
 conda install -c conda-forge bgcArgoDMQC
 ```
 
-The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
+The package is also available through the python package index <https://pypi.org/project/bgcArgoDMQC/>, install with:
 
 ```bash
 pip install bgcArgoDMQC
