@@ -490,11 +490,11 @@ class sprof:
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
 
-            varlist = list(plot_dict.keys())
+            varlist = list(plot_dict[label].keys())
             g = fplt.profiles(self.df, varlist=varlist)
 
             for v, ax in zip(varlist, g.axes):
-                ax.plot(plot_dict[label][v], pres, fmt=fmt, label=label)
+                ax.plot(plot_dict[label][v], pres, fmt, label=label)
 
         return g
 
