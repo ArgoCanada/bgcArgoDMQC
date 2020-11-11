@@ -95,6 +95,8 @@ def pH2O(T, S=0, unit='Pa'):
     elif unit == 'mbar':
         # SCOR WG 142
         vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk))) - 4.8489*np.log(((Tk/100)) - 0.000544*S))
+    else:
+        raise ValueError('Invalid unit input of {}, must be one of "Pa" or "mbar"'.format(unit))
 
     return vapor_pressure
 
