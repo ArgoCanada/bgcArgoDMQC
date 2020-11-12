@@ -174,9 +174,9 @@ def mL_per_L_to_umol_per_L(ppt, T):
     Returns:
     '''
 
-    Tk      = T + 273.15 # temperature in kelvin
-    R       = 8.314 # gas constant in J mol-1 K-1
-    Vm      = ppt/1000 # volume of oxygen in L
+    Tk  = T + 273.15 # temperature in kelvin
+    R   = 8.314 # gas constant in J mol-1 K-1
+    Vm  = ppt/1000 # volume of oxygen in L
 
     nmol = 101.325 * Vm / (R * Tk) # mol L-1
     umol = nmol * 1e6 # umol L-1 or mmol m-3
