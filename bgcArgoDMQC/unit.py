@@ -135,6 +135,54 @@ def atmos_pO2(P, pH2O):
 
     return pO2
 
+def umol_per_sw_to_umol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
+    '''
+    Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.
+
+    Args:
+        doxy (float or array-like): dissolved oxygen in umol kg-1
+        S (float or array-like): salinity, array of same length as `doxy` or single value
+        T (float or array-like): temperature (deg C), array of same length  as `doxy` or single value
+        P (float or array-like): pressure (dbar), array of same length  as `doxy` or single value
+        Pref (optional, float): reference pressure (dbar) for potential density calculation, default 0
+        lat (optional, float or array-like): latitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+        lon (optional, float or array-like): longitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+
+    Returns:
+        umol_L_conc (float or array-like): dissolved oxygen concentration in umol L-1 (or equivalently mmol m-3)
+    '''
+
+    if flagSA:
+        if lat is None and lon is None:
+            pot_density = gsw.pot_rho_t_exact(S, T, P, Pref)
+            warnings.warn('No coordinate information required, proceeding with calculation using practical salinity instead of absolute salinity')
+        else:
+            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, Pref)
+    else:
+        pot_density = pden(S, T, P, pr=Pref)
+
+    umol_L_conc = 1000*doxy / pot_density
+
+    return umol_L_conc
+
+def mL_per_L_to_umol_per_L(ppt, T):
+    '''
+    Convert oxygen measured in mL L-1 to concentration in umol L-1.
+
+    Args:
+
+    Returns:
+    '''
+
+    Tk      = T + 273.15 # temperature in kelvin
+    R       = 8.314 # gas constant in J mol-1 K-1
+    Vm      = ppt/1000 # volume of oxygen in L
+
+    nmol = 101.325 * Vm / (R * Tk) # mol L-1
+    umol = nmol * 1e6 # umol L-1 or mmol m-3
+
+    return umol
+
 # -----------------------------------------------------------------------------
 # Section - conversion code from "SCOR WG 142: Quality Control Procedures for 
 # Oxygen and Other Biogeochemical Sensors on Floats and Gliders". Code
@@ -191,14 +239,14 @@ def pO2_to_doxy(pO2, S, T, P=0):
     '''
     convert oxygen partial pressure to molar oxygen concentration
 
-    inputs:
-        pO2    - oxygen partial pressure in mbar
-        T      - temperature in deg C
-        S      - salinity (PSS-78)
-        P      - hydrostatic pressure in dbar (default: 0 dbar)
+    Args:
+        pO2 (float or array-like): oxygen partial pressure in mbar
+        T (float or array-like): temperature in deg C
+        S (float or array-like): salinity (PSS-78)
+        P (optional, float or array-like): hydrostatic pressure in dbar (default: 0 dbar)
 
-    output:
-        DOXY   - oxygen concentration in umol L-1
+    Returns:
+        DOXY: oxygen concentration in umol L-1
 
     according to recommendations by SCOR WG 142 "Quality Control Procedures
     for Oxygen and Other Biogeochemical Sensors on Floats and Gliders"
@@ -233,33 +281,3 @@ def pO2_to_doxy(pO2, S, T, P=0):
     O2conc  = pO2/(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
 
     return O2conc
-
-def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
-    '''
-    Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.
-
-    Args:
-        doxy (float or array-like): dissolved oxygen in umol kg-1
-        S (float or array-like): salinity, array of same length as `doxy` or single value
-        T (float or array-like): temperature (deg C), array of same length  as `doxy` or single value
-        P (float or array-like): pressure (dbar), array of same length  as `doxy` or single value
-        Pref (optional, float): reference pressure (dbar) for potential density calculation, default 0
-        lat (optional, float or array-like): latitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
-        lon (optional, float or array-like): longitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
-
-    Returns:
-        mmol_L_conc (float or array-like): dissolved oxygen concentration in mmol L-1
-    '''
-
-    if flagSA:
-        if lat is None and lon is None:
-            pot_density = gsw.pot_rho_t_exact(S, T, P, 0)
-            warnings.warn('No coordinate information required, proceeding with calculation using practical salinity instead of absolute salinity')
-        else:
-            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, 0)
-    else:
-        pot_density = pden(S, T, P)
-
-    mmol_L_conc = 1000*doxy / pot_density
-
-    return mmol_L_conc
