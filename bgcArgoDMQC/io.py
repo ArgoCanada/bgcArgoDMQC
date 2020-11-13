@@ -41,21 +41,29 @@ def read_index(mission='B'):
     '''
 
     if mission == 'B':
-        filename = index_path / 'argo_bio-profile_index.txt.gz'
+        local_filename = index_path / 'argo_bio-profile_index.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_bio-profile_index.txt.gz'
     elif mission == 'C':
-        filename = index_path / 'ar_index_global_prof.txt.gz'
+        local_filename = index_path / 'ar_index_global_prof.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_prof.txt.gz'
     elif mission == 'S':
-        filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+        local_filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_synthetic-profile_index.txt.gz'
     elif mission == 'M':
-        filename = index_path / 'ar_index_global_meta.txt.gz'
+        local_filename = index_path / 'ar_index_global_meta.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_meta.txt.gz'
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
-    if not Path(filename).exists():
-        sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
-        update_index(ftype=mission)
+    try:
+        df = pd.read_csv(remote_filename, compression='gzip', header=8)
+    except:
+        warnings.warn('Could not read index file from ifremer FTP server, trying to load using local file, which may not be up to date.')
+        if not Path(local_filename).exists():
+            sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
+            update_index(ftype=mission)
 
-    df =  pd.read_csv(filename, compression='gzip', header=8)
+        df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
     df['dac'] = np.array([f.split('/')[0] for f in df.file])
     df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
