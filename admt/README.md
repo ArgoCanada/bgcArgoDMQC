@@ -1,6 +1,6 @@
 # Presentation Outline
 
-- What is `bgcArgo`, and why did we make it?
+- What is `bgcArgoDMQC`, and why did we make it?
 - Basic information
 - Status of the package
 - Key features with examples
@@ -8,9 +8,9 @@
 - Planning ahead/future work
 - Outreach
 
-## What is `bgcArgo`
+## What is `bgcArgoDMQC`
 
-`bgcArgo` is a python package for performing quality control on biogeochemical
+`bgcArgoDMQC` is a python package for performing quality control on biogeochemical
 variables recorded by the BGC-Argo program. At this stage of development,
 dissolved oxygen (DOXY) is the only variable this package works on, but in the
 long term we would like to see it expand to include QC methods for all 6 of the
