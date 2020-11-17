@@ -39,13 +39,13 @@ reliable, agrees with previously established methods, and is open source.
 The recommended install is through the conda-forge channel, via the command:
 
 ```bash
-conda install -c conda-forge bgcargo
+conda install -c conda-forge bgcargodmqc
 ```
 
 The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
 
 ```bash
-pip install bgcArgo
+pip install bgcArgoDMQC
 ```
 
 ## Status
@@ -61,7 +61,7 @@ significant validation testing, but is still under active development.
 - Load in Argo data from synthetic or profile files:
 
 ```python
-import bgcArgo as bgc
+import bgcArgoDMQC as bgc
 
 syn  = bgc.sprof(4902480)
 prof = bgc.profiles([4902480, 4902481])
