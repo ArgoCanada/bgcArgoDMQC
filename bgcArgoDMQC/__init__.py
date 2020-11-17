@@ -45,4 +45,3 @@ __version__ = '0.2.9'
 # check age of index file, or if it exists
 if not io.index_exists():
     io.update_index()
-io.check_index()

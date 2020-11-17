@@ -9,6 +9,8 @@
 
 This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
 
+[![Binder](https://binder.pangeo.io/badge_logo.svg)](https://binder.pangeo.io/v2/gh/ArgoCanada/bgcArgoDMQC/master?filepath=notebooks%2FbgcArgoDMQC-basic-usage.ipynb) try it out in binder before installing!
+
 ## installation
 
 The recommended install is through the conda-forge channel, via the command:

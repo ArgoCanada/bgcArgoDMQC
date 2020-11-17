@@ -1,6 +1,6 @@
 # Presentation Outline
 
-- What is `bgcArgo`, and why did we make it?
+- What is `bgcArgoDMQC`, and why did we make it?
 - Basic information
 - Status of the package
 - Key features with examples
@@ -8,9 +8,9 @@
 - Planning ahead/future work
 - Outreach
 
-## What is `bgcArgo`
+## What is `bgcArgoDMQC`
 
-`bgcArgo` is a python package for performing quality control on biogeochemical
+`bgcArgoDMQC` is a python package for performing quality control on biogeochemical
 variables recorded by the BGC-Argo program. At this stage of development,
 dissolved oxygen (DOXY) is the only variable this package works on, but in the
 long term we would like to see it expand to include QC methods for all 6 of the
@@ -39,13 +39,13 @@ reliable, agrees with previously established methods, and is open source.
 The recommended install is through the conda-forge channel, via the command:
 
 ```bash
-conda install -c conda-forge bgcargo
+conda install -c conda-forge bgcargodmqc
 ```
 
 The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
 
 ```bash
-pip install bgcArgo
+pip install bgcArgoDMQC
 ```
 
 ## Status
@@ -61,7 +61,7 @@ significant validation testing, but is still under active development.
 - Load in Argo data from synthetic or profile files:
 
 ```python
-import bgcArgo as bgc
+import bgcArgoDMQC as bgc
 
 syn  = bgc.sprof(4902480)
 prof = bgc.profiles([4902480, 4902481])
