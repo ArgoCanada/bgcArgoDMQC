@@ -7,7 +7,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 
-import bgcArgo as bgc
+import bgcArgoDMQC as bgc
 
 # load in DOXY audit file - most recent one was on July 9 2020
 audit_file = Path('../data/DOXY_audit_070720.TXT')

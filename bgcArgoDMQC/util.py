@@ -374,8 +374,12 @@ def haversine(c1, c2):
 
     # Haversine formula
     a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
-    c = 2 * np.atan2(np.sqrt(a), np.sqrt(1 - a))
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
     distance = R * c
 
     return distance
+
+def cycle_from_time(time, t_arr, c_arr):
+    ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))
+    return c_arr[ix][0]

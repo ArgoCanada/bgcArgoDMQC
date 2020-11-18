@@ -9,7 +9,16 @@ from scipy.interpolate import interp1d, RectBivariateSpline
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.offsetbox import AnchoredText
 import datetime
+
+# try to import cartopy
+try:
+    map_flag = True
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+except:
+    map_flag = False
 
 # soft attempt to load gsw, but allow for seawater as well
 try: 
@@ -508,29 +517,87 @@ class sprof:
             meta_keys = meta_keys + list(meta_dict[label].keys())
         meta_keys = set(meta_keys)
 
+        for label in meta_dict.keys():
+            if label == ' ':
+                label = 'Observation'
+
+            if meta_dict[label]['date'] is None:
+                cyc = 1
+                dstr = 'N/A'
+            else:
+                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
+                dstr = mdates.num2date(meta_dict[label]['date']).strftime('%b %d, %Y')
+
+            meta_data_string = '{} date: {}\n'.format(label, dstr)
+            meta_data_string = meta_data_string + 'Argo profile #{} date: {}\n'.format(cyc, mdates.num2date(self.SDN[self.CYCLE == cyc][0]).strftime('%b %d, %Y'))
+
         map_num = 0
         if 'lat' in meta_keys and 'lon' in meta_keys:
-            map_num = 1
+            map_num = 0 # change to 1 later, just broken right now
         
         nvar = len(set(var_keys))
-        fig, axes = plt.subplots(1, nvar + map_num)
-        if nvar + map_num == 1:
-            axes = [axes]
-
-        axes_dict = {v:ax for v, ax in zip(var_keys, axes)}
+        fig = plt.figure()
+        ax_list = [fig.add_subplot(1, nvar+map_num, n+1) for n in range(nvar)]
+        axes_dict = {v:ax for v, ax in zip(var_keys, ax_list)}
         if map_num > 0:
-            axes_dict['MAP'] = axes[-1]
+            ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
         
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
 
+            if meta_dict[label]['date'] is None:
+                cyc = 1
+            else:
+                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
+
             varlist = list(plot_dict[label].keys())
 
             for v in varlist:
-                gt = fplt.profiles(self.df, varlist=[v], axes=axes_dict[v])
+                fplt.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
                 axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=label)
 
-        return fig, axes
+        if map_num > 0:
+            mx = ax_list[-1]
+            print(mx)
+            dist_str = ''
+            for label in meta_dict.keys():
+                if meta_dict[label]['date'] is None:
+                    cyc = 1
+                else:
+                    cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
+                c1 = (meta_dict[label]['lat'], meta_dict[label]['lon'])
+                c2 = (self.LATITUDE[self.CYCLE == cyc][0], self.LONGITUDE[self.CYCLE == cyc][0])
+                mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label)
+                dist_str = dist_str + '{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
+            
+                mx.plot(c2[1], c2[0], label='Float {}'.format(self.WMO))
+
+            mx.set_extent([], crs=ccrs.PlateCarree())
+
+            anc = AnchoredText('Distance between obs and float: ' + dist_str,
+                loc=2, frameon=True, prop=dict(size=8))
+            # mx.add_artist(anc)
+        
+        if map_num == 0 and len(ax_list) > 1:
+            for ax in ax_list[1:]:
+                ax.set_title('')
+                ax.set_ylabel('')
+                ax.set_yticklabels([])
+        elif map_num == 1 and len(ax_list) > 2:
+            for ax in ax_list[1:-1]:
+                ax.set_title('')
+                ax.set_ylabel('')
+                ax.set_yticklabels([])
+
+        ax_list[0].legend(loc=4)
+
+        print(meta_data_string)
+
+        anc = AnchoredText(meta_data_string,
+                loc=2, frameon=True, prop=dict(size=8))
+        ax_list[0].add_artist(anc)
+
+        return fig, ax_list
 
 class profiles:
 
@@ -1603,7 +1670,7 @@ def range_check(key, floatdict, verbose=True):
     r = range_dict[key.replace('_ADJUSTED','')]
     outside_range = np.logical_or(argo_var < r[0], argo_var > r[1])
     if verbose:
-        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
+        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN\n'.format(np.sum(outside_range)))
 
     argo_var[outside_range] = np.nan
     cleandict[key] = argo_var

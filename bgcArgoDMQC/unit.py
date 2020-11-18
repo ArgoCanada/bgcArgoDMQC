@@ -135,7 +135,7 @@ def atmos_pO2(P, pH2O):
 
     return pO2
 
-def umol_per_sw_to_umol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
+def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
     '''
     Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.
 
