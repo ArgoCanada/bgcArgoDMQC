@@ -3,11 +3,9 @@ import copy
 import warnings
 from pathlib import Path
 import fnmatch
-import time
 
 import numpy as np
 from scipy.interpolate import interp1d, RectBivariateSpline
-from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -248,9 +246,9 @@ class sprof:
             self.__rangecheckdict__ = range_check(k, self.__floatdict__)
             self.__floatdict__ = self.__rangecheckdict__
 
-        # recalculate O2sat if its DOXY
-        if k == 'DOXY':
-            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+            # recalculate O2sat if its DOXY
+            if k == 'DOXY':
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
 
         self.assign(self.__rangecheckdict__)
     
@@ -400,6 +398,9 @@ class sprof:
                 self.to_dataframe()
 
             g = fplt.profiles(self.df, varlist=varlist, **kwargs)
+
+        else:
+            raise ValueError('Invalid input for keyword argument "kind"')
 
         return g
 
@@ -619,9 +620,9 @@ class profiles:
             self.__rangecheckdict__ = range_check(k, self.__floatdict__)
             self.__floatdict__ = self.__rangecheckdict__
 
-        # recalculate O2sat if its DOXY
-        if k == 'DOXY':
-            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+            # recalculate O2sat if its DOXY
+            if k == 'DOXY':
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
 
         self.assign(self.__rangecheckdict__)
              
@@ -739,7 +740,7 @@ class profiles:
         for i,w in enumerate(self.df.WMO.unique()):
             if i > 0:
                 sys.stdout.write(', ')
-            sys.stdout.write('{}'.format(int(WMO)))
+            sys.stdout.write('{}'.format(int(w)))
         sys.stdout.write('\n')
         
         sys.stdout.write('Variables:\n')
@@ -919,6 +920,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
     if not BRtraj.exists():
+        BRtraj_nc = None
         BRtraj_flag = False
         if verbose:
             sys.stdout.write('Continuing without BRtraj file\n')
@@ -1142,7 +1144,7 @@ def load_profiles(files):
             try:
                 cc = Dataset(Path(ARGO_PATH) / cn, 'r')
             except:
-                warnings.warn('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+                raise ValueError('Cannot get core Argo data, no such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
 
         # number of profile cycles
         M = cc.dimensions['N_LEVELS'].size
