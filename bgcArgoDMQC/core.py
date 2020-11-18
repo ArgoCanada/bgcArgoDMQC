@@ -420,7 +420,7 @@ class sprof:
             sys.stdout.write('{}\n'.format(k))
         sys.stdout.write('\n')
 
-    def add_independent_data(self, date=None, data_dict=None, label=None, **kwargs):
+    def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
         Add independent data in order to easily plot and compare.
 
@@ -462,6 +462,12 @@ class sprof:
         if type(date) is datetime.datetime:
             date = mdates.date2num(date)
 
+        meta_dict = dict(date=date)
+        if not lat is None:
+            meta_dict['lat'] = lat
+        if not lon is None:
+            meta_dict['lon'] = lon
+
         if data_dict is None:
             data_dict = dict(**kwargs)
         elif data_dict is not None and len(kwargs) > 0:
@@ -475,29 +481,56 @@ class sprof:
         # if there isn't already independent data, make a dict for it
         if not hasattr(self, '__indepdict__'):
             self.__indepdict__ = {label:data_dict}
-            self.__indeptime__ = {label:date}
+            self.__indepmeta__ = {label:meta_dict}
         # if there is one already, append to it
         else:
             self.__indepdict__[label] = data_dict
-            self.__indeptime__[label] = date
+            self.__indepmeta__[label] = meta_dict
 
     def compare_independent_data(self, fmt='*', **kwargs):
+        '''
+        Plot the independent data overtop of the nearest profile in time
+        '''
 
         if not hasattr(self, 'df'):
             self.df = self.to_dataframe()
 
         plot_dict = copy.deepcopy(self.__indepdict__)
+        meta_dict = copy.deepcopy(self.__indepmeta__)
+
+        var_keys = []
+        for label in plot_dict.keys():
+            var_keys = var_keys + list(plot_dict[label].keys())
+        var_keys.remove('PRES')
+
+        meta_keys = []
+        for label in meta_dict.keys():
+            meta_keys = meta_keys + list(meta_dict[label].keys())
+        meta_keys = set(meta_keys)
+
+        map_num = 0
+        if 'lat' in meta_keys and 'lon' in meta_keys:
+            map_num = 1
+        
+        nvar = len(set(var_keys))
+        fig, axes = plt.subplots(1, nvar + map_num)
+        if nvar + map_num == 1:
+            axes = [axes]
+
+        axes_dict = {v:ax for v, ax in zip(var_keys, axes)}
+        if map_num > 0:
+            axes_dict['MAP'] = axes[-1]
         
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
 
             varlist = list(plot_dict[label].keys())
-            g = fplt.profiles(self.df, varlist=varlist)
 
-            for v, ax in zip(varlist, g.axes):
-                ax.plot(plot_dict[label][v], pres, fmt, label=label)
+            for v in varlist:
+                gt = fplt.profiles(self.df, varlist=[v], axes=axes_dict[v])
+                axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=label)
 
-        return g
+        return fig, axes
 
 class profiles:
 
