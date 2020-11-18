@@ -31,7 +31,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B'):
+def read_index(mission='B', remote=False):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -55,10 +55,10 @@ def read_index(mission='B'):
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
-    try:
+    if remote:
         df = pd.read_csv(remote_filename, compression='gzip', header=8)
-    except:
-        warnings.warn('Could not read index file from ifremer FTP server, trying to load using local file, which may not be up to date.')
+    else:
+        # warnings.warn('Could not read index file from ifremer FTP server, trying to load using local file, which may not be up to date.')
         if not Path(local_filename).exists():
             sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
             update_index(ftype=mission)
