@@ -330,25 +330,13 @@ def get_var_by(v1, v2, float_data):
     variable (v2) in a float_data dictionary (output of load_argo), though
     it would work with any python dict
     
-    INPUT:
-              v1: string input of a key in float_data
-              v2: string input of a key in float_data
-              float_data: python dict() object
+    Args:
+        v1 (str): string input of a key in float_data
+        v2 (str): string input of a key in float_data
+        float_data (dict): python dict() object
     
-    OUTPUT:
-              out_array: 1D numpy array with mean values
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    LAST UPDATE: 20-04-2020
-    
-    CHANGE LOG:
+    Returns:
+        1D numpy array with mean values
     '''
 
     
@@ -358,3 +346,36 @@ def get_var_by(v1, v2, float_data):
         out_array[i] = np.nanmean(float_data[v1][float_data[v2] == v])
     
     return out_array
+
+def haversine(c1, c2):
+    '''
+    Calculate the distance between two coordinates using the Haversine formula.
+
+    Args:
+        c1 (tuple): first set of coordinates - (lat, long)
+        c2 (tuple): second set of coordinates - (lat, long)
+
+    Returns: 
+        Distnace between c1 and c2 in kilometers
+    '''
+
+    # approx radius of earth in km
+    R = 6373.0
+
+    # convert coordinates to radians
+    lat1 = np.radians(c1[0])
+    lon1 = np.radians(c1[1])
+    lat2 = np.radians(c2[0])
+    lon2 = np.radians(c2[1])
+
+    # difference in coords
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    # Haversine formula
+    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    c = 2 * np.atan2(np.sqrt(a), np.sqrt(1 - a))
+
+    distance = R * c
+
+    return distance
