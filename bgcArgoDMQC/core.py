@@ -5,7 +5,7 @@ from pathlib import Path
 import fnmatch
 
 import numpy as np
-from scipy.interpolate import interp1d, RectBivariateSpline
+from scipy.interpolate import interp1d, interp2d
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
@@ -1718,10 +1718,10 @@ def correct_response_time(t, DO, T, thickness):
     thickness = thickness*np.ones((N-1,))
 
     # translate boundary layer thickness to temperature dependent tau
-    f_thickness = RectBivariateSpline(lut_T, lut_lL, tau100, kx=1, ky=1)
-    tau_T = np.squeeze(f_thickness(thickness, mean_temp, grid=False))
-
-    # loop through oxygen data
+    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
+    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
+    print(tau_T)
+    # loop through oxygen data 
     for i in range(N-1):
         dt = t_sec[i+1] - t_sec[i]
 
@@ -1735,14 +1735,13 @@ def correct_response_time(t, DO, T, thickness):
     return DO_out
 
 def correct_response_time_Tconst(t, DO, tau):
+    # convert time to seconds
+    t_sec = t*24*60*60
 
     # array for the loop
     N = DO.shape[0]
     mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = np.array((N-1)*[np.nan])
-
-    # convert time to seconds
-    t_sec = t*24*60*60
+    mean_time = t_sec[:-1] + np.diff(t_sec)/2
 
     # loop through oxygen data
     for i in range(N-1):
@@ -1750,7 +1749,6 @@ def correct_response_time_Tconst(t, DO, tau):
 
         # do the correction using the mean filter, get the mean time
         mean_oxy[i]  = (1/(2*oxy_b(dt, tau)))*(DO[i+1] - oxy_a(dt, tau)*DO[i])
-        mean_time[i] = t_sec[i] + dt/2
     
     # interpolate back to original times for output
     f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
