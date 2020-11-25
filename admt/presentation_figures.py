@@ -4,12 +4,15 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 import pandas as pd
+
+from netCDF4 import Dataset
 
 import bgcArgoDMQC as bgc
 
 sns.set(context='talk', style='ticks')
-
+'''
 datapath = Path('/Users/gordonc/Documents/data/')
 bgc.set_dirs(
     argo_path=datapath / 'Argo',
@@ -51,12 +54,38 @@ mll  = df['Oxygen:Dissolved (mL/L)']
 temp = df['Temperature:Secondary (\'deg)']
 psal = df['Salinity:Bottle (PSS-78)']
 pres = df['Pressure (decibar)']
+'''
+### RESPONSE TIME ###
 
-doxy = bgc.unit.mL_per_L_to_umol_per_L(mll, temp)
+# load some time-resolved APEX data from GoM
+fn = Path('/Users/gordonc/Documents/data/GoMRI/Sprof/f7939_Sprof.nc')
+nc = Dataset(fn)
 
-syn.add_independent_data(label='CTD/Winkler', date=time, lat=lat, lon=lon, DOXY=doxy, TEMP=temp, PRES=pres)
-fig, axes = syn.compare_independent_data()
+# extract one profile
+ix = 3
+time = nc.variables['MTIME'][:][ix,:].compressed()
+pres = nc.variables['PRES'][:][ix,:].compressed()
+doxy = nc.variables['DOXY'][:][ix,:].compressed()
+temp = nc.variables['TEMP'][:][ix,:].compressed()
 
-fig.set_size_inches(8,6)
-fig.savefig(Path('figures/independent_example.png'), bbox_inches='tight', dpi=350)
-plt.close(fig)
+# do the time response correction
+cd1 = bgc.correct_response_time_Tconst(time, doxy, 70)
+cd2 = bgc.correct_response_time(time, doxy, temp, 125)
+
+temp[pres > 300] = np.nan
+
+fig, axes = plt.subplots(1, 2, sharey=True)
+
+axes[0].plot(doxy, pres, label='Uncorrected')
+axes[0].plot(cd1, pres, label='T-constant Corr.')
+axes[0].plot(cd2, pres, label='T-dependent Corr.')
+axes[1].plot(temp, pres)
+axes[1].set_ylim((250,0))
+
+axes[0].legend(loc=4, fontsize=10)
+
+axes[0].set_xlabel('Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)')
+axes[1].set_xlabel('Temperature ({}C)'.format(chr(176)))
+axes[0].set_ylabel('Pressure (dbar)')
+
+fig.savefig(Path('figures/response_time_corr.png'), bbox_inches='tight', dpi=350)
