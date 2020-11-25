@@ -12,6 +12,13 @@ import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import datetime
 
+# try to import seaborn
+try:
+    sns_flag = True
+    import seaborn as sns
+except:
+    sns_flag = False
+
 # try to import cartopy
 try:
     map_flag = True
@@ -472,10 +479,12 @@ class sprof:
             date = mdates.date2num(date)
 
         meta_dict = dict(date=date)
-        if not lat is None:
-            meta_dict['lat'] = lat
-        if not lon is None:
-            meta_dict['lon'] = lon
+        if lat is None:
+            lat = np.nan
+        if lon is None:
+            lon = np.nan
+        meta_dict['lat'] = lat
+        meta_dict['lon'] = lon
 
         if data_dict is None:
             data_dict = dict(**kwargs)
@@ -510,6 +519,7 @@ class sprof:
         var_keys = []
         for label in plot_dict.keys():
             var_keys = var_keys + list(plot_dict[label].keys())
+        var_keys = list(set(var_keys))
         var_keys.remove('PRES')
 
         meta_keys = []
@@ -517,6 +527,7 @@ class sprof:
             meta_keys = meta_keys + list(meta_dict[label].keys())
         meta_keys = set(meta_keys)
 
+        meta_data_string = ''
         for label in meta_dict.keys():
             if label == ' ':
                 label = 'Observation'
@@ -528,19 +539,29 @@ class sprof:
                 cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
                 dstr = mdates.num2date(meta_dict[label]['date']).strftime('%b %d, %Y')
 
-            meta_data_string = '{} date: {}\n'.format(label, dstr)
-            meta_data_string = meta_data_string + 'Argo profile #{} date: {}\n'.format(cyc, mdates.num2date(self.SDN[self.CYCLE == cyc][0]).strftime('%b %d, %Y'))
+            meta_data_string = meta_data_string + '{} date: {}\n'.format(label, dstr)
+        meta_data_string = meta_data_string + 'Argo profile #{} date: {}'.format(cyc, mdates.num2date(self.SDN[self.CYCLE == cyc][0]).strftime('%b %d, %Y'))
 
         map_num = 0
         if 'lat' in meta_keys and 'lon' in meta_keys:
-            map_num = 0 # change to 1 later, just broken right now
+            map_num = 1 # change to 1 later, just broken right now
         
         nvar = len(set(var_keys))
         fig = plt.figure()
         ax_list = [fig.add_subplot(1, nvar+map_num, n+1) for n in range(nvar)]
         axes_dict = {v:ax for v, ax in zip(var_keys, ax_list)}
+        print(var_keys)
+        print(ax_list)
         if map_num > 0:
             ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
+        
+        ccount = 0
+        if sns_flag:
+            fcol = sns.color_palette('colorblind')[0]
+            clist = sns.color_palette('colorblind')[1:]
+        else:
+            fcol = 'blue'
+            clist = ['orange', 'green', 'cyan', 'red']
         
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
@@ -554,11 +575,15 @@ class sprof:
 
             for v in varlist:
                 fplt.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
-                axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=label)
+                axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
+            
+            ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
+            ccount += 1
 
+        ccount = 0
         if map_num > 0:
+            c = []
             mx = ax_list[-1]
-            print(mx)
             dist_str = ''
             for label in meta_dict.keys():
                 if meta_dict[label]['date'] is None:
@@ -566,17 +591,48 @@ class sprof:
                 else:
                     cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
                 c1 = (meta_dict[label]['lat'], meta_dict[label]['lon'])
-                c2 = (self.LATITUDE[self.CYCLE == cyc][0], self.LONGITUDE[self.CYCLE == cyc][0])
-                mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label)
-                dist_str = dist_str + '{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
+                c2 = (np.nanmean(self.LATITUDE[self.CYCLE == cyc]), np.nanmean(self.LONGITUDE[self.CYCLE == cyc]))
+                c.append(c1)
+                c.append(c2)
+                mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label, color=clist[ccount])
+                dist_str = dist_str + '\n{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
+                ccount += 1
             
-                mx.plot(c2[1], c2[0], label='Float {}'.format(self.WMO))
+                mx.plot(c2[1], c2[0], 'o', color=fcol, label=None, transform=ccrs.PlateCarree())
+            mx.plot(np.nan, np.nan, 'o', color=fcol, label='Float {}'.format(self.WMO))
 
-            mx.set_extent([], crs=ccrs.PlateCarree())
+            c = np.array(c)
+            print(c)
+            minlon, maxlon = np.nanmin(c[:,1]), np.nanmax(c[:,1])
+            minlat, maxlat = np.nanmin(c[:,0]), np.nanmax(c[:,0])
+
+            extent = [minlon, maxlon, minlat, maxlat]
+            for i in range(len(extent)):
+                if extent[i] < 0 and i % 2 == 0:
+                    extent[i] = 1.1*extent[i]
+                elif extent[i] < 0 and i % 2 != 0:
+                    extent[i] = 0.9*extent[i]
+                elif extent[i] > 0 and i % 2 == 0:
+                    extent[i] = 0.9*extent[i]
+                elif extent[i] > 0 and i % 2 != 0:
+                    extent[i] = 1.1*extent[i]
+            
+
+            extent[2] = extent[2] - 6
+            extent[3] = extent[3] + 6
+
+            print(extent)
+            mx.set_extent(extent, crs=ccrs.PlateCarree())
+            mx.legend(loc=4, bbox_to_anchor=(1.05, 1.0), fontsize=8)
+            mx.add_feature(cfeature.COASTLINE)
+            mx.add_feature(cfeature.BORDERS)
+            mx.add_feature(cfeature.OCEAN)
+            mx.add_feature(cfeature.LAND)
+            mx.add_feature(cfeature.RIVERS)
 
             anc = AnchoredText('Distance between obs and float: ' + dist_str,
-                loc=2, frameon=True, prop=dict(size=8))
-            # mx.add_artist(anc)
+                loc=1, frameon=True, prop=dict(size=8))
+            mx.add_artist(anc)
         
         if map_num == 0 and len(ax_list) > 1:
             for ax in ax_list[1:]:
@@ -589,12 +645,12 @@ class sprof:
                 ax.set_ylabel('')
                 ax.set_yticklabels([])
 
-        ax_list[0].legend(loc=4)
+        ax_list[0].legend(loc=2, fontsize=10)
 
         print(meta_data_string)
 
         anc = AnchoredText(meta_data_string,
-                loc=2, frameon=True, prop=dict(size=8))
+                loc=4, frameon=True, prop=dict(size=8))
         ax_list[0].add_artist(anc)
 
         return fig, ax_list
