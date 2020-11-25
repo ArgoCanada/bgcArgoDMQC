@@ -12,7 +12,7 @@ from netCDF4 import Dataset
 import bgcArgoDMQC as bgc
 
 sns.set(context='talk', style='ticks')
-'''
+
 datapath = Path('/Users/gordonc/Documents/data/')
 bgc.set_dirs(
     argo_path=datapath / 'Argo',
@@ -22,7 +22,7 @@ bgc.set_dirs(
 
 
 ### GAIN PLOT ###
-
+'''
 # will load a synthetic (Sprof) file
 syn  = bgc.sprof(4902481)
 # calculate the gain using in-air data
@@ -33,7 +33,7 @@ g = syn.plot('gain', ref='NCEP')
 # save figure
 g.fig.savefig(Path('figures/gain_example.png'), bbox_inches='tight', dpi=350)
 plt.close(g.fig)
-
+'''
 ### INDEPENDENT DATA ###
 
 files = list(Path('/Users/gordonc/Documents/data/Ship/PacOxyFloats/').glob('*chem*'))
@@ -54,9 +54,27 @@ mll  = df['Oxygen:Dissolved (mL/L)']
 temp = df['Temperature:Secondary (\'deg)']
 psal = df['Salinity:Bottle (PSS-78)']
 pres = df['Pressure (decibar)']
-'''
-### RESPONSE TIME ###
 
+doxy = bgc.unit.mL_per_L_to_umol_per_L(mll, temp)
+
+syn.add_independent_data(label='Winkler', date=time, lat=lat, lon=lon, DOXY=doxy, PRES=pres)
+syn.add_independent_data(label='CTD', date=time, lat=lat-1, lon=lon-1, TEMP=temp, PRES=pres)
+fig, axes = syn.compare_independent_data()
+
+for ax in axes[1:]:
+    ax.set_title('')
+    ax.set_ylabel('')
+    ax.set_yticklabels([])
+
+axes[1].set_title(f'Float #{wmo}')
+
+fig.set_size_inches(10,6)
+fig.savefig(Path('figures/independent_example.png'), bbox_inches='tight', dpi=350)
+
+plt.close()
+
+### RESPONSE TIME ###
+'''
 # load some time-resolved APEX data from GoM
 fn = Path('/Users/gordonc/Documents/data/GoMRI/Sprof/f7939_Sprof.nc')
 nc = Dataset(fn)
@@ -88,4 +106,4 @@ axes[0].set_xlabel('Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)')
 axes[1].set_xlabel('Temperature ({}C)'.format(chr(176)))
 axes[0].set_ylabel('Pressure (dbar)')
 
-fig.savefig(Path('figures/response_time_corr.png'), bbox_inches='tight', dpi=350)
+fig.savefig(Path('figures/response_time_corr.png'), bbox_inches='tight', dpi=350)'''
