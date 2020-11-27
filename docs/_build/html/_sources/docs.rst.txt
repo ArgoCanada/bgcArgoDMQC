@@ -4,35 +4,35 @@ Documentation
 Core Functions
 ^^^^^^^^^^^^^^
 
-.. automodule:: bgcArgo.core
+.. automodule:: bgcArgoDMQC.core
     :members:
 
 File I/O Functions
 ^^^^^^^^^^^^^^^^^^
 
-.. automodule:: bgcArgo.io
+.. automodule:: bgcArgoDMQC.io
     :members:
 
 Interpolation Functions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: bgcArgo.interp
+.. automodule:: bgcArgoDMQC.interp
     :members:
 
 Unit Conversion
 ^^^^^^^^^^^^^^^
 
-.. automodule:: bgcArgo.unit
+.. automodule:: bgcArgoDMQC.unit
     :members:
 
 Plotting
 ^^^^^^^^
 
-.. automodule:: bgcArgo.fplt
+.. automodule:: bgcArgoDMQC.fplt
     :members:
 
 Other Functions
 ^^^^^^^^^^^^^^^
 
-.. automodule:: bgcArgo.util
+.. automodule:: bgcArgoDMQC.util
     :members:

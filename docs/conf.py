@@ -17,12 +17,12 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'bgcArgo'
+project = 'bgcArgoDMQC'
 copyright = '2020, Christopher Gordon'
 author = 'Christopher Gordon'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.8'
+release = '0.2.9'
 
 
 # -- General configuration ---------------------------------------------------
