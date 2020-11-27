@@ -1,5 +1,5 @@
 {% set name = "bgcArgoDMQC" %}
-{% set version = "0.2.9" %}
+{% set version = "0.2.10" %}
 
 
 package:
@@ -8,7 +8,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/bgcArgoDMQC-{{ version }}.tar.gz
-  sha256: fa26d02558225bf098e2e383469d5eb80ba863611c95bbd117cd0189a608316c
+  sha256: ba2047e3291b180a6b0749e83575c88eacaafe8e05d6281e4340138805857364
 
 build:
   number: 0
