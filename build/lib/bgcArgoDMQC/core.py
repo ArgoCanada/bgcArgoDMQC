@@ -3,15 +3,29 @@ import copy
 import warnings
 from pathlib import Path
 import fnmatch
-import time
 
 import numpy as np
-from scipy.interpolate import interp1d, RectBivariateSpline
-from scipy.stats import linregress
+from scipy.interpolate import interp1d, interp2d
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.offsetbox import AnchoredText
 import datetime
+
+# try to import seaborn
+try:
+    sns_flag = True
+    import seaborn as sns
+except:
+    sns_flag = False
+
+# try to import cartopy
+try:
+    map_flag = True
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+except:
+    map_flag = False
 
 # soft attempt to load gsw, but allow for seawater as well
 try: 
@@ -248,9 +262,9 @@ class sprof:
             self.__rangecheckdict__ = range_check(k, self.__floatdict__)
             self.__floatdict__ = self.__rangecheckdict__
 
-        # recalculate O2sat if its DOXY
-        if k == 'DOXY':
-            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+            # recalculate O2sat if its DOXY
+            if k == 'DOXY':
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
 
         self.assign(self.__rangecheckdict__)
     
@@ -401,6 +415,9 @@ class sprof:
 
             g = fplt.profiles(self.df, varlist=varlist, **kwargs)
 
+        else:
+            raise ValueError('Invalid input for keyword argument "kind"')
+
         return g
 
 
@@ -419,7 +436,7 @@ class sprof:
             sys.stdout.write('{}\n'.format(k))
         sys.stdout.write('\n')
 
-    def add_independent_data(self, date=None, data_dict=None, label=None, **kwargs):
+    def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
         Add independent data in order to easily plot and compare.
 
@@ -461,6 +478,14 @@ class sprof:
         if type(date) is datetime.datetime:
             date = mdates.date2num(date)
 
+        meta_dict = dict(date=date)
+        if lat is None:
+            lat = np.nan
+        if lon is None:
+            lon = np.nan
+        meta_dict['lat'] = lat
+        meta_dict['lon'] = lon
+
         if data_dict is None:
             data_dict = dict(**kwargs)
         elif data_dict is not None and len(kwargs) > 0:
@@ -474,29 +499,161 @@ class sprof:
         # if there isn't already independent data, make a dict for it
         if not hasattr(self, '__indepdict__'):
             self.__indepdict__ = {label:data_dict}
-            self.__indeptime__ = {label:date}
+            self.__indepmeta__ = {label:meta_dict}
         # if there is one already, append to it
         else:
             self.__indepdict__[label] = data_dict
-            self.__indeptime__[label] = date
+            self.__indepmeta__[label] = meta_dict
 
     def compare_independent_data(self, fmt='*', **kwargs):
+        '''
+        Plot the independent data overtop of the nearest profile in time
+        '''
 
         if not hasattr(self, 'df'):
             self.df = self.to_dataframe()
 
         plot_dict = copy.deepcopy(self.__indepdict__)
+        meta_dict = copy.deepcopy(self.__indepmeta__)
+
+        var_keys = []
+        for label in plot_dict.keys():
+            var_keys = var_keys + list(plot_dict[label].keys())
+        var_keys = list(set(var_keys))
+        var_keys.remove('PRES')
+
+        meta_keys = []
+        for label in meta_dict.keys():
+            meta_keys = meta_keys + list(meta_dict[label].keys())
+        meta_keys = set(meta_keys)
+
+        meta_data_string = ''
+        for label in meta_dict.keys():
+            if label == ' ':
+                label = 'Observation'
+
+            if meta_dict[label]['date'] is None:
+                cyc = 1
+                dstr = 'N/A'
+            else:
+                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
+                dstr = mdates.num2date(meta_dict[label]['date']).strftime('%b %d, %Y')
+
+            meta_data_string = meta_data_string + '{} date: {}\n'.format(label, dstr)
+        meta_data_string = meta_data_string + 'Argo profile #{} date: {}'.format(cyc, mdates.num2date(self.SDN[self.CYCLE == cyc][0]).strftime('%b %d, %Y'))
+
+        map_num = 0
+        if 'lat' in meta_keys and 'lon' in meta_keys:
+            map_num = 1 # change to 1 later, just broken right now
+        
+        nvar = len(set(var_keys))
+        fig = plt.figure()
+        ax_list = [fig.add_subplot(1, nvar+map_num, n+1) for n in range(nvar)]
+        axes_dict = {v:ax for v, ax in zip(var_keys, ax_list)}
+        print(var_keys)
+        print(ax_list)
+        if map_num > 0:
+            ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
+        
+        ccount = 0
+        if sns_flag:
+            fcol = sns.color_palette('colorblind')[0]
+            clist = sns.color_palette('colorblind')[1:]
+        else:
+            fcol = 'blue'
+            clist = ['orange', 'green', 'cyan', 'red']
         
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
 
-            varlist = list(plot_dict.keys())
-            g = fplt.profiles(self.df, varlist=varlist)
+            if meta_dict[label]['date'] is None:
+                cyc = 1
+            else:
+                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
 
-            for v, ax in zip(varlist, g.axes):
-                ax.plot(plot_dict[label][v], pres, fmt=fmt, label=label)
+            varlist = list(plot_dict[label].keys())
 
-        return g
+            for v in varlist:
+                fplt.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
+                axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
+            
+            ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
+            ccount += 1
+
+        ccount = 0
+        if map_num > 0:
+            c = []
+            mx = ax_list[-1]
+            dist_str = ''
+            for label in meta_dict.keys():
+                if meta_dict[label]['date'] is None:
+                    cyc = 1
+                else:
+                    cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
+                c1 = (meta_dict[label]['lat'], meta_dict[label]['lon'])
+                c2 = (np.nanmean(self.LATITUDE[self.CYCLE == cyc]), np.nanmean(self.LONGITUDE[self.CYCLE == cyc]))
+                c.append(c1)
+                c.append(c2)
+                mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label, color=clist[ccount])
+                dist_str = dist_str + '\n{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
+                ccount += 1
+            
+                mx.plot(c2[1], c2[0], 'o', color=fcol, label=None, transform=ccrs.PlateCarree())
+            mx.plot(np.nan, np.nan, 'o', color=fcol, label='Float {}'.format(self.WMO))
+
+            c = np.array(c)
+            print(c)
+            minlon, maxlon = np.nanmin(c[:,1]), np.nanmax(c[:,1])
+            minlat, maxlat = np.nanmin(c[:,0]), np.nanmax(c[:,0])
+
+            extent = [minlon, maxlon, minlat, maxlat]
+            for i in range(len(extent)):
+                if extent[i] < 0 and i % 2 == 0:
+                    extent[i] = 1.1*extent[i]
+                elif extent[i] < 0 and i % 2 != 0:
+                    extent[i] = 0.9*extent[i]
+                elif extent[i] > 0 and i % 2 == 0:
+                    extent[i] = 0.9*extent[i]
+                elif extent[i] > 0 and i % 2 != 0:
+                    extent[i] = 1.1*extent[i]
+            
+
+            extent[2] = extent[2] - 6
+            extent[3] = extent[3] + 6
+
+            print(extent)
+            mx.set_extent(extent, crs=ccrs.PlateCarree())
+            mx.legend(loc=4, bbox_to_anchor=(1.05, 1.0), fontsize=8)
+            mx.add_feature(cfeature.COASTLINE)
+            mx.add_feature(cfeature.BORDERS)
+            mx.add_feature(cfeature.OCEAN)
+            mx.add_feature(cfeature.LAND)
+            mx.add_feature(cfeature.RIVERS)
+
+            anc = AnchoredText('Distance between obs and float: ' + dist_str,
+                loc=1, frameon=True, prop=dict(size=8))
+            mx.add_artist(anc)
+        
+        if map_num == 0 and len(ax_list) > 1:
+            for ax in ax_list[1:]:
+                ax.set_title('')
+                ax.set_ylabel('')
+                ax.set_yticklabels([])
+        elif map_num == 1 and len(ax_list) > 2:
+            for ax in ax_list[1:-1]:
+                ax.set_title('')
+                ax.set_ylabel('')
+                ax.set_yticklabels([])
+
+        ax_list[0].legend(loc=2, fontsize=10)
+
+        print(meta_data_string)
+
+        anc = AnchoredText(meta_data_string,
+                loc=4, frameon=True, prop=dict(size=8))
+        ax_list[0].add_artist(anc)
+
+        return fig, ax_list
 
 class profiles:
 
@@ -619,9 +776,9 @@ class profiles:
             self.__rangecheckdict__ = range_check(k, self.__floatdict__)
             self.__floatdict__ = self.__rangecheckdict__
 
-        # recalculate O2sat if its DOXY
-        if k == 'DOXY':
-            self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+            # recalculate O2sat if its DOXY
+            if k == 'DOXY':
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
 
         self.assign(self.__rangecheckdict__)
              
@@ -739,7 +896,7 @@ class profiles:
         for i,w in enumerate(self.df.WMO.unique()):
             if i > 0:
                 sys.stdout.write(', ')
-            sys.stdout.write('{}'.format(int(WMO)))
+            sys.stdout.write('{}'.format(int(w)))
         sys.stdout.write('\n')
         
         sys.stdout.write('Variables:\n')
@@ -919,6 +1076,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
     if not BRtraj.exists():
+        BRtraj_nc = None
         BRtraj_flag = False
         if verbose:
             sys.stdout.write('Continuing without BRtraj file\n')
@@ -1142,7 +1300,7 @@ def load_profiles(files):
             try:
                 cc = Dataset(Path(ARGO_PATH) / cn, 'r')
             except:
-                warnings.warn('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
+                raise ValueError('Cannot get core Argo data, no such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
 
         # number of profile cycles
         M = cc.dimensions['N_LEVELS'].size
@@ -1568,7 +1726,7 @@ def range_check(key, floatdict, verbose=True):
     r = range_dict[key.replace('_ADJUSTED','')]
     outside_range = np.logical_or(argo_var < r[0], argo_var > r[1])
     if verbose:
-        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN'.format(np.sum(outside_range)))
+        sys.stdout.write('{} values found outside RTQC range check, replacing with NaN\n'.format(np.sum(outside_range)))
 
     argo_var[outside_range] = np.nan
     cleandict[key] = argo_var
@@ -1616,10 +1774,10 @@ def correct_response_time(t, DO, T, thickness):
     thickness = thickness*np.ones((N-1,))
 
     # translate boundary layer thickness to temperature dependent tau
-    f_thickness = RectBivariateSpline(lut_T, lut_lL, tau100, kx=1, ky=1)
-    tau_T = np.squeeze(f_thickness(thickness, mean_temp, grid=False))
-
-    # loop through oxygen data
+    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
+    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
+    print(tau_T)
+    # loop through oxygen data 
     for i in range(N-1):
         dt = t_sec[i+1] - t_sec[i]
 
@@ -1633,14 +1791,13 @@ def correct_response_time(t, DO, T, thickness):
     return DO_out
 
 def correct_response_time_Tconst(t, DO, tau):
+    # convert time to seconds
+    t_sec = t*24*60*60
 
     # array for the loop
     N = DO.shape[0]
     mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = np.array((N-1)*[np.nan])
-
-    # convert time to seconds
-    t_sec = t*24*60*60
+    mean_time = t_sec[:-1] + np.diff(t_sec)/2
 
     # loop through oxygen data
     for i in range(N-1):
@@ -1648,7 +1805,6 @@ def correct_response_time_Tconst(t, DO, tau):
 
         # do the correction using the mean filter, get the mean time
         mean_oxy[i]  = (1/(2*oxy_b(dt, tau)))*(DO[i+1] - oxy_a(dt, tau)*DO[i])
-        mean_time[i] = t_sec[i] + dt/2
     
     # interpolate back to original times for output
     f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')

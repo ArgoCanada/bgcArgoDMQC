@@ -8,7 +8,7 @@ with open('requirements.txt') as fr:
 
 setuptools.setup(
     name='bgcArgoDMQC',
-    version='0.2.9',
+    version='0.2.10',
     license='The MIT License (MIT)',
     author_email='chris.gordon@dfo-mpo.gc.ca',
     description='A python library for quality control of BGC-Argo data',

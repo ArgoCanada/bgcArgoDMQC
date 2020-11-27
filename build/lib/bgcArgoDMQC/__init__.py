@@ -1,7 +1,7 @@
 '''
 # Argo Canada BGC Quality Control
 
-## bgcArgo dependencies
+## bgcArgoDMQC dependencies
 
 - Must run on `python3.4` or higher, not supported on `python2.x` (uses [pathlib](https://docs.python.org/3/library/pathlib.html), introduced in python version 3.4)
 - TEOS-10 package [gsw](https://teos-10.github.io/GSW-Python/), but will also work with the [seawater](https://pypi.org/project/seawater/) package, though it is deprecated in favor of gsw
@@ -23,6 +23,8 @@
 0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well
 
 0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock
+
+0.2.9: November 9, 2020 - name change to bgcArgoDMQC, various other updates over the past month
 '''
 
 from __future__ import absolute_import
@@ -38,9 +40,8 @@ __all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 # check age of index file, or if it exists
 if not io.index_exists():
     io.update_index()
-io.check_index()

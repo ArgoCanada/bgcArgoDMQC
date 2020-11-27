@@ -1,33 +1,35 @@
 Metadata-Version: 2.1
 Name: bgcArgoDMQC
-Version: 0.2.9
+Version: 0.2.10
 Summary: A python library for quality control of BGC-Argo data
 Home-page: https://github.com/ArgoCanada/bgcArgoDMQC
 Author-email: chris.gordon@dfo-mpo.gc.ca
 License: The MIT License (MIT)
 Description: # Argo Canada BGC Quality Control
         
-        [![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargo) 
-        [![Build Status](https://travis-ci.com/ArgoCanada/bgcArgo.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgo) 
-        [![Documentation Status](https://readthedocs.org/projects/bgcargo/badge/?version=latest)](https://bgcargo.readthedocs.io/en/latest/?badge=latest)
-        [![codecov](https://codecov.io/gh/ArgoCanada/bgcArgo/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgo)
+        [![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargodmqc)
+        [![Build Status](https://travis-ci.com/ArgoCanada/bgcArgoDMQC.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgoDMQC)
+        [![Documentation Status](https://readthedocs.org/projects/bgcargodmqc/badge/?version=latest)](https://bgcargodmqc.readthedocs.io/en/latest/?badge=latest)
+        [![codecov](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC)
         
         ## disclaimer
         
         This code is in _very_ active development. Use of this code is available (encouraged even), but will likely throw errors, behave in undesired ways, etc. Submission of issues is also encouraged to help in development!
+        
+        [![Binder](https://binder.pangeo.io/badge_logo.svg)](https://binder.pangeo.io/v2/gh/ArgoCanada/bgcArgoDMQC/master?filepath=notebooks%2FbgcArgoDMQC-basic-usage.ipynb) try it out in binder before installing!
         
         ## installation
         
         The recommended install is through the conda-forge channel, via the command:
         
         ```bash
-        conda install -c conda-forge bgcargo
+        conda install -c conda-forge bgcArgoDMQC
         ```
         
-        The package is also available through the python package index <https://pypi.org/project/bgcArgo/>, install with:
+        The package is also available through the python package index <https://pypi.org/project/bgcArgoDMQC/>, install with:
         
         ```bash
-        pip install bgcArgo
+        pip install bgcArgoDMQC
         ```
         
         ## general description
@@ -114,8 +116,8 @@ Description: # Argo Canada BGC Quality Control
         Mean in-water gain: 1.04
         ```
         
-        <img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_1.png" width="800">
-        <img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgo/master/figures/example_2.png" width="600">
+        <img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgoDMQC/master/figures/example_1.png" width="800">
+        <img src="https://raw.githubusercontent.com/ArgoCanada/bgcArgoDMQC/master/figures/example_2.png" width="600">
         
         ## version history
         
@@ -130,6 +132,8 @@ Description: # Argo Canada BGC Quality Control
         0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well
         
         0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock
+        
+        0.2.9: November 9, 2020 - name change to bgcArgoDMQC, various other updates over the past month
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3.4

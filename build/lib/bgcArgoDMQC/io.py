@@ -31,7 +31,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B'):
+def read_index(mission='B', remote=False):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -41,21 +41,29 @@ def read_index(mission='B'):
     '''
 
     if mission == 'B':
-        filename = index_path / 'argo_bio-profile_index.txt.gz'
+        local_filename = index_path / 'argo_bio-profile_index.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_bio-profile_index.txt.gz'
     elif mission == 'C':
-        filename = index_path / 'ar_index_global_prof.txt.gz'
+        local_filename = index_path / 'ar_index_global_prof.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_prof.txt.gz'
     elif mission == 'S':
-        filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+        local_filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_synthetic-profile_index.txt.gz'
     elif mission == 'M':
-        filename = index_path / 'ar_index_global_meta.txt.gz'
+        local_filename = index_path / 'ar_index_global_meta.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_meta.txt.gz'
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
-    if not Path(filename).exists():
-        sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
-        update_index(ftype=mission)
+    if remote:
+        df = pd.read_csv(remote_filename, compression='gzip', header=8)
+    else:
+        # warnings.warn('Could not read index file from ifremer FTP server, trying to load using local file, which may not be up to date.')
+        if not Path(local_filename).exists():
+            sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
+            update_index(ftype=mission)
 
-    df =  pd.read_csv(filename, compression='gzip', header=8)
+        df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
     df['dac'] = np.array([f.split('/')[0] for f in df.file])
     df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
@@ -375,7 +383,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission='CB', mode='RD', __nfiles__=None):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -390,6 +398,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
         mode (optional, str): Download real-time ('R') or delayed-mode ('D') or all ('RD') data, default 'RD'
         
     Returns:
+        ftplib.FTP object
 
     Author:   Christopher Gordon
               Fisheries and Oceans Canada
@@ -494,7 +503,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     # define the local file to have the same name as on the FTP server
                     wmo_file = wmo_path / fn
                     # only download the file if it doesn't already exist locally
-                    if not wmo_file.exists() or overwrite:
+                    if not wmo_file.exists() or overwrite or summary_overwrite:
                         print(wmo_file)
                         # open the local file
                         lf = open(wmo_file, 'wb')
@@ -582,7 +591,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 # define the local file to have the same name as on the FTP server
                 wmo_file = wmo_path / fn
                 # only download the file if it doesn't already exist locally
-                if not wmo_file.exists() or overwrite:
+                if not wmo_file.exists() or overwrite or summary_overwrite:
                     print(wmo_file)
                     # open the local file
                     lf = open(wmo_file, 'wb')
