@@ -383,7 +383,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftype=None, mission='CB', mode='RD', __nfiles__=None):
+def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -398,6 +398,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
         mode (optional, str): Download real-time ('R') or delayed-mode ('D') or all ('RD') data, default 'RD'
         
     Returns:
+        ftplib.FTP object
 
     Author:   Christopher Gordon
               Fisheries and Oceans Canada
@@ -502,7 +503,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                     # define the local file to have the same name as on the FTP server
                     wmo_file = wmo_path / fn
                     # only download the file if it doesn't already exist locally
-                    if not wmo_file.exists() or overwrite:
+                    if not wmo_file.exists() or overwrite or summary_overwrite:
                         print(wmo_file)
                         # open the local file
                         lf = open(wmo_file, 'wb')
@@ -590,7 +591,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, ftyp
                 # define the local file to have the same name as on the FTP server
                 wmo_file = wmo_path / fn
                 # only download the file if it doesn't already exist locally
-                if not wmo_file.exists() or overwrite:
+                if not wmo_file.exists() or overwrite or summary_overwrite:
                     print(wmo_file)
                     # open the local file
                     lf = open(wmo_file, 'wb')
