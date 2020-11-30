@@ -647,11 +647,11 @@ class sprof:
 
         ax_list[0].legend(loc=2, fontsize=10)
 
-        print(meta_data_string)
-
         anc = AnchoredText(meta_data_string,
                 loc=4, frameon=True, prop=dict(size=8))
         ax_list[0].add_artist(anc)
+
+        fig.set_size_inches(10,6)
 
         return fig, ax_list
 
