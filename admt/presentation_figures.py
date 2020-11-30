@@ -57,6 +57,12 @@ pres = df['Pressure (decibar)']
 
 doxy = bgc.unit.mL_per_L_to_umol_per_L(mll, temp)
 
+of1 = pd.DataFrame(dict(oxygen=doxy, pressure=pres, lat=np.array(doxy.shape[0]*[lat]), lon=np.array(doxy.shape[0]*[lon])))
+of2 = pd.DataFrame(dict(temperature=temp, salinity=psal, pressure=pres, lat=np.array(doxy.shape[0]*[lat]), lon=np.array(doxy.shape[0]*[lon])))
+
+of1.to_csv(Path('../notebooks/ex-data/my_winkler_data.csv'))
+of2.to_csv(Path('../notebooks/ex-data/my_CTD_data.csv'))
+
 syn.add_independent_data(label='Winkler', date=time, lat=lat, lon=lon, DOXY=doxy, PRES=pres)
 syn.add_independent_data(label='CTD', date=time, lat=lat-1, lon=lon-1, TEMP=temp, PRES=pres)
 fig, axes = syn.compare_independent_data()
@@ -74,7 +80,7 @@ fig.savefig(Path('figures/independent_example.png'), bbox_inches='tight', dpi=35
 plt.close()
 
 ### RESPONSE TIME ###
-'''
+
 # load some time-resolved APEX data from GoM
 fn = Path('/Users/gordonc/Documents/data/GoMRI/Sprof/f7939_Sprof.nc')
 nc = Dataset(fn)
@@ -106,4 +112,4 @@ axes[0].set_xlabel('Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)')
 axes[1].set_xlabel('Temperature ({}C)'.format(chr(176)))
 axes[0].set_ylabel('Pressure (dbar)')
 
-fig.savefig(Path('figures/response_time_corr.png'), bbox_inches='tight', dpi=350)'''
+fig.savefig(Path('figures/response_time_corr.png'), bbox_inches='tight', dpi=350)
