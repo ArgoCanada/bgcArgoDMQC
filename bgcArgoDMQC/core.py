@@ -132,9 +132,9 @@ class sprof:
     
     set_dirs = set_dirs
 
-    def __init__(self, wmo, keep_fillvalue=False, rcheck=True):
+    def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True)
+        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
@@ -244,7 +244,7 @@ class sprof:
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
 
-    def check_range(self, key):
+    def check_range(self, key, verbose=False):
         '''
         Performs a range check for variables that have a RTQC range available.
         Replaces values outside the range with NaN values. Takes string input
@@ -259,7 +259,7 @@ class sprof:
             key = [key]
         
         for k in key:
-            self.__rangecheckdict__ = range_check(k, self.__floatdict__)
+            self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
             self.__floatdict__ = self.__rangecheckdict__
 
             # recalculate O2sat if its DOXY
@@ -327,7 +327,7 @@ class sprof:
 
         return copy.deepcopy(self.track)
 
-    def get_ncep(self):
+    def get_ncep(self, verbose=True):
         '''
         Loads NCEP data along the float track
         '''
@@ -339,7 +339,7 @@ class sprof:
         
         return copy.deepcopy(self.NCEP)
 
-    def get_woa(self):
+    def get_woa(self, verbose=True):
         '''
         Loads WOA data along the float track
         '''
@@ -347,11 +347,11 @@ class sprof:
         if not hasattr(self, 'track'):
             self.get_track()
         
-        self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
+        self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path, verbose=verbose)
 
         return copy.deepcopy(self.WOA)
 
-    def calc_gains(self, ref='NCEP', zlim=25.):
+    def calc_gains(self, ref='NCEP', zlim=25., verbose=True):
         '''
         Calculate gain values using NCEP or WOA reference data. Uses function
         calc_gain(). 
@@ -363,22 +363,22 @@ class sprof:
         if ref == 'NCEP':
             # check if reference data is already calculated
             if not hasattr(self, 'NCEP'):
-                self.get_ncep()
+                self.get_ncep(verbose=verbose)
 
             pH2O = unit.pH2O(util.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
 
             common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
 
             self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
-            self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX)
+            self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX, verbose=verbose)
             self.gains = self.__NCEPgains__
 
         if ref == 'WOA':
             # check if reference data is already calculated
             if not hasattr(self, 'WOA'):
-                self.get_woa()
+                self.get_woa(verbose=verbose)
 
-            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim)
+            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
             self.gains = self.__WOAgains__
         
         return copy.deepcopy(self.gains)
@@ -659,12 +659,12 @@ class profiles:
 
     set_dirs = set_dirs
 
-    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False, rcheck=True):
+    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False, rcheck=True, verbose=False):
         if type(floats) is int:
             floats = [floats]
 
         self.__argofiles__ = organize_files(get_files(ARGO_PATH, floats, cycles=cycles, mission=mission, mode=mode))
-        self.__floatdict__ = load_profiles(self.__argofiles__)
+        self.__floatdict__ = load_profiles(self.__argofiles__, verbose=verbose)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
@@ -1460,7 +1460,7 @@ def track(float_data):
 
     return track
 
-def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
+def woa_to_float_track(track, param, zlim=(0,1000), local_path='./', verbose=True):
     '''
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
@@ -1495,8 +1495,8 @@ def woa_to_float_track(track, param, zlim=(0,1000), local_path='./'):
     Change log:
     '''
 
-    xtrack, woa_track, woa_data = io.load_woa_data(track, param, zlim=zlim, local_path=local_path)
-    woa_interp, wt, yrday = interp.interp_woa_data(xtrack, woa_track, woa_data)
+    xtrack, woa_track, woa_data = io.load_woa_data(track, param, zlim=zlim, local_path=local_path, verbose=verbose)
+    woa_interp, wt, yrday = interp.interp_woa_data(xtrack, woa_track, woa_data, verbose=verbose)
     z = woa_track[0]
 
     return z, woa_interp, wt
