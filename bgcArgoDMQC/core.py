@@ -27,19 +27,7 @@ try:
 except:
     map_flag = False
 
-# soft attempt to load gsw, but allow for seawater as well
-try: 
-    import gsw
-    flagSA = True
-except:
-    try:
-        # if this also fails, just load gsw to throw the error
-        from seawater import pden
-        flagSA = False
-        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater is deprecated in favour of gsw-python, see https://teos-10.github.io/GSW-Python/\n')
-    except:
-        import gsw
-
+import gsw
 from netCDF4 import Dataset
 
 from . import io
@@ -181,10 +169,7 @@ class sprof:
         self.PSAL    = floatdict['PSAL']
         self.PSAL_QC = floatdict['PSAL_QC']
         # potential density
-        if flagSA:
-            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.PRES, 0) - 1000
-        else:
-            self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
+        self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.PRES, 0) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
@@ -707,10 +692,7 @@ class profiles:
             self.PSAL    = floatdict['PSAL']
             self.PSAL_QC = floatdict['PSAL_QC']
             # potential density
-            if flagSA:
-                self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
-            else:
-                self.PDEN = pden(self.PSAL, self.TEMP, self.PRES, 0) - 1000
+            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
 
         # bgc variables - not necessarily all there so check if the fields exist
         if 'DOXY' in floatdict.keys():
