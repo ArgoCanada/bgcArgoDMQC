@@ -12,12 +12,7 @@ import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 import datetime
 
-# try to import seaborn
-try:
-    sns_flag = True
-    import seaborn as sns
-except:
-    sns_flag = False
+import seaborn as sns
 
 # try to import cartopy
 try:
@@ -383,6 +378,8 @@ class sprof:
                 g = fplt.gainplot(self.SDN, self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
             elif ref == 'WOA':
                 g = fplt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
+            else:
+                raise ValueError('Invalid input for keyword argument "ref"')
 
         elif kind == 'cscatter':
             var = kwargs.pop('varname')
@@ -513,6 +510,7 @@ class sprof:
         meta_keys = set(meta_keys)
 
         meta_data_string = ''
+        cyc = 1
         for label in meta_dict.keys():
             if label == ' ':
                 label = 'Observation'
@@ -541,12 +539,8 @@ class sprof:
             ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
         
         ccount = 0
-        if sns_flag:
-            fcol = sns.color_palette('colorblind')[0]
-            clist = sns.color_palette('colorblind')[1:]
-        else:
-            fcol = 'blue'
-            clist = ['orange', 'green', 'cyan', 'red']
+        fcol = sns.color_palette('colorblind')[0]
+        clist = sns.color_palette('colorblind')[1:]
         
         for label in plot_dict.keys():
             pres = plot_dict[label].pop('PRES')
@@ -904,9 +898,11 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
 
     if mission == 'B':
         subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
-    if mission == 'C':
+    elif mission == 'C':
         __coreindex__ = io.read_index(mission='C')
         subset_index = __coreindex__[__coreindex__.wmo.isin(wmo_numbers)]
+    else:
+        raise ValueError('Invalid input for parameter "mission"')
     if cycles is not None:
         subset_index = subset_index[subset_index.cycle.isin(cycles)]
     wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
@@ -1668,9 +1664,9 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
     return gains, carry_over
 
 
-def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
+# def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
 
-    return gV
+    # return gV
 
 def vertically_align(P1, P2, V2):
 

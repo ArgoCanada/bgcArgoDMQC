@@ -5,17 +5,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-try:
-    import seaborn as sns
-    sns.set(style='ticks', context='paper', palette='colorblind')
-except:
-    sys.stdout.write('Although the seaborn package is not required, it is recommended for plotting - see https://seaborn.pydata.org/\n')
+import seaborn as sns
+sns.set(style='ticks', context='paper', palette='colorblind')
 
 try:
     import cmocean.cm as cmo
     cmocean_flag = True
 except:
-    sys.stdout.write('Although the cmocean package is not required, it is recommended for plotting - see https://matplotlib.org/cmocean/\n')
     cmocean_flag = False
 
 class pltClass:
