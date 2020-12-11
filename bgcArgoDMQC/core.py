@@ -1711,7 +1711,7 @@ def range_check(key, floatdict, verbose=True):
 
     return cleandict
 
-def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10, zlim=25):
+def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10):
     '''
     Calculate DOXY_ADJUSTED_ERROR for fixed partial pressure of 10 mbar 
     PPOX_DOXY.
@@ -1721,7 +1721,7 @@ def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10, zlim=25):
     T = floatdict['TEMP']
     P = floatdict['PRES']
 
-    error = unit.pO2_to_doxy(np.array(S.shape[0]*[10]), S, T, P=P)
+    error = unit.pO2_to_doxy(np.array(S.shape[0]*[fix_err]), S, T, P=P)
 
     return error
 
@@ -1731,6 +1731,11 @@ def oxy_b(dt, tau):
 
 def oxy_a(dt, tau):
     return 1 - 2*oxy_b(dt, tau)
+
+# hard code the LUT table value so I don't have to 
+# ship the text file with the package
+### is this the right/ok way to do this??? feels wrong ###
+from lut import lut as lut_data
 
 def correct_response_time(t, DO, T, thickness):
 
@@ -1745,7 +1750,6 @@ def correct_response_time(t, DO, T, thickness):
 
     # load temperature, boundary layer thickness, and tau matrix from 
     # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_data = np.loadtxt(REF_PATH / 'T_lL_tau_3830_4330.dat')
     lut_lL = lut_data[0,1:]
     lut_T  = lut_data[1:,0]
     tau100 = lut_data[1:,1:]
