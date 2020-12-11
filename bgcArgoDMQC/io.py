@@ -633,40 +633,33 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
 
-    INPUT:
-              track: array with the columns (SDN, lat, lon)
-              param: requested variable, valid inputs are
-                  T: temperature
-                  S: salinity
-                  O2: dissolved oxygen
-                  O2sat: oxygen percent saturation
-                  NO3: nitrate
-                  Si: silicate
-                  PO4: phosphate
-              zlim: depth bounds (upper, lower), default to (0, 1000)
-              local_path: local directory where WOA files are stored, assumes
-                          current directory if no input
+    Args:
+        track: array with the columns (SDN, lat, lon)
+        param: requested variable, valid inputs are
+            - T: temperature
+            - S: salinity
+            - O2: dissolved oxygen
+            - O2sat: oxygen percent saturation
+            - NO3: nitrate
+            - Si: silicate
+            - PO4: phosphate
+        zlim: depth bounds (upper, lower), default to (0, 1000)
+        local_path: local directory where WOA files are stored, assumes
+                    current directory if no input
 
-    OUTPUT:
-              xtrack: same as track input, but adjusted lon if the track
-                      crosses the 180/-180 meridian
-              woa_track: list with z, lat, and lon arrays of WOA data
-              data: gridded array of the input variable (month, z, lat, lon)
+    Returns:
+        xtrack: same as track input, but adjusted lon if the track crosses the 180/-180 meridian
+        woa_track: list with z, lat, and lon arrays of WOA data
+        data: gridded array of the input variable (month, z, lat, lon)
 
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Acknowledgement: 
+        This code is adapted from the SOCCOM SAGE_O2Argo matlab
+        code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+        written by Tanya Maurer & Josh Plant
 
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-
-    LAST UPDATE: 29-04-2020
-
-    CHANGE LOG:
-
-    23-04-2020: changed zlim to optional input argument
-    29-04-2020: switched file/path handling from os module to pathlib
+    Change log:
+        23-04-2020: changed zlim to optional input argument
+        29-04-2020: switched file/path handling from os module to pathlib
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -741,20 +734,12 @@ def load_ncep_data(track, varname, local_path='./'):
     float in-air data. Data to be interpolated along the provided
     track (t, lat, lon).
 
-    INPUT:
-              track: array with the columns (SDN, lat, lon)
-              local_path: local directory where NCEP files are stored, assumes
-                          current directory if no input
+    Args:
+        track: array with the columns (SDN, lat, lon)
+        local_path: local directory where NCEP files are stored, assumes current directory if no input
 
-    OUTPUT:
+    Returns:
 
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-
-    LAST UPDATE: 04-05-2020
-
-    CHANGE LOG:
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -848,26 +833,23 @@ def append_variable_to_file(fn, *args):
     fields that can be passed directly to the netCDF file. If the variable
     name already exists, it will overwrite it with the new information.
 
-    Inputs: 
+    Args: 
+        fn: string pointing to netcdf (.nc) file to be appended
+        *args: arbitrary number of python dicts with all required fields to create
+        or overwrite a new netcdf variable. Example: 
 
-    fn: string pointing to netcdf (.nc) file to be appended
-
-    *args: arbitrary number of python dicts with all required fields to create
-    or overwrite a new netcdf variable. Example: 
-
-    new_var = dict(
-        name='MY_NEW_VARIABLE',     # variable name, can be new or existing
-        dimensions=('N', 'M'),      # note these dims must already exist in the nc file
-        long_name='The new variable',
-        standard_name='my_new_var',
-        units='degree_celsius',
-        valid_min=0,
-        valid_max=1e9,
-        resolution=0.001,
-        comment='Added by John Doe on Sept 20, 2019'
-    )
+        new_var = dict(
+            name='MY_NEW_VARIABLE',     # variable name, can be new or existing
+            dimensions=('N', 'M'),      # note these dims must already exist in the nc file
+            long_name='The new variable',
+            standard_name='my_new_var',
+            units='degree_celsius',
+            valid_min=0,
+            valid_max=1e9,
+            resolution=0.001,
+            comment='Added by John Doe on Sept 20, 2019'
+        )
     '''
-
 
     nc = Dataset(fn, 'a')
 
