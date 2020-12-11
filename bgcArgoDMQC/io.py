@@ -826,7 +826,7 @@ def load_ncep_data(track, varname, local_path='./'):
 
     return xtrack, ncep_track, data
 
-def append_variable_to_file(fn, *args):
+def append_variable_to_file(fn, out_fn=None, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
     input fn. The input structure for each variable should be a dictionary with
@@ -840,7 +840,7 @@ def append_variable_to_file(fn, *args):
 
         new_var = dict(
             name='MY_NEW_VARIABLE',     # variable name, can be new or existing
-            dimensions=('N', 'M'),      # note these dims must already exist in the nc file
+            dimensions=('N', 'M'),      # will be created with warning if they do not exist
             long_name='The new variable',
             standard_name='my_new_var',
             units='degree_celsius',
@@ -854,3 +854,7 @@ def append_variable_to_file(fn, *args):
     nc = Dataset(fn, 'a')
 
     return nc
+
+def append_scienfitic_calib_information(nc_var, kind, str_to_append):
+
+    return None
