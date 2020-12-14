@@ -1735,7 +1735,7 @@ def oxy_a(dt, tau):
 # hard code the LUT table value so I don't have to 
 # ship the text file with the package
 ### is this the right/ok way to do this??? feels wrong ###
-from lut import lut as lut_data
+from .lut import lut as lut_data
 
 def correct_response_time(t, DO, T, thickness):
 
