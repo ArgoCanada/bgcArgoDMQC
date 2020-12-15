@@ -6,4 +6,3 @@ netCDF4
 pandas
 seaborn
 cmocean
-cartopy
