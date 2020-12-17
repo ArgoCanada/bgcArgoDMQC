@@ -18,12 +18,20 @@ def read_config():
         for line in f:
             llist = line.split('=')
             key = llist[0]
-            val = llist[1]
+            val = llist[1].strip()
             config_dict[key] = val
     
     return config_dict
 
 def configure(argo_path=None, ncep_path=None, woa_path=None):
+    # if they aren't already paths, make them paths, then make posix
+    if argo_path is not None:
+        argo_path = Path(argo_path).as_posix()
+    if ncep_path is not None:
+        ncep_path = Path(ncep_path).as_posix()
+    if woa_path is not None:
+        woa_path = Path(woa_path).as_posix()
+
     # existing and new configuration info
     existing_config = read_config()
     new_config = dict(argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path)
