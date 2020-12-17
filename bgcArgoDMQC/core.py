@@ -36,10 +36,6 @@ from . import configure
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
 
-ARGO_PATH = './'
-WOA_PATH  = None
-NCEP_PATH = None
-
 __bgcindex__ = io.read_index()
 global REF_PATH
 REF_PATH = Path(__file__).parent.absolute() / 'ref'
@@ -60,7 +56,7 @@ def get_config_dirs():
         global WOA_PATH
         WOA_PATH = config['woa_path']
 
-def set_dirs(argo_path=ARGO_PATH, woa_path=WOA_PATH, ncep_path=NCEP_PATH):
+def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
     '''
     Set local directories to look for Argo, WOA, and NCEP data.
 

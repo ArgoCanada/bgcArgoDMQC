@@ -47,4 +47,11 @@ __version__ = '0.2.9'
 if not io.index_exists():
     io.update_index()
 
+# check if there is a configuration file
 configure.check_config()
+# get a dict with with config info
+config = configure.read_config()
+# set the directories within the config file
+set_dirs(**config)
+
+from .core import *
