@@ -669,7 +669,7 @@ class profiles:
             self.rm_fillvalue()
 
         if rcheck:
-            self.check_range('DOXY')
+            self.check_range('all', verbose=verbose)
 
     def assign(self, floatdict):
 
@@ -747,7 +747,7 @@ class profiles:
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
 
-    def check_range(self, key):
+    def check_range(self, key, verbose=False):
         '''
         Performs a range check for variables that have a RTQC range available.
         Replaces values outside the range with NaN values. Takes string input
@@ -762,7 +762,7 @@ class profiles:
             key = [key]
         
         for k in key:
-            self.__rangecheckdict__ = range_check(k, self.__floatdict__)
+            self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
             self.__floatdict__ = self.__rangecheckdict__
 
             # recalculate O2sat if its DOXY
