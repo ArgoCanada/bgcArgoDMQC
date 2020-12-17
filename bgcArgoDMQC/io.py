@@ -855,6 +855,6 @@ def append_variable_to_file(fn, out_fn=None, *args):
 
     return nc
 
-def append_scienfitic_calib_information(nc_var, kind, str_to_append):
+def append_scienfitic_calib_information(nc_var, str_to_append):
 
     return None
