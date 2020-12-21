@@ -1,21 +1,9 @@
 import warnings
 
 import numpy as np
+import gsw
 
-# soft attempt to load gsw, but allow for seawater as well
-try: 
-    import gsw
-    flagSA = True
-except:
-    try:
-        # if this also fails, just load gsw to throw the error
-        from seawater import pden
-        flagSA = False
-        warnings.warn('gsw package for thermodynamic equations of seawater not installed, attempting to load seawater package, however seawater is deprecated in favour of gsw-python, see https://teos-10.github.io/GSW-Python/\n')
-    except:
-        import gsw
-
-def oxy_sol(S, T, unit='micromole/kg'):
+def oxy_sol(S, T, a4330=False):
     '''
     Calculate oxygen saturation concentration in seawater as a function of
     S & T, in equilibrium with standard coponsition moist air at 1atm total
@@ -23,46 +11,30 @@ def oxy_sol(S, T, unit='micromole/kg'):
     of Benson & Krause in table 1, as used in Sarmiento & Gruber's "Ocean
     Biogeochemical Dynamics" ch. 3, p. 81, table 3.2.4.
     
-    INPUT:
-              S: salinity, psu
-              T: temperature, deg C
-              unit: micromole/kg or millimole/m3, default if micromole/kg
-    
-    OUTPUT:
-              O2sol: oxygen solubility, unit same as input unit
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Josh Plant
-    
-    LAST UPDATE: 21-04-2020
-    
-    CHANGE LOG:
+    Args:
+        S: salinity, psu
+        T: temperature, deg C
+        a4330: True or False for Aanderaa 4330 optode
+
+    Returns:
+        O2sol: oxygen solubility
     '''
 
-    # check for improper units
-    if unit != 'micromole/kg' and unit != 'millimole/m3':
-        raise ValueError('Unrecognized unit string - valid units are ''micromole/kg'' or ''millimole/m3''.')
-
-    if unit == 'micromole/kg':
-        A = [3.80369, -9.86643e-2, 5.10006, 4.17887, 3.20291, 5.80871]
-        B = [-9.51519e-3, -1.13864e-2, -7.70028e-3, -7.01577e-3]
-        C = -2.75915e-7
-
-    elif unit == 'millimole/m3':
-        A = [3.88767, -0.256847, 4.94457, 4.05010, 3.22014, 2.00907]
-        B = [-8.17083e-3, -1.03410e-2, -7.37614e-3, -6.24523e-3]
+    if a4330:
+        A = [1.71069, 0.978188, 4.80299, 3.99063, 3.22400, 2.00856] # Temperature coeff
+        B = [-4.29155e-3, -6.90358e-3, -6.93498e-3, -6.24097e-3] # Salinity coeff
+        C = -3.11680e-7
+    else:
+        A = [3.88767, -0.256847, 4.94457, 4.05010, 3.22014, 2.00907] # Temperature coeff
+        B = [-8.17083e-3, -1.03410e-2, -7.37614e-3, -6.24523e-3] # Salinity coeff
         C = -4.88682e-7
 
+    O2_volume =  22.3916
     # Scaled temperature
     Ts = np.log((298.15 - T)/(273.15 + T));
     L = np.polyval(A,Ts) + S*np.polyval(B,Ts) + C*S**2
 
-    O2sol = np.exp(L)
+    O2sol = (1000/O2_volume)*np.exp(L)
 
     return O2sol
 
@@ -70,20 +42,12 @@ def pH2O(T, S=0, unit='Pa'):
     '''
     Calculate vapor pressure of water
     
-    INPUT:
-              T: temperature, deg C
-              S: salinity, only necessary for mbar unit
-    
-    OUTPUT:
-              vapor_pressure: vapor pressure of water, Pa or mbar
-    
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-    
-    LAST UPDATE: 06-05-2020
-    
-    CHANGE LOG:
+    Args:
+        T: temperature, deg C
+        S: salinity, only necessary for mbar unit
+
+    Returns:
+        vapor_pressure: vapor pressure of water, Pa or mbar
     '''
     
     # temperature in kelvin
