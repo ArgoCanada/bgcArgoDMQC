@@ -257,7 +257,7 @@ class sprof:
 
             # recalculate O2sat if its DOXY
             if k == 'DOXY':
-                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
 
         self.assign(self.__rangecheckdict__)
     
@@ -767,7 +767,7 @@ class profiles:
 
             # recalculate O2sat if its DOXY
             if k == 'DOXY':
-                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], unit='micromole/kg')
+                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
 
         self.assign(self.__rangecheckdict__)
              
@@ -1149,7 +1149,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T.flatten()
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
 
-    floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
+    floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
     # match the fill values
     ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
     floatData['O2Sat'][ix] = 99999.
@@ -1279,8 +1279,29 @@ def load_profiles(files, verbose=False):
                 floatData[v_qc] = np.append(floatData[v_qc], read_qc(nc.variables[v_qc][:].data.flatten()))
 
         if 'DOXY' in floatData.keys():
-            floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], unit='micromole/kg')
+            floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
             floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+
+    return floatData
+
+def read_all_variables(nc):
+    '''
+    Read all variables and dimensions from an Argo netCDF file.
+
+    Args:
+        nc: a netCDF file object
+    
+    Returns:
+        floatData: python dict with all variable and dimension names
+    '''
+
+    floatData = dict()
+    for name, dim in nc.dimensions.items():
+        floatData[name] = dim.size
+    for name, var in nc.variables.items():
+        print(name)
+        print(var)
+        floatData[name] = var[:].data.flatten()
 
     return floatData
 
