@@ -430,6 +430,8 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
                     base_path = '/ifremer/argo/dac'
                 elif url == 'usgodae.org':
                     base_path = '/pub/outgoing/argo/dac'
+                else:
+                    raise ValueError('Unrecognized Argo url: {}'.format(url))
 
                 a = '{}/{}/{:d}'.format(base_path, get_dac(init_a), init_a)
             else:
