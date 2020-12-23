@@ -116,15 +116,7 @@ def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
         umol_L_conc (float or array-like): dissolved oxygen concentration in umol L-1 (or equivalently mmol m-3)
     '''
 
-    if flagSA:
-        if lat is None and lon is None:
-            pot_density = gsw.pot_rho_t_exact(S, T, P, Pref)
-            warnings.warn('No coordinate information required, proceeding with calculation using practical salinity instead of absolute salinity')
-        else:
-            pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, Pref)
-    else:
-        pot_density = pden(S, T, P, pr=Pref)
-
+    pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, Pref)
     umol_L_conc = 1000*doxy / pot_density
 
     return umol_L_conc
