@@ -315,7 +315,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
         yearlist = years
     elif len(years) == 2:
         yearlist = range(years[0], years[1]+1)
-    elif len(years > 2):
+    else:
         yearlist = years
     
     if varname == 'pres':
