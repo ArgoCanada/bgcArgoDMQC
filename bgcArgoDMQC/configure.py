@@ -5,11 +5,20 @@ pkg_path = Path(__file__).parent.absolute()
 config_file = pkg_path / '.config'
 
 def check_config():
+    '''
+    Check that configuration file exists, and if not, create a blank one. 
+    Having a blank file exist eases throwing any FileNotFoundError's, but
+    if the config is blank then still no configuration is performed.
+    '''
     # make sure its there, even as an empty file, eases handling of FileNotFoundError's
     if not config_file.exists():
         config_file.touch()
 
 def read_config():
+    '''
+    Read in permanently stored configuration information for locations of
+    Argo, NCEP, or WOA data.
+    '''
     # dict object to load values into
     config_dict = dict()
     # loop through the config file - if there are no lines, will return an
@@ -23,7 +32,17 @@ def read_config():
     
     return config_dict
 
+def reset_config():
+    '''
+    Permanently erase .config data, replace with empty file.
+    '''
+    config_file.unlink()
+    config_file.touch()
+
 def configure(argo_path=None, ncep_path=None, woa_path=None):
+    '''
+    Set up locations for Argo, NCEP, and/or WOA data on local machine.
+    '''
     # if they aren't already paths, make them paths, then make posix
     if argo_path is not None:
         argo_path = Path(argo_path).as_posix()
