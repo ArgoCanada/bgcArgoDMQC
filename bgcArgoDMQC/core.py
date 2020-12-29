@@ -1157,21 +1157,26 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     if BRtraj_flag:
-        if 'PPOX_DOXY' in BRtraj_nc.variables.keys():
+        if 'PPOX_DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
             floatData['PPOX_DOXY']  = BRtraj_nc.variables['PPOX_DOXY'][:].data.flatten()
-        elif 'DOXY' in BRtraj_nc.variables.keys():
-            #  unit conversion from umol kg-1 to pO2, some shaky S and P assumptions?
+            floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
+            floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
+            floatData['inair']      = True
+        elif 'DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
+            # unit conversion from umol kg-1 to pO2, some shaky S and P assumptions?
             floatData['PPOX_DOXY'] = unit.doxy_to_pO2(unit.umol_per_sw_to_mmol_per_L(
                 BRtraj_nc.variables['DOXY'][:].data.flatten(),
                 0, # salinity is 0 in air???
                 BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten(),
                 0 # pressure is 0 in air???
             ), 0, BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten())
-        floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
-        floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
-        floatData['inair']      = True
+            floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
+            floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
+            floatData['inair']      = True
+        else:
+            floatData['inair']      = False
     else:
-        floatData['inair']      = False
+        floatData['inair']          = False
 
     return floatData, Sprof, BRtraj, meta
 
