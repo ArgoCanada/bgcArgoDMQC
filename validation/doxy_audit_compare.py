@@ -2,11 +2,7 @@
 
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
-
-import matplotlib.pyplot as plt
-
 import bgcArgoDMQC as bgc
 
 # load in DOXY audit file - most recent one was on July 9 2020
