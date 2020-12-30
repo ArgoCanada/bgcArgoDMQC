@@ -152,9 +152,8 @@ class sprof:
         '''
 
         # metadata and dimension variables
-        self.floatName  = floatdict['floatName']
         self.floatType  = floatdict['floatType']
-        self.N_CYCLES   = floatdict['N_CYCLES']
+        self.N_PROF     = floatdict['N_PROF']
         self.N_LEVELS   = floatdict['N_LEVELS']
         self.CYCLE      = floatdict['CYCLES']
         self.CYCLE_GRID = floatdict['CYCLE_GRID']
@@ -685,7 +684,6 @@ class profiles:
     def assign(self, floatdict):
 
         # metadata and dimension variables
-        self.floatName  = floatdict['floatName']
         self.floatType  = floatdict['floatType']
         self.N_LEVELS   = floatdict['N_LEVELS']
         self.CYCLE      = floatdict['CYCLES']
@@ -1023,8 +1021,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             - floatName: WMO number, from input
             - floatType: Kind of float (APEX, ARVOR, etc.)
             - N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
-            - N_CYCLES: Number of profiles, Argo dimension N_PROF
-            - CYCLES: Array from 1 to N_CYCLES
+            - N_PROF: Number of profiles, Argo dimension N_PROF
             - LATITUDE: Latitude (-90, 90) for each profile
             - LONGITUDE: Longitude (-180, 180) for each profile
             - SDN: Serial Date Number for each profile
@@ -1104,49 +1101,16 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # number of profile cycles
     M = Sprof_nc.dimensions['N_LEVELS'].size
     N = Sprof_nc.dimensions['N_PROF'].size
-    # beginning of output dict with basic info, following variables in SAGEO2
-    floatData = dict(floatName=wmo, N_CYCLES=N, N_LEVELS=M, WMO=int(wmo))
     
-    mask = Sprof_nc.variables['PRES'][:].mask
-    mask_vars = ['TEMP','PSAL']
-    if 'DOXY' in Sprof_nc.variables.keys():
-        mask_vars = mask_vars + ['DOXY']
-    if 'DOXY_ADJUSTED' in Sprof_nc.variables.keys():
-        mask_vars = mask_vars + ['DOXY_ADJUSTED']
+    floatData = read_all_variables(Sprof_nc)
+    floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
+    floatData['CYCLES'] = floatData['CYCLE_NUMBER']
+    floatData['WMO'] = wmo
 
-    for v in mask_vars:
-        mask = np.logical_or(mask, Sprof_nc.variables[v][:].mask)
-
-    if not 'CYCLE_NUMBER' in Sprof_nc.variables.keys():
-        floatData['CYCLES'] = np.arange(1,N+1)
-    else:
-        floatData['CYCLES'] = Sprof_nc.variables['CYCLE_NUMBER'][:].data.flatten()
-
-    # load in variables that will be in every file
-    floatData['PRES'] = Sprof_nc.variables['PRES'][:].data.flatten()
-    floatData['TEMP'] = Sprof_nc.variables['TEMP'][:].data.flatten()
-    floatData['PSAL'] = Sprof_nc.variables['PSAL'][:].data.flatten()
-    floatData['SDN']  = Sprof_nc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01')
-    floatData['LATITUDE']  = Sprof_nc.variables['LATITUDE'][:].data.flatten()
-    floatData['LONGITUDE'] = Sprof_nc.variables['LONGITUDE'][:].data.flatten()
-
-    # loop through other possible BGC variables
-    bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
-    core_vars = ['PRES', 'TEMP', 'PSAL', 'POSITION']
-    for v in bgc_vars:
-        if v in Sprof_nc.variables.keys():
-            floatData[v] = Sprof_nc.variables[v][:].data.flatten()
-
-    for v in bgc_vars + core_vars:
-        v_qc = v + '_QC'
-        if v_qc in Sprof_nc.variables.keys():
-            floatData[v_qc] = read_qc(Sprof_nc.variables[v_qc][:].data.flatten())
-        v_adj = v + '_ADJUSTED'
-        if v_adj in Sprof_nc.variables.keys():
-            floatData[v_adj] = Sprof_nc.variables[v_adj][:].data.flatten()
-            v_adj_qc = v_adj + '_QC'
-            if v_adj_qc in Sprof_nc.variables.keys():
-                floatData[v_adj_qc] = read_qc(Sprof_nc.variables[v_adj_qc][:].data.flatten())
+    qc_keys = [s for s in floatData.keys() if '_QC' in s and 'PROFILE' not in s]
+    for qc in qc_keys:
+        print(qc)
+        floatData[qc] = read_qc(floatData[qc])
 
     if grid:
         ftype = ''
@@ -1160,12 +1124,13 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T.flatten()
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
 
-    floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
-    # match the fill values
-    ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
-    floatData['O2Sat'][ix] = 99999.
-    # get the worst QC flag from each quantity that goes into the calculation
-    floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+    if 'DOXY' in floatData.keys():
+        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
+        # match the fill values
+        ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
+        floatData['O2Sat'][ix] = 99999.
+        # get the worst QC flag from each quantity that goes into the calculation
+        floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     if BRtraj_flag:
         if 'PPOX_DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
@@ -1372,7 +1337,7 @@ def read_history_qctest(nc):
 def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_flags = [k for k in clean_float_data.keys() if '_QC' in k]
+    qc_flags = [k for k in clean_float_data.keys() if '_QC' in k and 'PROFILE' not in k]
 
     if bad_flags is None:
         for qc_key in qc_flags:
@@ -1405,7 +1370,7 @@ def dict_clean(float_data, bad_flags=None):
 def dict_fillvalue_clean(float_data):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k and 'SDN' not in k]
+    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k and 'SDN' not in k and 'PROFILE' not in k]
 
     for k in qc_keys:
         data_key   = k.replace('_QC','')
