@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import gsw
 
-def oxy_sol(S, T, a4330=False):
+def oxy_sol(S, T, a4330=True):
     '''
     Calculate oxygen saturation concentration in seawater as a function of
     S & T, in equilibrium with standard coponsition moist air at 1atm total
