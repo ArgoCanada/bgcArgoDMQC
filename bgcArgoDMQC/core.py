@@ -62,8 +62,8 @@ def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
 
     Args:
         argo_path (str or path-like): location of local Argo data
-        woa_path (str or path-like): location of local World Ocean Atlas data
         ncep_data (str or path-like): location of local NCEP data
+        woa_path (str or path-like): location of local World Ocean Atlas data
     '''
 
     global ARGO_PATH
@@ -210,6 +210,17 @@ class sprof:
         if 'O2Sat' in floatdict.keys():
             self.O2Sat = floatdict['O2Sat']
             self.O2Sat_QC = floatdict['O2Sat_QC']
+
+    def get_gridded_var(self, *args):
+
+        if not hasattr(self, '__griddict__'):
+            self.__griddict__ = read_sprof_gridded_variables(Dataset())
+
+        varlist = list()
+        for v in args:
+            varlist.append(self.__griddict__[v])
+
+        return varlist
 
     def rm_fillvalue(self):
         '''
@@ -1182,7 +1193,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
 def load_profiles(files, verbose=False):
 
-    common_variables = get_vars(files)
+    common_variables = util.get_vars(files)
     core_files = [fn.replace('B','') for fn in files]
 
     floatData = dict(
@@ -1307,6 +1318,28 @@ def read_all_variables(nc):
         print(name)
         print(var)
         floatData[name] = var[:].data.flatten()
+
+    return floatData
+
+def read_sprof_gridded_variables(nc):
+    '''
+    Read all variables and dimensions from an Argo Sprof file, do not flatten
+    arrays, keep as 2D arrays.
+
+    Args:
+        nc: a netCDF file object
+    
+    Returns:
+        floatData: python dict with all variable and dimension names
+    '''
+
+    floatData = dict()
+    for name, dim in nc.dimensions.items():
+        floatData[name] = dim.size
+    for name, var in nc.variables.items():
+        print(name)
+        print(var)
+        floatData[name] = var[:].data
 
     return floatData
 
@@ -1628,10 +1661,6 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
 
     return gains, carry_over
 
-
-# def grid_var(gridded_cycle, Nprof, Nlevel, argo_var):
-
-    # return gV
 
 def vertically_align(P1, P2, V2):
 
