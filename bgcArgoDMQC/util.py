@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 import numpy as np
 from netCDF4 import Dataset
 
@@ -383,3 +384,48 @@ def haversine(c1, c2):
 def cycle_from_time(time, t_arr, c_arr):
     ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))
     return c_arr[ix][0]
+
+def get_vars(files):
+
+    nc = Dataset(Path(files[0]), 'r')
+    varnames = set(nc.variables.keys())
+    nc.close()
+
+    for fn in files:
+        nc = Dataset(Path(fn), 'r')
+        varnames = varnames.intersection(nc.variables.keys())
+        nc.close()
+
+    varnames = list(varnames)
+
+    return varnames
+
+def read_qc(flags):
+
+    decode_flags = np.array([f.decode('utf-8') for f in flags])
+    decode_flags[decode_flags == ' '] = '4'
+
+    out_flags = np.array([int(f) for f in decode_flags])
+
+    return out_flags
+
+def get_worst_flag(*args):
+    out_flags = np.ones(args[0].shape)
+
+    if len(args) == 1:
+        out_flags = args[0]
+    else:
+        # make an array where all data marked as good
+        out_flags = np.ones(args[0].shape)
+        # loop through input flags
+        for flags in args:
+            # loop through each datapoint flag
+            for i,f in enumerate(flags):
+                if f > out_flags[i] and f <= 4:
+                    out_flags[i] = f
+                elif f in [5,8] and out_flags[i] <= 2:
+                    out_flags[i] = f
+                elif f == 9:
+                    out_flags[i] = 9
+        
+    return out_flags

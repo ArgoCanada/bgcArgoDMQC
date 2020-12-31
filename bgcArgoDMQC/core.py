@@ -962,51 +962,6 @@ def organize_files(files):
 
     return sorted_files
 
-def get_vars(files):
-
-    nc = Dataset(Path(files[0]), 'r')
-    varnames = set(nc.variables.keys())
-    nc.close()
-
-    for fn in files:
-        nc = Dataset(Path(fn), 'r')
-        varnames = varnames.intersection(nc.variables.keys())
-        nc.close()
-
-    varnames = list(varnames)
-
-    return varnames
-
-def read_qc(flags):
-
-    decode_flags = np.array([f.decode('utf-8') for f in flags])
-    decode_flags[decode_flags == ' '] = '4'
-
-    out_flags = np.array([int(f) for f in decode_flags])
-
-    return out_flags
-
-def get_worst_flag(*args):
-    out_flags = np.ones(args[0].shape)
-
-    if len(args) == 1:
-        out_flags = args[0]
-    else:
-        # make an array where all data marked as good
-        out_flags = np.ones(args[0].shape)
-        # loop through input flags
-        for flags in args:
-            # loop through each datapoint flag
-            for i,f in enumerate(flags):
-                if f > out_flags[i] and f <= 4:
-                    out_flags[i] = f
-                elif f in [5,8] and out_flags[i] <= 2:
-                    out_flags[i] = f
-                elif f == 9:
-                    out_flags[i] = 9
-        
-    return out_flags
-
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
@@ -1110,7 +1065,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     qc_keys = [s for s in floatData.keys() if '_QC' in s and 'PROFILE' not in s]
     for qc in qc_keys:
         print(qc)
-        floatData[qc] = read_qc(floatData[qc])
+        floatData[qc] = util.read_qc(floatData[qc])
 
     if grid:
         ftype = ''
@@ -1130,7 +1085,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
         floatData['O2Sat'][ix] = 99999.
         # get the worst QC flag from each quantity that goes into the calculation
-        floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+        floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     if BRtraj_flag:
         if 'PPOX_DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
@@ -1229,19 +1184,19 @@ def load_profiles(files, verbose=False):
 
         # load in variables that will be in every file
         floatData['PRES']           = np.append(floatData['PRES'], cc.variables['PRES'][:].data.flatten())
-        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], read_qc(cc.variables['PRES_QC'][:].data.flatten()))
+        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], util.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
         floatData['TEMP']           = np.append(floatData['TEMP'], cc.variables['TEMP'][:].data.flatten())
-        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
+        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], util.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
         floatData['PSAL']           = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
-        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
+        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], util.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
         floatData['SDN']            = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))
-        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], read_qc(cc.variables['JULD_QC'][:].data.flatten()))
+        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], util.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
         floatData['SDN_GRID']       = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))]))
         floatData['LATITUDE']       = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
         floatData['LATITUDE_GRID']  = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
         floatData['LONGITUDE']      = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())
         floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
-        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
+        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
         # loop through other possible BGC variables
         bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
@@ -1257,11 +1212,11 @@ def load_profiles(files, verbose=False):
         for v in floatData.keys():
             v_qc = v + '_QC'
             if v_qc in common_variables:
-                floatData[v_qc] = np.append(floatData[v_qc], read_qc(nc.variables[v_qc][:].data.flatten()))
+                floatData[v_qc] = np.append(floatData[v_qc], util.read_qc(nc.variables[v_qc][:].data.flatten()))
 
         if 'DOXY' in floatData.keys():
             floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
-            floatData['O2Sat_QC'] = get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+            floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
 
     return floatData
 
