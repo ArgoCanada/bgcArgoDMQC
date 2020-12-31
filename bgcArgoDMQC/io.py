@@ -561,7 +561,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
                             ftp.retrbinary('RETR ' + fn, lf.write)
                             lf.close()
 
-    elif len(args) > 1:
+    else:
         local_path = Path(local_path)
 
         dacdir = args[0]
@@ -675,6 +675,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
     else:
         lon_bounds = (np.nanmin(track[:,2]), np.nanmax(track[:,2]))
+        lix = None
     lat_bounds = (np.nanmin(track[:,1]), np.nanmax(track[:,1]))
 
     # set up extraction files, variables
@@ -682,6 +683,11 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     var_name  = woa_param + '_an'
 
     base_woa_file = 'woa18_{}_{}'.format(woa_ftype, woa_param)
+
+    # assign var names to avoid unbound warnings
+    data, xlon, z_sub, lat_sub, lon_sub = None, None, None, None, None
+    z_ix, lat_ix, lon_ix = None, None, None
+
     # loop through months
     for i in range(12):
         mo = i+1
@@ -766,6 +772,7 @@ def load_ncep_data(track, varname, local_path='./'):
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
     else:
         lon_bounds = (np.nanmin(track[:,2]), np.nanmax(track[:,2]))
+        lix = None
     lat_bounds = (np.nanmin(track[:,1]), np.nanmax(track[:,1]))
 
     sdn = track[:,0]
@@ -774,6 +781,10 @@ def load_ncep_data(track, varname, local_path='./'):
 
     if Nyear == 0 and yrs[0] != mdates.datetime.date.today().year:
         Nyear = 1
+
+    # assign var names to avoid unbound warnings
+    data, xlon, ncep_time, landmask, xtrack, ncep_track = None, None, None, None, None, None
+    lat_sub, lon_sub, lat_ix, lon_ix = None, None, None, None
 
     # counter index for going across years
     j = 0
@@ -816,7 +827,7 @@ def load_ncep_data(track, varname, local_path='./'):
 
         vdata = nc.variables[varname][:]
         for i in range(len(time)):
-            data_2d =  vdata[i,:,:][:,lon_ix][lat_ix,:]
+            data_2d = vdata[i,:,:][:,lon_ix][lat_ix,:]
             data_2d[landmask] = np.nan
             data[j,:,:] = data_2d
             ncep_time[j] = time[i]
