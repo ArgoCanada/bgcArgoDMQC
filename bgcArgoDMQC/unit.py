@@ -12,12 +12,12 @@ def oxy_sol(S, T, a4330=True):
     Biogeochemical Dynamics" ch. 3, p. 81, table 3.2.4.
     
     Args:
-        S: salinity, psu
-        T: temperature, deg C
-        a4330: True or False for Aanderaa 4330 optode
+        S (float or array-like): salinity, psu
+        T (float or array-like): temperature, deg C
+        a4330 (bool): True or False for Aanderaa 4330 optode
 
     Returns:
-        O2sol: oxygen solubility
+        O2sol (float or array-like): oxygen solubility
     '''
 
     if a4330:
@@ -43,8 +43,9 @@ def pH2O(T, S=0, unit='Pa'):
     Calculate vapor pressure of water
     
     Args:
-        T: temperature, deg C
-        S: salinity, only necessary for mbar unit
+        T (float or array-like): temperature, deg C
+        S (optional, float or array-like): salinity, only necessary for mbar unit, default 0
+        unit (optional, str): "Pa" or "mbar" for unit of vapor pressure, defauly "Pa"
 
     Returns:
         vapor_pressure: vapor pressure of water, Pa or mbar
