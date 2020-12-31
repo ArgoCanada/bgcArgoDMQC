@@ -236,6 +236,9 @@ def read_gain_value(fn, verbose=True):
             equation = eqs[ix]
             comment = comms[ix]
     
+    else:
+        raise ValueError('Cannot parse calibration info based on dimensions N_PROF={} and N_CALIB={}'.format(nprof, ncalib))
+    
 
     return G, equation, comment
 
