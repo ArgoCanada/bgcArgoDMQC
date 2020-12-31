@@ -839,7 +839,23 @@ def load_ncep_data(track, varname, local_path='./'):
 
     return xtrack, ncep_track, data
 
-def append_variable_to_file(fn, out_fn=None, *args):
+def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
+    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+        # copy global attributes all at once via dictionary
+        dst.setncatts(src.__dict__)
+        # copy dimensions except for the excluded
+        for name, dimension in src.dimensions.items():
+            if name not in exclude_dims:
+                dst.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
+        # copy file data except for the excluded
+        for name, variable in src.variables.items():
+            if name not in exclude_vars:
+                x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                # copy variable attributes all at once via dictionary
+                dst[name].setncatts(src[name].__dict__)
+                dst[name][:] = src[name][:]
+
+def append_variable_to_file(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
     input fn. The input structure for each variable should be a dictionary with
@@ -853,7 +869,9 @@ def append_variable_to_file(fn, out_fn=None, *args):
 
         new_var = dict(
             name='MY_NEW_VARIABLE',     # variable name, can be new or existing
+            datatype=np.float64,        # variable datatype, can be np datatype or string
             dimensions=('N', 'M'),      # will be created with warning if they do not exist
+            data=data_arr,              # the data
             long_name='The new variable',
             standard_name='my_new_var',
             units='degree_celsius',
@@ -865,6 +883,13 @@ def append_variable_to_file(fn, out_fn=None, *args):
     '''
 
     nc = Dataset(fn, 'a')
+    
+    for new_var in args:
+        name = new_var.pop('name')
+        data = new_var.pop('data')
+        nc.createVariable(name, new_var.pop('datatype'), new_var.pop('dimensions'))
+        nc[name].setncatts(new_var)
+        nc[name][:] = data
 
     return nc
 
