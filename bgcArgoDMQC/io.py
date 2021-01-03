@@ -840,6 +840,10 @@ def load_ncep_data(track, varname, local_path='./'):
     return xtrack, ncep_track, data
 
 def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
+    '''
+    Copy data from a netCDF file with the exception of dimension and variable
+    names listed in exclude_vars and exclude_dims.
+    '''
     with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
         # copy global attributes all at once via dictionary
         dst.setncatts(src.__dict__)
