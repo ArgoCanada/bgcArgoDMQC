@@ -403,6 +403,12 @@ def get_vars(files):
 
     return varnames
 
+def read_ncstr(arr):
+    decode_str = np.array([f.decode('utf-8') for f in arr])
+    out = ''.join(decode_str)
+
+    return out.strip()
+
 def read_qc(flags):
 
     decode_flags = np.array([f.decode('utf-8') for f in flags])
