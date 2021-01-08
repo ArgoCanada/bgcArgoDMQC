@@ -262,12 +262,13 @@ class sprof:
             key = [key]
         
         for k in key:
-            self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
-            self.__floatdict__ = self.__rangecheckdict__
+            if k in self.__floatdict__.keys():
+                self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
+                self.__floatdict__ = self.__rangecheckdict__
 
-            # recalculate O2sat if its DOXY
-            if k == 'DOXY':
-                self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
+                # recalculate O2sat if its DOXY
+                if k == 'DOXY':
+                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
 
         self.assign(self.__rangecheckdict__)
     
