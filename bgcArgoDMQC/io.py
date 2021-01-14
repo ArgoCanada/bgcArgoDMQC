@@ -858,7 +858,9 @@ def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
                 # copy variable attributes all at once via dictionary
                 dst[name].setncatts(src[name].__dict__)
                 dst[name][:] = src[name][:]
-
+    
+    return Dataset(outfile, 'a')
+        
 def append_variable_to_file(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
