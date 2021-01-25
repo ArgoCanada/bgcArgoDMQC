@@ -10,3 +10,4 @@ sagepy/__pycache__/
 /dmqc/
 /ARVOR-asc-desc/
 .DS_Store
+.config

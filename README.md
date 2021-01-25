@@ -38,10 +38,10 @@ calculate oxygen gains
 ## bgcArgo dependencies
 
 - Must run on `python3.4` or higher, not supported on `python2.x` (uses [pathlib](https://docs.python.org/3/library/pathlib.html), introduced in python version 3.4)
-- TEOS-10 package [gsw](https://teos-10.github.io/GSW-Python/), but will also work with the [seawater](https://pypi.org/project/seawater/) package, though it is deprecated in favor of gsw
+- TEOS-10 package [gsw](https://teos-10.github.io/GSW-Python/)
 - [netCDF4](https://pypi.org/project/netCDF4/) module for `.nc` files
-- [pandas](https://pandas.pydata.org/) is required (and highly recommended for all your data science needs!)
-- [seaborn](https://seaborn.pydata.org/) is recommended but not required, through there will be some reduced (non-essential) functionality
+- [pandas](https://pandas.pydata.org/) is required
+- [seaborn](https://seaborn.pydata.org/)
 - [cmocean](https://matplotlib.org/cmocean/) is also recommended for nicer plots, but not required
 
 ## basic functionality

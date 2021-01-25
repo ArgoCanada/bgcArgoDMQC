@@ -10,19 +10,15 @@ audit_file = Path('/Users/gordonc/Documents/argo/doxy-audit/DOXY_audit_112020.TX
 df = pd.read_csv(audit_file, sep='\t', header=25)
 
 # download the synthetic, meta, and BRtraj files for each float in the audit
-dacpath = '/ifremer/argo/dac'
-fltpath = ['{}/{}/{}'.format(dacpath, bgc.get_dac(w), w) for w in df.WMO.unique()]
 local_path = '/Users/gordonc/Documents/data/Argo'
-bgc.io.get_argo(fltpath, local_path=local_path, mode='summary')
-bgc.set_dirs(argo_path='/Users/gordonc/Documents/data/Argo', woa_path='/Users/gordonc/Documents/data/WOA18')
+# for wmo in df.WMO.unique():
+    # bgc.io.get_argo(wmo, local_path=local_path, ftype='summary')
 
-with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20200920.csv'),'w') as fid:
+with open(Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20201230.csv'),'w') as fid:
     fid.write('WMO,CYCLE,DAC,DATE,pyGAIN,sageGAIN')
     for wmo in df.WMO.unique():
         sub = df[df.WMO == wmo]
         syn = bgc.sprof(wmo)
-        # syn.clean(bad_flags=4)
-        syn.check_doxy_range()
         syn.calc_gains(ref='WOA')
         for i in range(sub.shape[0]):
             cycle = sub.cycle.iloc[i]
