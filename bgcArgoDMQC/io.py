@@ -65,9 +65,10 @@ def read_index(mission='B', remote=False):
 
         df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
-    df['dac'] = np.array([f.split('/')[0] for f in df.file])
-    df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
-    df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
+    if mission != 'M':
+        df['dac'] = np.array([f.split('/')[0] for f in df.file])
+        df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
+        df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
 
     return df
 
