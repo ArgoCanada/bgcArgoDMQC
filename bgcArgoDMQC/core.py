@@ -92,8 +92,8 @@ def get_index(index='bgc'):
             global __synthindex__
             __synthindex__ = io.read_index(mission='S')
         return __synthindex__
-    elif index == 'synthetic':
-        if '__synthindex__' not in globals():
+    elif index == '__metaindex__':
+        if '__metaindex__' not in globals():
             global __metaindex__
             __metaindex__ = io.read_index(mission='M')
         return __metaindex__
