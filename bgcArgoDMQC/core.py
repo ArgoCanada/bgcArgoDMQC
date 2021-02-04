@@ -934,7 +934,7 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
 
     matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
     subset_index = subset_index[subset_index.file.isin(matches)]
-    local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]).as_posix() for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
+    local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]) for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
 
     remove_ix = []
     for i,fn in enumerate(local_files):
@@ -953,13 +953,13 @@ def organize_files(files):
     '''
     Sort files according to time they were recorded.
     '''
-    lead_letter = files[0].split('/')[-1][0]
+    lead_letter = files[0].name[0]
     if lead_letter == 'R' or lead_letter == 'D':
         index = get_index('global')
     else:
         index = __bgcindex__
     
-    dates = np.array([index[index.file.str.find(fn.split('/')[-1]) != -1].date.iloc[0] for fn in files])
+    dates = np.array([index[index.file.str.find(fn.name) != -1].date.iloc[0] for fn in files])
     sorted_files = list(np.array(files)[np.argsort(dates)])
 
     return sorted_files
@@ -1116,7 +1116,19 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 def load_profiles(files, verbose=False):
 
     common_variables = util.get_vars(files)
-    core_files = [fn.replace('B','') for fn in files]
+    core_files = len(files)*[' ']
+    for i,f in enumerate(files):
+        data_mode = f.name[1]
+        if data_mode == 'D':
+            core_files[i] = f.parent / f.name.replace('B','')
+        else:
+            test_file = f.parent / f.name.replace('B','')
+            if not test_file.exists():
+                test_file = f.parent / f.name.replace('BR', 'D')
+                if not test_file.exists():
+                    raise FileNotFoundError('Corresponding core file not found')
+            core_files[i] = test_file
+
 
     floatData = dict(
         floatName=[], N_LEVELS=[], N_PROF=[], CYCLES=np.array([], dtype=int), floatType=[]
