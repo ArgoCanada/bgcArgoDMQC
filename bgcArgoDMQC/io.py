@@ -52,6 +52,9 @@ def read_index(mission='B', remote=False):
     elif mission == 'M':
         local_filename = index_path / 'ar_index_global_meta.txt.gz'
         remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_meta.txt.gz'
+    elif mission == 'T':
+        local_filename = index_path / 'ar_index_global_traj.txt.gz'
+        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_traj.txt.gz'
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
@@ -65,7 +68,7 @@ def read_index(mission='B', remote=False):
 
         df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
-    if mission != 'M':
+    if mission != 'M' and mission != 'T':
         df['dac'] = np.array([f.split('/')[0] for f in df.file])
         df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
         df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
@@ -83,14 +86,22 @@ def update_index(ftype=None):
     ftp.cwd('/ifremer/argo/')
 
     meta  = 'ar_index_global_meta.txt.gz'
+    traj  = 'ar_index_global_traj.txt.gz'
     index = 'ar_index_global_prof.txt.gz'
     bgc   = 'argo_bio-profile_index.txt.gz'
     synth = 'argo_synthetic-profile_index.txt.gz'
+
 
     local_meta = index_path / meta
     if ftype is None or ftype == 'meta':
         lf = open(local_meta, 'wb')
         ftp.retrbinary('RETR ' + meta, lf.write)
+        lf.close()
+
+    local_traj = index_path / traj
+    if ftype is None or ftype == 'traj':
+        lf = open(local_traj, 'wb')
+        ftp.retrbinary('RETR ' + traj, lf.write)
         lf.close()
 
     local_index = index_path / index

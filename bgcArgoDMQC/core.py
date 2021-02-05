@@ -97,6 +97,11 @@ def get_index(index='bgc'):
             global __metaindex__
             __metaindex__ = io.read_index(mission='M')
         return __metaindex__
+    elif index == 'traj':
+        if '__trajindex__' not in globals():
+            global __trajindex__
+            __trajindex__ = io.read_index(mission='T')
+        return __trajindex__
     else:
         raise ValueError('Input "{}" is unrecognized'.format(index))
 
