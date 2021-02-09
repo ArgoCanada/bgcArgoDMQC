@@ -73,7 +73,7 @@ for performing DMQC on BGC-Argo variables.
 The package, named `bgcArgoDMQC`, began as a python translation of MATLAB code
 written by Mauer & Plant (<https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING>)
 for correcting oxygen, particularly calculating oxygen gain following Johnson
-et al. (**2014**). Oxygen quality control is currently the package's primary
+et al. (2015). Oxygen quality control is currently the package's primary
 function, and thus will be the primary subject of this paper, however it will
 develop into a package that is capable of performing DMQC on all BGC variables.
 This package seeks to fill a gap in the current array of available software
@@ -87,6 +87,28 @@ in an open-source language.
 - Calculate gain using carry-over factor (Bittig et al. 2018)
 - Output required variables and information for delayed-mode Argo files
 - Sufficient plotting features to do visual QC
+
+The main correction required by oxygen sensors is that they are usually off by
+a multiplicative factor (need appropriate references here). The factor used to
+correct this is referred to as the gain, _G_. The gain factor _G_ is calculated
+by computing the ratio between the raw oxygen values observed by the float and
+either climatological or reanalysis oxygen data (Johnson et al. 2015). The gain
+is then used to adjust the original oxygen data:
+
+*DOXY\_ADJUSTED = G\*DOXY*  
+Where: *G = REFERENCE_DOXY/DOXY*
+
+The choice of reference data will depend on the nature of the observations
+obtained by the sensor. Some sensors, namely Aanderaa optodes, are capable of
+taking measurements in-air. These sensors can be compared to the National
+Centers for Environmental Prediction (NCEP) reanalysis data by computing the
+expected in-air partial pressure of oxygen using surface pressure data and the
+molar fraction of oxygen. Alternatively, if no in-air data is available, the
+observations can be compared to World Ocean Atlas climatological data at the
+surface, or at any other depth level designated by the user.
+
+The entire processing chain for calculating oxygen gain can be accomplished
+using the `bgcArgoDMQC` package is a few short steps.
 
 ## Conclusion
 
