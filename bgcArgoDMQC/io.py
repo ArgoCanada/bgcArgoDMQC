@@ -911,6 +911,10 @@ def append_variable_to_file(fn, *args):
 
     return nc
 
+def generate_standard_comments():
+
+    return comment
+
 def append_scienfitic_calib_information(nc_var, str_to_append):
 
     return None

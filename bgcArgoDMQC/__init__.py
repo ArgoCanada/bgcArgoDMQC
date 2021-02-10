@@ -52,6 +52,7 @@ configure.check_config()
 # get a dict with with config info
 config = configure.read_config()
 # set the directories within the config file
-set_dirs(**config)
+dir_config = {k:v for k,v in config.items() if k in ['argo_path', 'woa_path', 'ncep_path']}
+set_dirs(**dir_config)
 
 from .core import *

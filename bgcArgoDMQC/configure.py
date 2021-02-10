@@ -39,7 +39,7 @@ def reset_config():
     config_file.unlink()
     config_file.touch()
 
-def configure(argo_path=None, ncep_path=None, woa_path=None):
+def configure(argo_path=None, ncep_path=None, woa_path=None, operator_name=None, operator_orcid=None, default_url=None):
     '''
     Set up locations for Argo, NCEP, and/or WOA data on local machine.
     '''
@@ -53,7 +53,11 @@ def configure(argo_path=None, ncep_path=None, woa_path=None):
 
     # existing and new configuration info
     existing_config = read_config()
-    new_config = dict(argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path)
+    new_config = dict(
+        argo_path=argo_path, ncep_path=ncep_path, woa_path=woa_path,
+        operator_name=operator_name, operator_orcid=operator_orcid,
+        default_url=default_url
+    )
 
     # get rid of None values
     clean_new_config = {k: v for k, v in new_config.items() if v is not None}
