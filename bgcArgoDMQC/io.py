@@ -465,7 +465,7 @@ def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite
             # if its a float number, build ftp paths to floats
             if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
                 base_path = URL_DIR_DICT[url]
-                a = '{}/{}/{:d}'.format(base_path, get_dac(init_a), init_a)
+                a = (Path(base_path) / 'dac' / get_dac(init_a) / str(init_a)).as_posix()
             else:
                 a = init_a
 
@@ -482,7 +482,7 @@ def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite
 
                     # define local location to save file
                     dac_path = local_path / dac
-                    wmo_path = local_path / dac / wmo
+                    wmo_path = dac_path / wmo
                     profile_path = wmo_path / 'profiles'
 
                     # make the directory if it doesn't exist
@@ -517,13 +517,14 @@ def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite
                 ftp_wmo_path = a
                 wmo = ftp_wmo_path.split('/')[-1]
                 dac = ftp_wmo_path.split('/')[-2]
+                print(ftp_wmo_path)
                 ftp.cwd(ftp_wmo_path)
 
                 files = ftp.nlst('*.nc')
                     
                 # define local location to save file
                 dac_path = local_path / dac
-                wmo_path = local_path / dac / wmo
+                wmo_path = dac_path / wmo
 
                 # make the directory if it doesn't exist
                 if not dac_path.is_dir():
