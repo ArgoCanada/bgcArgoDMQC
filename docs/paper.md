@@ -108,7 +108,23 @@ observations can be compared to World Ocean Atlas climatological data at the
 surface, or at any other depth level designated by the user.
 
 The entire processing chain for calculating oxygen gain can be accomplished
-using the `bgcArgoDMQC` package is a few short steps.
+using the `bgcArgoDMQC` package is a few short steps:
+
+```python
+# import the package
+import bgcArgoDMQC as bgc
+
+# load data from a synthetic Argo file
+wmo = 4902480   # the float WMO ID of interest
+syn = bgc.sprof(wmo)
+
+# calculate the gain using in-air data and NCEP reanalysis
+air_gains = syn.calc_gains()
+# or, calculate comparing below surface data to WOA climatology
+surf_gains = syn.calc_gains(ref='WOA')
+# or finally, calculate using deep data
+deep_gains = syn.calc_gains(ref='WOA', zlim=(800,1200))
+```
 
 ## Conclusion
 
