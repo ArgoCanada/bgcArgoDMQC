@@ -11,12 +11,36 @@ import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
 
+from . import configure
 from . import util
 
 global index_path
 index_path = Path(__file__).parent.absolute() / 'ref'
 if not index_path.exists():
     index_path.mkdir()
+
+global URL_DICT
+URL_DICT = {
+    'ftp.ifremer.fr':'ftp.ifremer.fr', 
+    'ifremer':'ftp.ifremer.fr', 
+    'coriolis':'ftp.ifremer.fr', 
+    'usgodae.org':'usgodae.org', 
+    'godae':'usgodae.org', 
+    'us':'usgodae.org'
+}
+
+global URL_DIR_DICT
+URL_DIR_DICT = {
+    'ftp.ifremer.fr':'/ifremer/argo/', 
+    'usgodae.org':'/pub/outgoing/argo/', 
+}
+
+config = configure.read_config()
+if 'default_url' in config.keys():
+    url_name = config.pop('default_url')
+    url = URL_DICT[url_name]
+else:
+    url = 'ftp.ifremer.fr'
 
 def index_exists():
 
@@ -31,7 +55,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B', remote=False):
+def read_index(mission='B', remote=False, url=url):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -40,21 +64,22 @@ def read_index(mission='B', remote=False):
         mission (str): *B*, *C*, *S*, or *M* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
     '''
 
+    url_dir = URL_DIR_DICT[url]
     if mission == 'B':
         local_filename = index_path / 'argo_bio-profile_index.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_bio-profile_index.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_bio-profile_index.txt.gz').as_posix()
     elif mission == 'C':
         local_filename = index_path / 'ar_index_global_prof.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_prof.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_prof.txt.gz').as_posix()
     elif mission == 'S':
         local_filename = index_path / 'argo_synthetic-profile_index.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_synthetic-profile_index.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_synthetic-profile_index.txt.gz').as_posix()
     elif mission == 'M':
         local_filename = index_path / 'ar_index_global_meta.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_meta.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_meta.txt.gz').as_posix()
     elif mission == 'T':
         local_filename = index_path / 'ar_index_global_traj.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_traj.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
@@ -75,15 +100,16 @@ def read_index(mission='B', remote=False):
 
     return df
 
-def update_index(ftype=None):
+def update_index(ftype=None, url=url):
     '''
     Function to access FTP server to download Argo metadata and profile global
     index files
     '''
 
-    ftp = ftplib.FTP('ftp.ifremer.fr')
+    ftp = ftplib.FTP(url)
+    url_dir = URL_DIR_DICT[url]
     ftp.login()
-    ftp.cwd('/ifremer/argo/')
+    ftp.cwd(url_dir)
 
     meta  = 'ar_index_global_meta.txt.gz'
     traj  = 'ar_index_global_traj.txt.gz'
@@ -395,7 +421,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
+def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -403,7 +429,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
     Args:
         *args: list of files, floats, or directories
         local_path (optional, str or Path): local directory to save float data, defaults to current directory
-        url (optional, str): url of the GDAC to connect to, defaults to ifremer
+        url (optional, str): url of the GDAC to connect to, defaults to ifremer or the value in the configuration file
         overwrite (optional, bool): whether to overwrite existing local files, default *False*
         ftype (optional, str): can be 'summary' if the user wishes to only download Sprof, traj, meta files, default is *None*
         mission (optional, str): Argo mission, can be 'B' for biogeochemical or 'C' for core, or 'CB' for both, default is 'CB'
@@ -438,13 +464,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
         for init_a in arglist:
             # if its a float number, build ftp paths to floats
             if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
-                if url == 'ftp.ifremer.fr':
-                    base_path = '/ifremer/argo/dac'
-                elif url == 'usgodae.org':
-                    base_path = '/pub/outgoing/argo/dac'
-                else:
-                    raise ValueError('Unrecognized Argo url: {}'.format(url))
-
+                base_path = URL_DIR_DICT[url]
                 a = '{}/{}/{:d}'.format(base_path, get_dac(init_a), init_a)
             else:
                 a = init_a
@@ -913,7 +933,7 @@ def append_variable_to_file(fn, *args):
 
 def generate_standard_comments():
 
-    return comment
+    return None
 
 def append_scienfitic_calib_information(nc_var, str_to_append):
 
