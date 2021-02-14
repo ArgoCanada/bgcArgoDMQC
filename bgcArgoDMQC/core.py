@@ -562,8 +562,6 @@ class sprof:
         fig = plt.figure()
         ax_list = [fig.add_subplot(1, nvar+map_num, n+1) for n in range(nvar)]
         axes_dict = {v:ax for v, ax in zip(var_keys, ax_list)}
-        print(var_keys)
-        print(ax_list)
         if map_num > 0:
             ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
         
@@ -610,7 +608,6 @@ class sprof:
             mx.plot(np.nan, np.nan, 'o', color=fcol, label='Float {}'.format(self.WMO))
 
             c = np.array(c)
-            print(c)
             minlon, maxlon = np.nanmin(c[:,1]), np.nanmax(c[:,1])
             minlat, maxlat = np.nanmin(c[:,0]), np.nanmax(c[:,0])
 
@@ -629,7 +626,6 @@ class sprof:
             extent[2] = extent[2] - 6
             extent[3] = extent[3] + 6
 
-            print(extent)
             mx.set_extent(extent, crs=ccrs.PlateCarree())
             mx.legend(loc=4, bbox_to_anchor=(1.05, 1.0), fontsize=8)
             mx.add_feature(cfeature.COASTLINE)
@@ -1071,7 +1067,6 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     qc_keys = [s for s in floatData.keys() if '_QC' in s and 'PROFILE' not in s]
     for qc in qc_keys:
-        print(qc)
         floatData[qc] = util.read_qc(floatData[qc])
 
     if grid:
@@ -1254,8 +1249,6 @@ def read_all_variables(nc):
     for name, dim in nc.dimensions.items():
         floatData[name] = dim.size
     for name, var in nc.variables.items():
-        print(name)
-        print(var)
         floatData[name] = var[:].data.flatten()
 
     return floatData
@@ -1276,8 +1269,6 @@ def read_sprof_gridded_variables(nc):
     for name, dim in nc.dimensions.items():
         floatData[name] = dim.size
     for name, var in nc.variables.items():
-        print(name)
-        print(var)
         floatData[name] = var[:].data
 
     return floatData
@@ -1691,7 +1682,6 @@ def correct_response_time(t, DO, T, thickness):
     # translate boundary layer thickness to temperature dependent tau
     f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
     tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
-    print(tau_T)
     # loop through oxygen data 
     for i in range(N-1):
         dt = t_sec[i+1] - t_sec[i]

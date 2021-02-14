@@ -517,7 +517,6 @@ def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite
                 ftp_wmo_path = a
                 wmo = ftp_wmo_path.split('/')[-1]
                 dac = ftp_wmo_path.split('/')[-2]
-                print(ftp_wmo_path)
                 ftp.cwd(ftp_wmo_path)
 
                 files = ftp.nlst('*.nc')
