@@ -1141,13 +1141,12 @@ def load_profiles(files, verbose=False):
     for v in ['WMO', 'LATITUDE', 'LONGITUDE', 'POSITION_QC', 'SDN_GRID', 'LATITUDE_GRID', 'LONGITUDE_GRID', 'CYCLE_GRID']:
         floatData[v] = np.array([])
 
-    for v in ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']:
-        if v in common_variables:
-            floatData[v] = np.array([])
-            floatData[v + '_QC'] = np.array([])
-            if v + '_ADJUSTED' in common_variables:
-                floatData[v + '_ADJUSTED'] = np.array([])
-                floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
+    for v in common_variables:
+        floatData[v] = np.array([])
+        floatData[v + '_QC'] = np.array([])
+        if v + '_ADJUSTED' in common_variables:
+            floatData[v + '_ADJUSTED'] = np.array([])
+            floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
     for fn,cn in zip(files,core_files):
         if verbose:
@@ -1213,13 +1212,8 @@ def load_profiles(files, verbose=False):
         floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
         # loop through other possible BGC variables
-        bgc_vars = ['DOXY', 'CHLA', 'BBP700', 'CDOM', 'NITRATE', 'DOWNWELLING_IRRADIANCE']
-        for v in bgc_vars:
-            if v in common_variables:
-                floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
-            v_adj = v + '_ADJUSTED'
-            if v_adj in common_variables:
-                floatData[v_adj] = np.append(floatData[v_adj], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v_adj][:].data.flatten()))
+        for v in common_variables:
+            floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
 
         floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
 
@@ -1231,7 +1225,7 @@ def load_profiles(files, verbose=False):
         if 'DOXY' in floatData.keys():
             floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
             floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
-
+        
     return floatData
 
 def read_all_variables(nc):
