@@ -109,6 +109,25 @@ def get_index(index='bgc'):
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
 
+class traj:
+    '''
+    Class that loads Argo trajectory file data for a given float ID number
+    (wmo).
+    '''
+
+    def __init__(self, wmo, keep_fillvalue=False, verbose=False):
+
+        self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
+
+        # local path info
+        self.argo_path = ARGO_PATH
+        self.woa_path  = WOA_PATH
+        self.ncep_path = NCEP_PATH
+
+        if not keep_fillvalue:
+            self.rm_fillvalue()
+
+
 class sprof:
     '''
     Class that loads Argo synthetic profile data for a given float ID number
@@ -148,7 +167,7 @@ class sprof:
             self.rm_fillvalue()
 
         if rcheck:
-            self.check_range('DOXY')
+            self.check_range()
 
     def assign(self, floatdict):
         '''
@@ -964,6 +983,10 @@ def organize_files(files):
     sorted_files = list(np.array(files)[np.argsort(dates)])
 
     return sorted_files
+
+def load_traj(local_path, wmo):
+
+    return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
