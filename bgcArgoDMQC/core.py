@@ -167,7 +167,7 @@ class sprof:
             self.rm_fillvalue()
 
         if rcheck:
-            self.check_range()
+            self.check_range('DOXY')
 
     def assign(self, floatdict):
         '''
