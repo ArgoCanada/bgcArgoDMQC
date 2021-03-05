@@ -36,7 +36,6 @@ from . import configure
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
 
-__bgcindex__ = io.read_index()
 global REF_PATH
 REF_PATH = Path(__file__).parent.absolute() / 'ref'
 
@@ -81,6 +80,9 @@ def get_index(index='bgc'):
         index (str): *bgc* for the biogeochemical Argo index, *global* for the core index, *synthetic* for the synthetic index, or *meta* for the metadata index
     '''
     if index == 'bgc':
+        if '__bgcindex__' not in globals():
+            global __bgcindex__
+            __bgcindex__ = io.read_index()
         return __bgcindex__
     elif index == 'global':
         if '__globalindex__' not in globals():
