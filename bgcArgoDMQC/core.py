@@ -943,10 +943,13 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
     local_path = Path(local_path)
 
     if mission == 'B':
+        if '__bgcindex__' not in globals():
+            __bgcindex__ = get_index()
         subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
     elif mission == 'C':
-        __coreindex__ = io.read_index(mission='C')
-        subset_index = __coreindex__[__coreindex__.wmo.isin(wmo_numbers)]
+        if '__globalindex__' not in globals():
+            __globalindex__ = get_index(index='global')
+        subset_index = __globalindex__[__globalindex__.wmo.isin(wmo_numbers)]
     else:
         raise ValueError('Invalid input for parameter "mission"')
     if cycles is not None:
@@ -979,6 +982,8 @@ def organize_files(files):
     if lead_letter == 'R' or lead_letter == 'D':
         index = get_index('global')
     else:
+        if '__bgcindex__' not in globals():
+            __bgcindex__ = get_index()
         index = __bgcindex__
     
     dates = np.array([index[index.file.str.find(fn.name) != -1].date.iloc[0] for fn in files])
