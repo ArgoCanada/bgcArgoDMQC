@@ -5,13 +5,20 @@ constituent files have become too long to reasonably work on.
 
 ## core
 
-Main functions that can be accessed directory from the parent package. These
+Main functions that can be accessed directly from the parent package. These
 should be the "front-facing" functions, those that serve the principal
 purpose of the package.
+
+- sprof
+- profiles
+- traj
+- internal
 
 ## `configure`
 
 Functions to set up permanent directories, metadata, etc. to improve workflow.
+
+Short, no action required
 
 ## `io`
 
@@ -26,15 +33,22 @@ downloading. Includes netCDF file manipulation.
 Interpolation functions, mainly taking reference data and mapping it to a
 float trajectory.
 
+No action required
+
 ## `fplt`
 
 Plotting and data visualization.
+
+Fine for now, but consider adding functionality.
 
 note: re-name to `plot`.
 
 ## `unit`
 
 For converting between various units.
+
+- scor
+- other
 
 ## `util`
 
@@ -43,3 +57,5 @@ Ad-hoc functions for indexing, etc.
 ## `lut`
 
 Tempertaure/boundary layer thickness response time lookup table.
+
+No action required
