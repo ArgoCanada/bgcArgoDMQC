@@ -983,6 +983,7 @@ def organize_files(files):
         index = get_index('global')
     else:
         if '__bgcindex__' not in globals():
+            global __bgcindex__
             __bgcindex__ = get_index()
         index = __bgcindex__
     
@@ -1178,7 +1179,7 @@ def load_profiles(files, verbose=False):
             floatData[v + '_ADJUSTED'] = np.array([])
             floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
-    for fn,cn in zip(files,core_files):
+    for fn, cn in zip(files, core_files):
         if verbose:
             print(fn, cn)
         # try to load the profile as absolute path or relative path
@@ -1241,9 +1242,14 @@ def load_profiles(files, verbose=False):
         floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
         floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
+        print(common_variables)
         # loop through other possible BGC variables
         for v in common_variables:
-            floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
+            var_check   = v in nc.variables.keys() and 'N_LEVELS' in nc.variables[v].dimensions
+            dtype_check = nc.variables[v].dtype == 'float32' or nc.variables[v].dtype == 'float64'
+            check = var_check and dtype_check
+            if check:
+                floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
 
         floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
 
