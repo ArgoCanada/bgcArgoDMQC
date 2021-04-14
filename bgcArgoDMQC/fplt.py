@@ -226,7 +226,7 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
 
     return g
 
-def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
         var_units = dict(
@@ -246,6 +246,8 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
             DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
         )
         xlabels = [var_units[v] for v in varlist]
+
+    cm = plt.cm.gray
 
     if axes is None:
         fig, axes = plt.subplots(1, len(varlist), sharey=True)
@@ -271,11 +273,14 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
 
     CYCNUM = df.CYCLE.unique()
 
+    if Nprof > CYCNUM.shape[0]:
+        Nprof = CYCNUM.shape[0]
+
     for i,v in enumerate(varlist):
         for n in range(Nprof):
             subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1 + n-1]]
 
-            axes[i].plot(subset_df[v], subset_df[zvar], color=cm(CYCNUM[Ncycle-1 + n-1]/Ncycle), **kwargs)
+            axes[i].plot(subset_df[v], subset_df[zvar], color=cm(CYCNUM[Ncycle-1 + n-1]/Ncycle+0.05), **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
