@@ -275,7 +275,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=1, zvar='PRES', xlabels=None,
         for n in range(Nprof):
             subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1 + n-1]]
 
-            axes[i].plot(subset_df[v], subset_df[zvar], **kwargs)
+            axes[i].plot(subset_df[v], subset_df[zvar], color=cm(CYCNUM[Ncycle-1 + n-1]/Ncycle), **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
