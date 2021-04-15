@@ -72,7 +72,7 @@ def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
     global NCEP_PATH
     NCEP_PATH = ncep_path
 
-def get_index(index='bgc'):
+def get_index(index='bgc', **kwargs):
     '''
     Get the global, biogeochemical, synthetic, or metadata Argo index. 
 
@@ -83,29 +83,35 @@ def get_index(index='bgc'):
         if '__bgcindex__' not in globals():
             global __bgcindex__
             __bgcindex__ = io.read_index()
-        return __bgcindex__
+        return_index = __bgcindex__
     elif index == 'global':
         if '__globalindex__' not in globals():
             global __globalindex__
             __globalindex__ = io.read_index(mission='C')
-        return __globalindex__
+        return_index = __globalindex__
     elif index == 'synthetic':
         if '__synthindex__' not in globals():
             global __synthindex__
             __synthindex__ = io.read_index(mission='S')
-        return __synthindex__
+        return_index = __synthindex__
     elif index == 'meta':
         if '__metaindex__' not in globals():
             global __metaindex__
             __metaindex__ = io.read_index(mission='M')
-        return __metaindex__
+        return_index = __metaindex__
     elif index == 'traj':
         if '__trajindex__' not in globals():
             global __trajindex__
             __trajindex__ = io.read_index(mission='T')
-        return __trajindex__
+        return_index = __trajindex__
     else:
         raise ValueError('Input "{}" is unrecognized'.format(index))
+
+    for arg, val in kwargs.items():
+        return_index = return_index[return_index[arg] == val]
+    
+    return return_index.reset_index()
+
 
 # ----------------------------------------------------------------------------
 # FLOAT CLASS
