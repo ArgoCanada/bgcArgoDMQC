@@ -302,3 +302,83 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
     g.axes = axes
 
     return g
+
+def qc_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+
+    if xlabels is None:
+        var_units = dict(
+            TEMP='Temperature ({}C)'.format(chr(176)),
+            TEMP_ADJUSTED='Temperature ({}C)'.format(chr(176)),
+            PSAL='Practical Salinity', 
+            PSAL_ADJUSTED='Practical Salinity', 
+            PDEN='Potential Density (kg m$^{-3}$)',
+            CHLA='Chlorophyll (mg m$^{-3}$',
+            CHLA_ADJUSTED='Chlorophyll (mg m$^{-3}$',
+            BBP700='$\mathsf{b_{bp}}$ (m$^{-1}$)',
+            BBP700_ADJUSTED='$\mathsf{b_{bp}}$ (m$^{-1}$)',
+            CDOM='CDOM (mg m$^{-3}$)',
+            CDOM_ADJUSTED='CDOM (mg m$^{-3}$)',
+            DOXY='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+            DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
+        )
+        xlabels = [var_units[v] for v in varlist]
+
+    if axes is None:
+        fig, axes = plt.subplots(1, len(varlist), sharey=True)
+        if len(varlist) == 1:
+            axes = [axes]
+    elif len(varlist) > 1:
+        fig = axes[0].get_figure()
+    else:
+        fig = axes.get_figure()
+        axes = [axes]
+
+    if ylim is None:
+        if zvar == 'PRES':
+            ylim=(0,2000)
+            if ylabel is None:
+                ylabel = 'Pressure (dbar)'
+        elif zvar == 'PDEN':
+            ylim = (df.PDEN.min(), df.PDEN.max())
+            if ylabel is None:
+                ylabel = 'Density (kg m$^{-3}$)'
+
+    df.loc[df[zvar] > ylim[1]*1.1] = np.nan
+
+    CYCNUM = df.CYCLE.unique()
+
+    if Nprof > CYCNUM.shape[0]:
+        Nprof = CYCNUM.shape[0]
+
+    groups = {'Good':[1,2,5], 'Probably Bad':[3], 'Bad':[4], 'Interpolated':[8]}
+    colors = {'Good':'green', 'Probably Bad':'yellow', 'Bad':'red', 'Interpolated':'blue'}
+
+    for i,v in enumerate(varlist):
+        vqc = v + '_QC'
+        for n in range(Nprof):
+            subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1 + n-1]]
+            for k,f in groups.items():
+                flag_subset_df = subset_df[subset_df[vqc].isin(f)]
+                axes[i].plot(flag_subset_df[v], flag_subset_df[zvar], 'o', markeredgewidth=0.1, markeredgecolor='k', markerfacecolor=colors[k], **kwargs)
+                
+        axes[i].set_ylim(ylim[::-1])
+        axes[i].set_xlabel(xlabels[i])
+
+    subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1]]
+    date = mdates.num2date(subset_df.SDN.iloc[0]).strftime('%d %b, %Y')
+
+    axes[0].set_ylabel(ylabel)
+    if Nprof != 1:
+        axes[0].set_title('Cyc. {:d}-{:d}, {}'.format(int(CYCNUM[Ncycle-1]), int(CYCNUM[Ncycle-1+Nprof-1]), date))
+    else:
+        axes[0].set_title('Cyc. {:d}, {}'.format(int(CYCNUM[Ncycle-1]), date))
+
+    w, h = fig.get_figwidth(), fig.get_figheight()
+    fig.set_size_inches(w*len(varlist)/3, h)
+
+    g = pltClass()
+    g.fig  = fig
+    g.axes = axes
+
+    return g
