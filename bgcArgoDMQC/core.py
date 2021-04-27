@@ -325,30 +325,42 @@ class sprof:
         df = pd.DataFrame()
         df['CYCLE']     = self.CYCLE_GRID
         df['SDN']       = self.SDN_GRID
+        df['WMO']       = self.WMO
         df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
         df['PRES']      = self.PRES
         df['TEMP']      = self.TEMP
+        df['TEMP_QC']   = self.TEMP_QC
         df['PSAL']      = self.PSAL
+        df['PSAL_QC']   = self.PSAL_QC
         df['PDEN']      = self.PDEN
         if 'DOXY' in self.__floatdict__.keys():
             df['DOXY']      = self.DOXY
+            df['DOXY_QC']   = self.DOXY_QC
         if 'CHLA' in self.__floatdict__.keys():
             df['CHLA']      = self.CHLA
+            df['CHLA_QC']   = self.CHLA_QC
         if 'BBP700' in self.__floatdict__.keys():
             df['BBP700']    = self.BBP700
+            df['BBP700_QC'] = self.BBP700_QC
         if 'CDOM' in self.__floatdict__.keys():
             df['CDOM']      = self.CDOM
+            df['CDOM_QC']   = self.CDOM_QC
         if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
             df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
+            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
         if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
             df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
+            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
         if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
             df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
+            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
             df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
+            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
         if 'O2Sat' in self.__floatdict__.keys():
             df['O2Sat']      = self.O2Sat
+            df['O2Sat_QC']   = self.O2Sat_QC
 
         self.df = df
 
@@ -456,6 +468,14 @@ class sprof:
                 self.to_dataframe()
 
             g = fplt.profiles(self.df, varlist=varlist, **kwargs)
+
+        elif kind == 'qcprofiles':
+            varlist = kwargs.pop('varlist')
+
+            if not hasattr(self, 'df'):
+                self.to_dataframe()
+
+            g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
 
         else:
             raise ValueError('Invalid input for keyword argument "kind"')
