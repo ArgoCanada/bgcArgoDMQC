@@ -260,6 +260,7 @@ class sprof:
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
+        self.to_dataframe()
 
     def clean(self, bad_flags=None):
         '''
@@ -270,6 +271,7 @@ class sprof:
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
+        self.to_dataframe()
 
     def reset(self):
         '''
@@ -278,6 +280,7 @@ class sprof:
         '''
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
+        self.to_dataframe()
 
     def check_range(self, key, verbose=False):
         '''
@@ -303,6 +306,7 @@ class sprof:
                     self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
 
         self.assign(self.__rangecheckdict__)
+        self.to_dataframe()
     
     def to_dict(self):
         '''
@@ -775,15 +779,18 @@ class profiles:
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = self.__nofillvaluefloatdict__
         self.assign(self.__nofillvaluefloatdict__)
+        self.to_dataframe()
 
     def clean(self, bad_flags=None):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
+        self.to_dataframe()
 
     def reset(self):
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
+        self.to_dataframe()
 
     def check_range(self, key, verbose=False):
         '''
