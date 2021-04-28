@@ -245,7 +245,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
             DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
             DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
         )
-        xlabels = [var_units[v] for v in varlist]
+        xlabels = [var_units[v] if v in var_units.keys() else '' for v in varlist]
 
     cm = plt.cm.gray_r
 
@@ -272,6 +272,11 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
     df.loc[df[zvar] > ylim[1]*1.1] = np.nan
 
     CYCNUM = df.CYCLE.unique()
+    greyflag = False
+    if not 'color' in kwargs.keys():
+        greyflag = True
+    else:
+        c = kwargs.pop('color')
 
     if Nprof > CYCNUM.shape[0]:
         Nprof = CYCNUM.shape[0]
@@ -280,7 +285,9 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
         for n in range(Nprof):
             subset_df = df.loc[df.CYCLE == CYCNUM[Ncycle-1 + n-1]]
 
-            axes[i].plot(subset_df[v], subset_df[zvar], color=cm(0.75*(CYCNUM[Ncycle-1 + n-1]/CYCNUM[-1])+0.25), **kwargs)
+            if greyflag:
+                c = cm(0.75*(CYCNUM[Ncycle-1 + n-1]/CYCNUM[-1])+0.25)
+            axes[i].plot(subset_df[v], subset_df[zvar], color=c, **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
