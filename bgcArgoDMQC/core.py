@@ -362,6 +362,11 @@ class sprof:
             df['O2Sat']      = self.O2Sat
             df['O2Sat_QC']   = self.O2Sat_QC
 
+        exvals = [k for k,v in self.__floatdict__.items() if type(v) is not np.ndarray]
+        for key in list(set(self.__floatdict__.keys()) - set(df.columns) - set(exvals)):
+            if self.__floatdict__[key].shape[0] == df.shape[0]:
+                df[key] = self.__floatdict__[key]
+
         self.df = df
 
         return copy.deepcopy(self.df)
