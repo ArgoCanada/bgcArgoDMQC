@@ -59,7 +59,7 @@ def pH2O(T, S=0, unit='Pa'):
         vapor_pressure = np.exp(52.57 - (6690.9/Tk) - 4.681*np.log(Tk))
     elif unit == 'mbar':
         # SCOR WG 142
-        vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk))) - 4.8489*np.log(((Tk/100)) - 0.000544*S))
+        vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk)) - 4.8489*np.log(Tk/100) - 0.000544*S))
     else:
         raise ValueError('Invalid unit input of {}, must be one of "Pa" or "mbar"'.format(unit))
 
@@ -235,6 +235,6 @@ def pO2_to_doxy(pO2, S, T, P=0):
     Vm      = 0.317 # molar volume of O2 in m3 mol-1 Pa dbar-1 (Enns et al. 1965)
     R       = 8.314 # universal gas constant in J mol-1 K-1
 
-    O2conc  = pO2/(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
+    O2conc  = pO2/(xO2*(1013.25 - pH2Osat))*(Tcorr*Scorr)/np.exp(Vm*P/(R*Tk))
 
     return O2conc
