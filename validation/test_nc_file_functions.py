@@ -22,7 +22,7 @@ exclude_vars = [
     'PARAMETER_DATA_MODE',
     'DOXY_ADJUSTED_QC',
     'PROFILE_DOXY_QC'
-    ]
+]
 dims = [
     ('N_PROF', 'N_CALIB', 'N_PARAM', 'STRING256'),
     ('N_PROF', 'N_CALIB', 'N_PARAM', 'STRING256'),
@@ -57,7 +57,7 @@ scientific_calib_comment = np.full(
     sub_nc['SCIENTIFIC_CALIB_COMMENT'].shape,
     sub_nc['SCIENTIFIC_CALIB_COMMENT']._FillValue,    
     dtype=sub_nc['SCIENTIFIC_CALIB_COMMENT'].datatype
-    )
+)
 
 comment = 'A test comment written by Chris Gordon'
 N = len(comment)
@@ -71,7 +71,7 @@ scientific_calib_equation = np.full(
     sub_nc['SCIENTIFIC_CALIB_EQUATION'].shape,
     sub_nc['SCIENTIFIC_CALIB_EQUATION']._FillValue,    
     dtype=sub_nc['SCIENTIFIC_CALIB_EQUATION'].datatype
-    )
+)
 
 equation = 'DOXY_ADJUSTED = G*DOXY - a test equation by Chris Gordon'
 N = len(equation)
@@ -85,7 +85,7 @@ scientific_calib_coefficient = np.full(
     sub_nc['SCIENTIFIC_CALIB_COEFFICIENT'].shape,
     sub_nc['SCIENTIFIC_CALIB_COEFFICIENT']._FillValue,    
     dtype=sub_nc['SCIENTIFIC_CALIB_COEFFICIENT'].datatype
-    )
+)
 
 coeff = 'G = 1.04 - a made up coefficient for testing by Chris Gordon'
 N = len(coeff)
