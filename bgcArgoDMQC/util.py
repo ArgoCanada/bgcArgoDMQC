@@ -438,3 +438,9 @@ def get_worst_flag(*args):
                     out_flags[i] = 9
         
     return out_flags
+
+def get_parameter_index(parameter_array, parameter):
+    str_arr = np.array([read_ncstr(s) for s in parameter_array])
+    index = np.where(str_arr == parameter)[0][0]
+
+    return index

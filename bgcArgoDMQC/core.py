@@ -1784,3 +1784,20 @@ def correct_response_time_Tconst(t, DO, tau):
     DO_out = f(t_sec)
 
     return DO_out
+
+def get_optode_type(wmo):
+    if '__metaindex__' not in globals():
+        global __metaindex__
+        __metaindex__ = get_index(index='meta')
+    
+    ix = __metaindex__[__metaindex__.wmo == wmo]
+
+    local_file = Path(ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
+    nc = Dataset(local_file)
+
+    doxy_index = util.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
+
+    optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index, :])
+    
+    return optode_type
+
