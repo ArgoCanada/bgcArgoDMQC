@@ -1151,7 +1151,8 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
 
     if 'DOXY' in floatData.keys():
-        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
+        optode_flag = get_optode_type(wmo) == 'AANDERAA_OPTODE_4330'
+        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], a4330=optode_flag)
         # match the fill values
         ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
         floatData['O2Sat'][ix] = 99999.
