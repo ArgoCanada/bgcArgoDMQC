@@ -303,7 +303,8 @@ class sprof:
 
                 # recalculate O2sat if its DOXY
                 if k == 'DOXY':
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
+                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], self.__rangecheckdict__['PDEN'], a4330=optode_flag)
 
         self.assign(self.__rangecheckdict__)
         self.to_dataframe()
@@ -838,7 +839,8 @@ class profiles:
 
                 # recalculate O2sat if its DOXY
                 if k == 'DOXY':
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
+                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], a4330=optode_flag)
 
         self.assign(self.__rangecheckdict__)
              
@@ -982,10 +984,12 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
 
     if mission == 'B':
         if '__bgcindex__' not in globals():
+            global __bgcindex__
             __bgcindex__ = get_index()
         subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
     elif mission == 'C':
         if '__globalindex__' not in globals():
+            global __globalindex__
             __globalindex__ = get_index(index='global')
         subset_index = __globalindex__[__globalindex__.wmo.isin(wmo_numbers)]
     else:
@@ -1149,10 +1153,11 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         floatData['CYCLE_GRID']     = np.tile(floatData['CYCLES'],(M,1)).T.flatten()
         floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T.flatten()
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
+        floatData['PDEN'] = gsw.pot_rho_t_exact(gsw.SA_from_SP(floatData['PSAL'], floatData['PRES'], floatData['LONGITUDE_GRID'], floatData['LATITUDE_GRID']), floatData['TEMP'], floatData['PRES'], 0)
 
     if 'DOXY' in floatData.keys():
-        optode_flag = get_optode_type(wmo) == 'AANDERAA_OPTODE_4330'
-        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], a4330=optode_flag)
+        optode_flag = get_optode_type(int(wmo)) == 'AANDERAA_OPTODE_4330'
+        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], floatData['PDEN'], a4330=optode_flag)
         # match the fill values
         ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
         floatData['O2Sat'][ix] = 99999.
@@ -1516,7 +1521,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     comparison is not available.
     
     Args:
-        data: float data dict object, output from load_argo_data()
+        data: float data dict object, output from load_argo()
         ref: reference data set, either NCEP pO2 or WOA O2sat
         inair: boolean flag to indicate if comparison to NCEP in-air
             data or WOA surface data should be done, default to
