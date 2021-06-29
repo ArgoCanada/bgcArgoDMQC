@@ -441,6 +441,6 @@ def get_worst_flag(*args):
 
 def get_parameter_index(parameter_array, parameter):
     str_arr = np.array([read_ncstr(s) for s in parameter_array])
-    index = np.where(str_arr == parameter)[0][0]
+    index = np.where(str_arr == parameter)[0]
 
     return index

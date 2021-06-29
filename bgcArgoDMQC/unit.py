@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import gsw
 
-def oxy_sol(S, T, a4330=True):
+def oxy_sol(S, T, PDEN, a4330=True):
     '''
     Calculate oxygen saturation concentration in seawater as a function of
     S & T, in equilibrium with standard coponsition moist air at 1atm total
@@ -19,22 +19,24 @@ def oxy_sol(S, T, a4330=True):
     Returns:
         O2sol (float or array-like): oxygen solubility
     '''
-
+    
+    O2_volume =  22.3916
     if a4330:
         A = [1.71069, 0.978188, 4.80299, 3.99063, 3.22400, 2.00856] # Temperature coeff
         B = [-4.29155e-3, -6.90358e-3, -6.93498e-3, -6.24097e-3] # Salinity coeff
         C = -3.11680e-7
+        factor = 1000/O2_volume
     else:
         A = [3.88767, -0.256847, 4.94457, 4.05010, 3.22014, 2.00907] # Temperature coeff
         B = [-8.17083e-3, -1.03410e-2, -7.37614e-3, -6.24523e-3] # Salinity coeff
         C = -4.88682e-7
+        factor = 44.614 # listed in argo cookbook
 
-    O2_volume =  22.3916
     # Scaled temperature
-    Ts = np.log((298.15 - T)/(273.15 + T));
+    Ts = np.log((298.15 - T)/(273.15 + T))
     L = np.polyval(A,Ts) + S*np.polyval(B,Ts) + C*S**2
 
-    O2sol = (1000/O2_volume)*np.exp(L)
+    O2sol = factor*np.exp(L)*1000/PDEN
 
     return O2sol
 
