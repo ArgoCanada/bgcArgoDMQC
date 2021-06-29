@@ -1802,8 +1802,9 @@ def get_optode_type(wmo):
     nc = Dataset(local_file)
 
     doxy_index = util.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
-
-    optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index, :])
-    
-    return optode_type
+    if doxy_index.shape[0] == 0:
+        return 'NO_OPTODE_FOUND'
+    else:
+        optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
+        return optode_type
 
