@@ -4,11 +4,13 @@ README.md
 requirements.txt
 setup.py
 bgcArgoDMQC/__init__.py
+bgcArgoDMQC/configure.py
 bgcArgoDMQC/core.py
 bgcArgoDMQC/diagnostic.py
 bgcArgoDMQC/fplt.py
 bgcArgoDMQC/interp.py
 bgcArgoDMQC/io.py
+bgcArgoDMQC/lut.py
 bgcArgoDMQC/unit.py
 bgcArgoDMQC/util.py
 bgcArgoDMQC.egg-info/PKG-INFO

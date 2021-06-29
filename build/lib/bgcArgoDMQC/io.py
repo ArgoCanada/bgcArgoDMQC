@@ -11,12 +11,36 @@ import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
 
+from . import configure
 from . import util
 
 global index_path
 index_path = Path(__file__).parent.absolute() / 'ref'
 if not index_path.exists():
     index_path.mkdir()
+
+global URL_DICT
+URL_DICT = {
+    'ftp.ifremer.fr':'ftp.ifremer.fr', 
+    'ifremer':'ftp.ifremer.fr', 
+    'coriolis':'ftp.ifremer.fr', 
+    'usgodae.org':'usgodae.org', 
+    'godae':'usgodae.org', 
+    'us':'usgodae.org'
+}
+
+global URL_DIR_DICT
+URL_DIR_DICT = {
+    'ftp.ifremer.fr':'/ifremer/argo/', 
+    'usgodae.org':'/pub/outgoing/argo/', 
+}
+
+config = configure.read_config()
+if 'default_url' in config.keys():
+    url_name = config.pop('default_url')
+    url = URL_DICT[url_name]
+else:
+    url = 'ftp.ifremer.fr'
 
 def index_exists():
 
@@ -31,7 +55,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B', remote=False):
+def read_index(mission='B', remote=False, url=url):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -40,18 +64,22 @@ def read_index(mission='B', remote=False):
         mission (str): *B*, *C*, *S*, or *M* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
     '''
 
+    url_dir = URL_DIR_DICT[url]
     if mission == 'B':
         local_filename = index_path / 'argo_bio-profile_index.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_bio-profile_index.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_bio-profile_index.txt.gz').as_posix()
     elif mission == 'C':
         local_filename = index_path / 'ar_index_global_prof.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_prof.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_prof.txt.gz').as_posix()
     elif mission == 'S':
         local_filename = index_path / 'argo_synthetic-profile_index.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/argo_synthetic-profile_index.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_synthetic-profile_index.txt.gz').as_posix()
     elif mission == 'M':
         local_filename = index_path / 'ar_index_global_meta.txt.gz'
-        remote_filename = 'ftp://ftp.ifremer.fr/ifremer/argo/ar_index_global_meta.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_meta.txt.gz').as_posix()
+    elif mission == 'T':
+        local_filename = index_path / 'ar_index_global_traj.txt.gz'
+        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
     else:
         raise ValueError('Input {} not recognized'.format(mission))
 
@@ -65,31 +93,41 @@ def read_index(mission='B', remote=False):
 
         df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
-    df['dac'] = np.array([f.split('/')[0] for f in df.file])
     df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
-    df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
+    df['dac'] = np.array([f.split('/')[0] for f in df.file])
+    if mission != 'M' and mission != 'T':
+        df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
 
     return df
 
-def update_index(ftype=None):
+def update_index(ftype=None, url=url):
     '''
     Function to access FTP server to download Argo metadata and profile global
     index files
     '''
 
-    ftp = ftplib.FTP('ftp.ifremer.fr')
+    ftp = ftplib.FTP(url)
+    url_dir = URL_DIR_DICT[url]
     ftp.login()
-    ftp.cwd('/ifremer/argo/')
+    ftp.cwd(url_dir)
 
     meta  = 'ar_index_global_meta.txt.gz'
+    traj  = 'ar_index_global_traj.txt.gz'
     index = 'ar_index_global_prof.txt.gz'
     bgc   = 'argo_bio-profile_index.txt.gz'
     synth = 'argo_synthetic-profile_index.txt.gz'
+
 
     local_meta = index_path / meta
     if ftype is None or ftype == 'meta':
         lf = open(local_meta, 'wb')
         ftp.retrbinary('RETR ' + meta, lf.write)
+        lf.close()
+
+    local_traj = index_path / traj
+    if ftype is None or ftype == 'traj':
+        lf = open(local_traj, 'wb')
+        ftp.retrbinary('RETR ' + traj, lf.write)
         lf.close()
 
     local_index = index_path / index
@@ -315,7 +353,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
         yearlist = years
     elif len(years) == 2:
         yearlist = range(years[0], years[1]+1)
-    elif len(years > 2):
+    else:
         yearlist = years
     
     if varname == 'pres':
@@ -383,7 +421,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
+def get_argo(*args, local_path='./', url=url, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -391,7 +429,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
     Args:
         *args: list of files, floats, or directories
         local_path (optional, str or Path): local directory to save float data, defaults to current directory
-        url (optional, str): url of the GDAC to connect to, defaults to ifremer
+        url (optional, str): url of the GDAC to connect to, defaults to ifremer or the value in the configuration file
         overwrite (optional, bool): whether to overwrite existing local files, default *False*
         ftype (optional, str): can be 'summary' if the user wishes to only download Sprof, traj, meta files, default is *None*
         mission (optional, str): Argo mission, can be 'B' for biogeochemical or 'C' for core, or 'CB' for both, default is 'CB'
@@ -426,12 +464,8 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
         for init_a in arglist:
             # if its a float number, build ftp paths to floats
             if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
-                if url == 'ftp.ifremer.fr':
-                    base_path = '/ifremer/argo/dac'
-                elif url == 'usgodae.org':
-                    base_path = '/pub/outgoing/argo/dac'
-
-                a = '{}/{}/{:d}'.format(base_path, get_dac(init_a), init_a)
+                base_path = URL_DIR_DICT[url]
+                a = (Path(base_path) / 'dac' / get_dac(init_a) / str(init_a)).as_posix()
             else:
                 a = init_a
 
@@ -448,7 +482,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
 
                     # define local location to save file
                     dac_path = local_path / dac
-                    wmo_path = local_path / dac / wmo
+                    wmo_path = dac_path / wmo
                     profile_path = wmo_path / 'profiles'
 
                     # make the directory if it doesn't exist
@@ -489,7 +523,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
                     
                 # define local location to save file
                 dac_path = local_path / dac
-                wmo_path = local_path / dac / wmo
+                wmo_path = dac_path / wmo
 
                 # make the directory if it doesn't exist
                 if not dac_path.is_dir():
@@ -559,7 +593,7 @@ def get_argo(*args, local_path='./', url='ftp.ifremer.fr', overwrite=False, summ
                             ftp.retrbinary('RETR ' + fn, lf.write)
                             lf.close()
 
-    elif len(args) > 1:
+    else:
         local_path = Path(local_path)
 
         dacdir = args[0]
@@ -633,40 +667,33 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     Function to load WOA18 climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
 
-    INPUT:
-              track: array with the columns (SDN, lat, lon)
-              param: requested variable, valid inputs are
-                  T: temperature
-                  S: salinity
-                  O2: dissolved oxygen
-                  O2sat: oxygen percent saturation
-                  NO3: nitrate
-                  Si: silicate
-                  PO4: phosphate
-              zlim: depth bounds (upper, lower), default to (0, 1000)
-              local_path: local directory where WOA files are stored, assumes
-                          current directory if no input
+    Args:
+        track: array with the columns (SDN, lat, lon)
+        param: requested variable, valid inputs are
+            - T: temperature
+            - S: salinity
+            - O2: dissolved oxygen
+            - O2sat: oxygen percent saturation
+            - NO3: nitrate
+            - Si: silicate
+            - PO4: phosphate
+        zlim: depth bounds (upper, lower), default to (0, 1000)
+        local_path: local directory where WOA files are stored, assumes
+                    current directory if no input
 
-    OUTPUT:
-              xtrack: same as track input, but adjusted lon if the track
-                      crosses the 180/-180 meridian
-              woa_track: list with z, lat, and lon arrays of WOA data
-              data: gridded array of the input variable (month, z, lat, lon)
+    Returns:
+        xtrack: same as track input, but adjusted lon if the track crosses the 180/-180 meridian
+        woa_track: list with z, lat, and lon arrays of WOA data
+        data: gridded array of the input variable (month, z, lat, lon)
 
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
+    Acknowledgement: 
+        This code is adapted from the SOCCOM SAGE_O2Argo matlab
+        code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
+        written by Tanya Maurer & Josh Plant
 
-    ACKNOWLEDGEMENT: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-
-    LAST UPDATE: 29-04-2020
-
-    CHANGE LOG:
-
-    23-04-2020: changed zlim to optional input argument
-    29-04-2020: switched file/path handling from os module to pathlib
+    Change log:
+        23-04-2020: changed zlim to optional input argument
+        29-04-2020: switched file/path handling from os module to pathlib
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -680,6 +707,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
     else:
         lon_bounds = (np.nanmin(track[:,2]), np.nanmax(track[:,2]))
+        lix = None
     lat_bounds = (np.nanmin(track[:,1]), np.nanmax(track[:,1]))
 
     # set up extraction files, variables
@@ -687,6 +715,11 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     var_name  = woa_param + '_an'
 
     base_woa_file = 'woa18_{}_{}'.format(woa_ftype, woa_param)
+
+    # assign var names to avoid unbound warnings
+    data, xlon, z_sub, lat_sub, lon_sub = None, None, None, None, None
+    z_ix, lat_ix, lon_ix = None, None, None
+
     # loop through months
     for i in range(12):
         mo = i+1
@@ -741,20 +774,12 @@ def load_ncep_data(track, varname, local_path='./'):
     float in-air data. Data to be interpolated along the provided
     track (t, lat, lon).
 
-    INPUT:
-              track: array with the columns (SDN, lat, lon)
-              local_path: local directory where NCEP files are stored, assumes
-                          current directory if no input
+    Args:
+        track: array with the columns (SDN, lat, lon)
+        local_path: local directory where NCEP files are stored, assumes current directory if no input
 
-    OUTPUT:
+    Returns:
 
-    AUTHOR:   Christopher Gordon
-              Fisheries and Oceans Canada
-              chris.gordon@dfo-mpo.gc.ca
-
-    LAST UPDATE: 04-05-2020
-
-    CHANGE LOG:
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -779,6 +804,7 @@ def load_ncep_data(track, varname, local_path='./'):
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
     else:
         lon_bounds = (np.nanmin(track[:,2]), np.nanmax(track[:,2]))
+        lix = None
     lat_bounds = (np.nanmin(track[:,1]), np.nanmax(track[:,1]))
 
     sdn = track[:,0]
@@ -787,6 +813,10 @@ def load_ncep_data(track, varname, local_path='./'):
 
     if Nyear == 0 and yrs[0] != mdates.datetime.date.today().year:
         Nyear = 1
+
+    # assign var names to avoid unbound warnings
+    data, xlon, ncep_time, landmask, xtrack, ncep_track = None, None, None, None, None, None
+    lat_sub, lon_sub, lat_ix, lon_ix = None, None, None, None
 
     # counter index for going across years
     j = 0
@@ -829,7 +859,7 @@ def load_ncep_data(track, varname, local_path='./'):
 
         vdata = nc.variables[varname][:]
         for i in range(len(time)):
-            data_2d =  vdata[i,:,:][:,lon_ix][lat_ix,:]
+            data_2d = vdata[i,:,:][:,lon_ix][lat_ix,:]
             data_2d[landmask] = np.nan
             data[j,:,:] = data_2d
             ncep_time[j] = time[i]
@@ -841,6 +871,28 @@ def load_ncep_data(track, varname, local_path='./'):
 
     return xtrack, ncep_track, data
 
+def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
+    '''
+    Copy data from a netCDF file with the exception of dimension and variable
+    names listed in exclude_vars and exclude_dims.
+    '''
+    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+        # copy global attributes all at once via dictionary
+        dst.setncatts(src.__dict__)
+        # copy dimensions except for the excluded
+        for name, dimension in src.dimensions.items():
+            if name not in exclude_dims:
+                dst.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
+        # copy file data except for the excluded
+        for name, variable in src.variables.items():
+            if name not in exclude_vars:
+                x = dst.createVariable(name, variable.datatype, variable.dimensions)
+                # copy variable attributes all at once via dictionary
+                dst[name].setncatts(src[name].__dict__)
+                dst[name][:] = src[name][:]
+    
+    return Dataset(outfile, 'a')
+        
 def append_variable_to_file(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
@@ -848,27 +900,45 @@ def append_variable_to_file(fn, *args):
     fields that can be passed directly to the netCDF file. If the variable
     name already exists, it will overwrite it with the new information.
 
-    Inputs: 
+    Args: 
+        fn: string pointing to netcdf (.nc) file to be appended
+        *args: arbitrary number of python dicts with all required fields to create
+        or overwrite a new netcdf variable. Example: 
 
-    fn: string pointing to netcdf (.nc) file to be appended
-
-    *args: arbitrary number of python dicts with all required fields to create
-    or overwrite a new netcdf variable. Example: 
-
-    new_var = dict(
-        name='MY_NEW_VARIABLE',     # variable name, can be new or existing
-        dimensions=('N', 'M'),      # note these dims must already exist in the nc file
-        long_name='The new variable',
-        standard_name='my_new_var',
-        units='degree_celsius',
-        valid_min=0,
-        valid_max=1e9,
-        resolution=0.001,
-        comment='Added by John Doe on Sept 20, 2019'
-    )
+        new_var = dict(
+            name='MY_NEW_VARIABLE',     # variable name, can be new or existing
+            datatype=np.float64,        # variable datatype, can be np datatype or string
+            dimensions=('N', 'M'),      # will be created with warning if they do not exist
+            data=data_arr,              # the data
+            long_name='The new variable',
+            standard_name='my_new_var',
+            units='degree_celsius',
+            valid_min=0,
+            valid_max=1e9,
+            resolution=0.001,
+            comment='Added by John Doe on Sept 20, 2019'
+        )
     '''
 
-
     nc = Dataset(fn, 'a')
+    
+    for new_var in args:
+        name = new_var.pop('name')
+        data = new_var.pop('data')
+        nc.createVariable(name, new_var.pop('datatype'), new_var.pop('dimensions'))
+        nc[name].setncatts(new_var)
+        nc[name][:] = data
 
     return nc
+
+def generate_standard_comments():
+
+    return
+
+def append_scienfitic_calib_information(nc_var, str_to_append):
+
+    return
+
+def str_to_nc(s):
+
+    return
