@@ -72,7 +72,7 @@ def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
     global NCEP_PATH
     NCEP_PATH = ncep_path
 
-def get_index(index='bgc'):
+def get_index(index='bgc', **kwargs):
     '''
     Get the global, biogeochemical, synthetic, or metadata Argo index. 
 
@@ -83,29 +83,35 @@ def get_index(index='bgc'):
         if '__bgcindex__' not in globals():
             global __bgcindex__
             __bgcindex__ = io.read_index()
-        return __bgcindex__
+        return_index = __bgcindex__
     elif index == 'global':
         if '__globalindex__' not in globals():
             global __globalindex__
             __globalindex__ = io.read_index(mission='C')
-        return __globalindex__
+        return_index = __globalindex__
     elif index == 'synthetic':
         if '__synthindex__' not in globals():
             global __synthindex__
             __synthindex__ = io.read_index(mission='S')
-        return __synthindex__
+        return_index = __synthindex__
     elif index == 'meta':
         if '__metaindex__' not in globals():
             global __metaindex__
             __metaindex__ = io.read_index(mission='M')
-        return __metaindex__
+        return_index = __metaindex__
     elif index == 'traj':
         if '__trajindex__' not in globals():
             global __trajindex__
             __trajindex__ = io.read_index(mission='T')
-        return __trajindex__
+        return_index = __trajindex__
     else:
         raise ValueError('Input "{}" is unrecognized'.format(index))
+
+    for arg, val in kwargs.items():
+        return_index = return_index[return_index[arg] == val]
+    
+    return return_index.reset_index()
+
 
 # ----------------------------------------------------------------------------
 # FLOAT CLASS
@@ -254,6 +260,7 @@ class sprof:
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
         self.assign(self.__nofillvaluefloatdict__)
+        self.to_dataframe()
 
     def clean(self, bad_flags=None):
         '''
@@ -264,6 +271,7 @@ class sprof:
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
         self.assign(self.__cleanfloatdict__)
+        self.to_dataframe()
 
     def reset(self):
         '''
@@ -272,6 +280,7 @@ class sprof:
         '''
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self.assign(self.__rawfloatdict__)
+        self.to_dataframe()
 
     def check_range(self, key, verbose=False):
         '''
@@ -294,9 +303,11 @@ class sprof:
 
                 # recalculate O2sat if its DOXY
                 if k == 'DOXY':
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
+                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], self.__rangecheckdict__['PDEN'], a4330=optode_flag)
 
         self.assign(self.__rangecheckdict__)
+        self.to_dataframe()
     
     def to_dict(self):
         '''
@@ -315,30 +326,47 @@ class sprof:
         df = pd.DataFrame()
         df['CYCLE']     = self.CYCLE_GRID
         df['SDN']       = self.SDN_GRID
+        df['WMO']       = self.WMO
         df['LATITUDE']  = self.LATITUDE_GRID
         df['LONGITUDE'] = self.LONGITUDE_GRID
         df['PRES']      = self.PRES
         df['TEMP']      = self.TEMP
+        df['TEMP_QC']   = self.TEMP_QC
         df['PSAL']      = self.PSAL
+        df['PSAL_QC']   = self.PSAL_QC
         df['PDEN']      = self.PDEN
         if 'DOXY' in self.__floatdict__.keys():
             df['DOXY']      = self.DOXY
+            df['DOXY_QC']   = self.DOXY_QC
         if 'CHLA' in self.__floatdict__.keys():
             df['CHLA']      = self.CHLA
+            df['CHLA_QC']   = self.CHLA_QC
         if 'BBP700' in self.__floatdict__.keys():
             df['BBP700']    = self.BBP700
+            df['BBP700_QC'] = self.BBP700_QC
         if 'CDOM' in self.__floatdict__.keys():
             df['CDOM']      = self.CDOM
+            df['CDOM_QC']   = self.CDOM_QC
         if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
             df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
+            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
         if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
             df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
+            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
         if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
             df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
+            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
         if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
             df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
+            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
         if 'O2Sat' in self.__floatdict__.keys():
             df['O2Sat']      = self.O2Sat
+            df['O2Sat_QC']   = self.O2Sat_QC
+
+        exvals = [k for k,v in self.__floatdict__.items() if type(v) is not np.ndarray]
+        for key in list(set(self.__floatdict__.keys()) - set(df.columns) - set(exvals)):
+            if self.__floatdict__[key].shape[0] == df.shape[0]:
+                df[key] = self.__floatdict__[key]
 
         self.df = df
 
@@ -446,6 +474,14 @@ class sprof:
                 self.to_dataframe()
 
             g = fplt.profiles(self.df, varlist=varlist, **kwargs)
+
+        elif kind == 'qcprofiles':
+            varlist = kwargs.pop('varlist')
+
+            if not hasattr(self, 'df'):
+                self.to_dataframe()
+
+            g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
 
         else:
             raise ValueError('Invalid input for keyword argument "kind"')
@@ -769,15 +805,18 @@ class profiles:
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = self.__nofillvaluefloatdict__
         self.assign(self.__nofillvaluefloatdict__)
+        self.to_dataframe()
 
     def clean(self, bad_flags=None):
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = self.__cleanfloatdict__
         self.assign(self.__cleanfloatdict__)
+        self.to_dataframe()
 
     def reset(self):
         self.__floatdict__ = self.__rawfloatdict__
         self.assign(self.__rawfloatdict__)
+        self.to_dataframe()
 
     def check_range(self, key, verbose=False):
         '''
@@ -800,7 +839,8 @@ class profiles:
 
                 # recalculate O2sat if its DOXY
                 if k == 'DOXY':
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'])
+                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], a4330=optode_flag)
 
         self.assign(self.__rangecheckdict__)
              
@@ -944,10 +984,12 @@ def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verb
 
     if mission == 'B':
         if '__bgcindex__' not in globals():
+            global __bgcindex__
             __bgcindex__ = get_index()
         subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
     elif mission == 'C':
         if '__globalindex__' not in globals():
+            global __globalindex__
             __globalindex__ = get_index(index='global')
         subset_index = __globalindex__[__globalindex__.wmo.isin(wmo_numbers)]
     else:
@@ -983,6 +1025,7 @@ def organize_files(files):
         index = get_index('global')
     else:
         if '__bgcindex__' not in globals():
+            global __bgcindex__
             __bgcindex__ = get_index()
         index = __bgcindex__
     
@@ -1110,9 +1153,11 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         floatData['CYCLE_GRID']     = np.tile(floatData['CYCLES'],(M,1)).T.flatten()
         floatData['LATITUDE_GRID']  = np.tile(floatData['LATITUDE'],(M,1)).T.flatten()
         floatData['LONGITUDE_GRID'] = np.tile(floatData['LONGITUDE'],(M,1)).T.flatten()
+        floatData['PDEN'] = gsw.pot_rho_t_exact(gsw.SA_from_SP(floatData['PSAL'], floatData['PRES'], floatData['LONGITUDE_GRID'], floatData['LATITUDE_GRID']), floatData['TEMP'], floatData['PRES'], 0)
 
     if 'DOXY' in floatData.keys():
-        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
+        optode_flag = get_optode_type(int(wmo)) == 'AANDERAA_OPTODE_4330'
+        floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], floatData['PDEN'], a4330=optode_flag)
         # match the fill values
         ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
         floatData['O2Sat'][ix] = 99999.
@@ -1178,7 +1223,7 @@ def load_profiles(files, verbose=False):
             floatData[v + '_ADJUSTED'] = np.array([])
             floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
 
-    for fn,cn in zip(files,core_files):
+    for fn, cn in zip(files, core_files):
         if verbose:
             print(fn, cn)
         # try to load the profile as absolute path or relative path
@@ -1241,9 +1286,14 @@ def load_profiles(files, verbose=False):
         floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
         floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
+        print(common_variables)
         # loop through other possible BGC variables
         for v in common_variables:
-            floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
+            var_check   = v in nc.variables.keys() and 'N_LEVELS' in nc.variables[v].dimensions
+            dtype_check = nc.variables[v].dtype == 'float32' or nc.variables[v].dtype == 'float64'
+            check = var_check and dtype_check
+            if check:
+                floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
 
         floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
 
@@ -1471,7 +1521,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     comparison is not available.
     
     Args:
-        data: float data dict object, output from load_argo_data()
+        data: float data dict object, output from load_argo()
         ref: reference data set, either NCEP pO2 or WOA O2sat
         inair: boolean flag to indicate if comparison to NCEP in-air
             data or WOA surface data should be done, default to
@@ -1740,3 +1790,21 @@ def correct_response_time_Tconst(t, DO, tau):
     DO_out = f(t_sec)
 
     return DO_out
+
+def get_optode_type(wmo):
+    if '__metaindex__' not in globals():
+        global __metaindex__
+        __metaindex__ = get_index(index='meta')
+    
+    ix = __metaindex__[__metaindex__.wmo == wmo]
+
+    local_file = Path(ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
+    nc = Dataset(local_file)
+
+    doxy_index = util.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
+    if doxy_index.shape[0] == 0:
+        return 'NO_OPTODE_FOUND'
+    else:
+        optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
+        return optode_type
+
