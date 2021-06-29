@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 import gsw
 
-def oxy_sol(S, T, a4330=True):
+def oxy_sol(S, T, PDEN, a4330=True):
     '''
     Calculate oxygen saturation concentration in seawater as a function of
     S & T, in equilibrium with standard coponsition moist air at 1atm total
@@ -19,22 +19,24 @@ def oxy_sol(S, T, a4330=True):
     Returns:
         O2sol (float or array-like): oxygen solubility
     '''
-
+    
+    O2_volume =  22.3916
     if a4330:
         A = [1.71069, 0.978188, 4.80299, 3.99063, 3.22400, 2.00856] # Temperature coeff
         B = [-4.29155e-3, -6.90358e-3, -6.93498e-3, -6.24097e-3] # Salinity coeff
         C = -3.11680e-7
+        factor = 1000/O2_volume
     else:
         A = [3.88767, -0.256847, 4.94457, 4.05010, 3.22014, 2.00907] # Temperature coeff
         B = [-8.17083e-3, -1.03410e-2, -7.37614e-3, -6.24523e-3] # Salinity coeff
         C = -4.88682e-7
+        factor = 44.614 # listed in argo cookbook
 
-    O2_volume =  22.3916
     # Scaled temperature
-    Ts = np.log((298.15 - T)/(273.15 + T));
+    Ts = np.log((298.15 - T)/(273.15 + T))
     L = np.polyval(A,Ts) + S*np.polyval(B,Ts) + C*S**2
 
-    O2sol = (1000/O2_volume)*np.exp(L)
+    O2sol = factor*np.exp(L)*1000/PDEN
 
     return O2sol
 
@@ -59,7 +61,7 @@ def pH2O(T, S=0, unit='Pa'):
         vapor_pressure = np.exp(52.57 - (6690.9/Tk) - 4.681*np.log(Tk))
     elif unit == 'mbar':
         # SCOR WG 142
-        vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk))) - 4.8489*np.log(((Tk/100)) - 0.000544*S))
+        vapor_pressure = 1013.25 * (np.exp(24.4543 - (67.4509*(100/Tk)) - 4.8489*np.log(Tk/100) - 0.000544*S))
     else:
         raise ValueError('Invalid unit input of {}, must be one of "Pa" or "mbar"'.format(unit))
 
@@ -235,6 +237,6 @@ def pO2_to_doxy(pO2, S, T, P=0):
     Vm      = 0.317 # molar volume of O2 in m3 mol-1 Pa dbar-1 (Enns et al. 1965)
     R       = 8.314 # universal gas constant in J mol-1 K-1
 
-    O2conc  = pO2/(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
+    O2conc  = pO2/(xO2*(1013.25 - pH2Osat))*(Tcorr*Scorr)/np.exp(Vm*P/(R*Tk))
 
     return O2conc

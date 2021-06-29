@@ -8,10 +8,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import seaborn as sns
-from pywaffle import Waffle
+# from pywaffle import Waffle
 
 # summary comparison between bgcArgo and SAGE/DOXY audit
-fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_20201230.csv')
+datestr = '20210629'
+fn = Path('../data/doxy_audit_vs_bgcArgo_py_comparison_{}.csv'.format(datestr))
 df = pd.read_csv(fn)
 df['diffGAIN'] = df.pyGAIN - df.sageGAIN
 df['absdiffGAIN'] = np.abs(df.diffGAIN)
@@ -54,7 +55,7 @@ ax.set_aspect(10)
 ax.set_title('$N={:d}$'.format(df.shape[0]), loc='left')
 ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
-plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_20201230.png', bbox_inches='tight', dpi=250)
+plt.savefig('../figures/doxy_audit/DOXY_audit_comparison_breakdown_{}.png'.format(datestr), bbox_inches='tight', dpi=250)
 plt.close()
 
 # waf = plt.figure(FigureClass=Waffle, rows=5, values=counts[' '].values, labels=list(counts.name), colors=tuple(palette), 
@@ -93,7 +94,7 @@ axes[1].set_xlabel('$\Delta$G')
 w, h = fig.get_figwidth(), fig.get_figheight()
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_fulllims_20201230.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_fulllims_{}.png'.format(datestr)), bbox_inches='tight', dpi=250)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
@@ -112,7 +113,7 @@ axes[1].set_xlabel('$\Delta$G')
 
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_medlims_20201230.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_medlims_{}.png'.format(datestr)), bbox_inches='tight', dpi=250)
 
 fig, axes = plt.subplots(1,2)
 axes[0].plot(df.sageGAIN, df.pyGAIN, 'k.')
@@ -131,6 +132,6 @@ axes[1].set_xlabel('$\Delta$G')
 
 fig.set_size_inches(w, h/2)
 fig.tight_layout()
-fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_smalllims_20201230.png'), bbox_inches='tight', dpi=250)
+fig.savefig(Path('../figures/doxy_audit/scatter_and_dist_smalllims_{}.png'.format(datestr)), bbox_inches='tight', dpi=250)
 
 plt.close('all')

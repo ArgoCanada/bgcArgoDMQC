@@ -28,6 +28,10 @@
 '''
 
 from __future__ import absolute_import
+
+from . import configure
+configure.check_config()
+
 from .core import *
 from . import fplt
 from . import unit
@@ -35,7 +39,6 @@ from . import util
 from . import io
 from . import interp
 from . import diagnostic
-from . import configure
 
 __all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic', 'configure']
 
@@ -47,11 +50,10 @@ __version__ = '0.2.9'
 if not io.index_exists():
     io.update_index()
 
-# check if there is a configuration file
-configure.check_config()
 # get a dict with with config info
 config = configure.read_config()
 # set the directories within the config file
-set_dirs(**config)
+dir_config = {k:v for k,v in config.items() if k in ['argo_path', 'woa_path', 'ncep_path']}
+set_dirs(**dir_config)
 
 from .core import *
