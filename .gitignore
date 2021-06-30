@@ -11,3 +11,7 @@ sagepy/__pycache__/
 /ARVOR-asc-desc/
 .DS_Store
 .config
+admt/
+dist/
+build/
+figures/
