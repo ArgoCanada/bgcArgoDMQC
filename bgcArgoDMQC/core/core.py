@@ -125,7 +125,7 @@ class traj:
 
     def __init__(self, wmo, keep_fillvalue=False, verbose=False):
 
-        self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
+        # self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
 
         # local path info
         self.argo_path = ARGO_PATH
@@ -1034,9 +1034,9 @@ def organize_files(files):
 
     return sorted_files
 
-def load_traj(local_path, wmo):
+# def load_traj(local_path, wmo):
 
-    return trajData, trajFile
+    # return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
@@ -1733,7 +1733,7 @@ def oxy_a(dt, tau):
 # hard code the LUT table value so I don't have to 
 # ship the text file with the package
 ### is this the right/ok way to do this??? feels wrong ###
-from .lut import lut as lut_data
+from ..lut import lut as lut_data
 
 def correct_response_time(t, DO, T, thickness):
 
