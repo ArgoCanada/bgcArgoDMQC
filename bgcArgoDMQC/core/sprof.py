@@ -1,6 +1,5 @@
-
-
 from .core import *
+from .. import plot
 
 class sprof:
     '''
@@ -318,9 +317,9 @@ class sprof:
         if kind == 'gain':
             ref = kwargs['ref']
             if ref == 'NCEP':
-                g = fplt.gainplot(self.SDN, self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
+                g = plot.gainplot(self.SDN, self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
             elif ref == 'WOA':
-                g = fplt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
+                g = plot.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
             else:
                 raise ValueError('Invalid input for keyword argument "ref"')
 
@@ -330,7 +329,7 @@ class sprof:
             if not hasattr(self, 'df'):
                 self.to_dataframe()
 
-            g = fplt.var_cscatter(self.df, varname=var, **kwargs)
+            g = plot.var_cscatter(self.df, varname=var, **kwargs)
 
         elif kind == 'profiles':
             varlist = kwargs.pop('varlist')
@@ -338,7 +337,7 @@ class sprof:
             if not hasattr(self, 'df'):
                 self.to_dataframe()
 
-            g = fplt.profiles(self.df, varlist=varlist, **kwargs)
+            g = plot.profiles(self.df, varlist=varlist, **kwargs)
 
         elif kind == 'qcprofiles':
             varlist = kwargs.pop('varlist')
@@ -346,7 +345,7 @@ class sprof:
             if not hasattr(self, 'df'):
                 self.to_dataframe()
 
-            g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
+            g = plot.qc_profiles(self.df, varlist=varlist, **kwargs)
 
         else:
             raise ValueError('Invalid input for keyword argument "kind"')
@@ -408,7 +407,7 @@ class sprof:
 
         if type(date) is str:
             date = mdates.datestr2num(date)
-        if type(date) is datetime.datetime:
+        if type(date) is mdates.datetime.datetime:
             date = mdates.date2num(date)
 
         meta_dict = dict(date=date)
@@ -502,7 +501,7 @@ class sprof:
             varlist = list(plot_dict[label].keys())
 
             for v in varlist:
-                fplt.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
+                plot.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
                 axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
             
             ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
