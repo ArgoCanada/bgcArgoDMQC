@@ -12,11 +12,11 @@ from matplotlib.offsetbox import AnchoredText
 import gsw
 from netCDF4 import Dataset
 
-from . import io
-from . import interp
-from . import unit
-from . import util
-from . import configure
+from .. import io
+from .. import interp
+from .. import unit
+from .. import util
+from .. import configure
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP

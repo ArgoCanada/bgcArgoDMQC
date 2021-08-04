@@ -11,8 +11,8 @@ import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
 
-from . import configure
-from . import util
+from .. import configure
+from .. import util
 
 global index_path
 index_path = Path(__file__).parent.absolute() / 'ref'

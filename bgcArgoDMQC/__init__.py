@@ -33,14 +33,14 @@ from . import configure
 configure.check_config()
 
 from .core import *
-from . import fplt
+from . import plot
 from . import unit
 from . import util
 from . import io
 from . import interp
 from . import diagnostic
 
-__all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic', 'configure']
+__all__ = ['plot', 'unit', 'util', 'io', 'interp', 'diagnostic', 'configure']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 

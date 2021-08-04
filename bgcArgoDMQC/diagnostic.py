@@ -6,7 +6,7 @@ from . import io
 from . import interp
 from . import unit
 from . import util
-from . import fplt
+from . import plot
 
 def simple_test(argo_path=None, ncep_path=None, woa_path=None, data_path=''):
 
