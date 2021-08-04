@@ -11,7 +11,7 @@ import pandas as pd
 from .. import configure
 
 global index_path
-index_path = Path(__file__).parent.absolute() / 'ref'
+index_path = Path(__file__).parent.parent.absolute() / 'ref'
 if not index_path.exists():
     index_path.mkdir()
 
