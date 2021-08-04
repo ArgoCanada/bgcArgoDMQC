@@ -35,9 +35,9 @@ global URL
 config = configure.read_config()
 if 'default_url' in config.keys():
     url_name = config.pop('default_url')
-    url = URL_DICT[url_name]
+    URL = URL_DICT[url_name]
 else:
-    url = 'ftp.ifremer.fr'
+    URL = 'ftp.ifremer.fr'
 
 def index_exists():
 
