@@ -52,7 +52,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B', remote=False, url=url):
+def read_index(mission='B', remote=False, url=URL):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -97,7 +97,7 @@ def read_index(mission='B', remote=False, url=url):
 
     return df
 
-def update_index(ftype=None, url=url):
+def update_index(ftype=None, url=URL):
     '''
     Function to access FTP server to download Argo metadata and profile global
     index files
