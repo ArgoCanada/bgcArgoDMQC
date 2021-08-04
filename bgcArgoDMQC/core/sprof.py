@@ -448,5 +448,5 @@ class sprof:
         plot_dict = copy.deepcopy(self.__indepdict__)
         meta_dict = copy.deepcopy(self.__indepmeta__)
 
-        fig, ax_list = plot.compare_independent_data(self.df, plot_dict, meta_dict)
+        fig, ax_list = plot.compare_independent_data(self.df, plot_dict, meta_dict, fmt, **kwargs)
         return fig, ax_list
