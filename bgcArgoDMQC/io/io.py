@@ -930,15 +930,3 @@ def append_variable_to_file(fn, *args):
         nc[name][:] = data
 
     return nc
-
-def generate_standard_comments():
-
-    return
-
-def append_scienfitic_calib_information(nc_var, str_to_append):
-
-    return
-
-def str_to_nc(s):
-
-    return
