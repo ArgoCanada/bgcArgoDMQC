@@ -140,7 +140,7 @@ def gainplot(sdn, float_data, ref_data, gainvals, ref):
 
     return g
 
-def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=None, vmin=None, vmax=None, **kwargs):
+def variable_color_scatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=None, vmin=None, vmax=None, **kwargs):
     # define colormaps
     if cmocean_flag:
         color_maps = dict(
@@ -198,7 +198,7 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
     else:
         fig = ax.get_figure()
 
-    df = df.loc[df.PRES < ylim[1]+50]
+    df = df[df.PRES < ylim[1]+50]
 
     if vmin is None:
         vmin = 1.05*df[varname].min()
@@ -232,7 +232,7 @@ def var_cscatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000), clabel=N
 
     return g
 
-def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+def variable_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
         var_units = dict(
@@ -316,7 +316,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
 
     return g
 
-def qc_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+def qcflag_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
         var_units = dict(
