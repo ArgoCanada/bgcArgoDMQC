@@ -191,23 +191,7 @@ def variable_color_scatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000)
 def variable_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
-        var_units = dict(
-            TEMP='Temperature ({}C)'.format(chr(176)),
-            TEMP_ADJUSTED='Temperature ({}C)'.format(chr(176)),
-            PSAL='Practical Salinity', 
-            PSAL_ADJUSTED='Practical Salinity', 
-            PDEN='Potential Density (kg m$^{-3}$)',
-            CHLA='Chlorophyll (mg m$^{-3}$',
-            CHLA_ADJUSTED='Chlorophyll (mg m$^{-3}$',
-            BBP700='$\mathsf{b_{bp}}$ (m$^{-1}$)',
-            BBP700_ADJUSTED='$\mathsf{b_{bp}}$ (m$^{-1}$)',
-            CDOM='CDOM (mg m$^{-3}$)',
-            CDOM_ADJUSTED='CDOM (mg m$^{-3}$)',
-            DOXY='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
-            DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
-            DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
-        )
-        xlabels = [var_units[v] if v in var_units.keys() else '' for v in varlist]
+        xlabels = [style.var_units[v] if v in style.var_units.keys() else '' for v in varlist]
 
     cm = plt.cm.gray_r
 
@@ -275,23 +259,7 @@ def variable_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES',
 def qcflag_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
-        var_units = dict(
-            TEMP='Temperature ({}C)'.format(chr(176)),
-            TEMP_ADJUSTED='Temperature ({}C)'.format(chr(176)),
-            PSAL='Practical Salinity', 
-            PSAL_ADJUSTED='Practical Salinity', 
-            PDEN='Potential Density (kg m$^{-3}$)',
-            CHLA='Chlorophyll (mg m$^{-3}$',
-            CHLA_ADJUSTED='Chlorophyll (mg m$^{-3}$',
-            BBP700='$\mathsf{b_{bp}}$ (m$^{-1}$)',
-            BBP700_ADJUSTED='$\mathsf{b_{bp}}$ (m$^{-1}$)',
-            CDOM='CDOM (mg m$^{-3}$)',
-            CDOM_ADJUSTED='CDOM (mg m$^{-3}$)',
-            DOXY='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
-            DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
-            DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
-        )
-        xlabels = [var_units[v] for v in varlist]
+        xlabels = [style.var_units[v] for v in varlist]
 
     if axes is None:
         fig, axes = plt.subplots(1, len(varlist), sharey=True)
@@ -406,7 +374,7 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
         varlist = list(plot_dict[label].keys())
 
         for v in varlist:
-            profiles(df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
+            variable_profiles(df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
             axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
         
         ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
