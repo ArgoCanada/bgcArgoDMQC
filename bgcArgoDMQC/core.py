@@ -482,6 +482,18 @@ class sprof:
                 self.to_dataframe()
 
             g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
+        
+        elif kind == 'map':
+            start = kwargs.pop('start')
+            projection = kwargs.pop('projection')
+            extent = kwargs.pop('start')
+            ax = kwargs.pop('ax')
+
+            lat  = self.__floatdict__['LATITUDE']
+            lon  = self.__floatdict__['LONGITUDE']
+            time = self.__floatdict__['SDN']
+
+            g = fplt.map(lat, lon, time, **kwargs)
 
         else:
             raise ValueError('Invalid input for keyword argument "kind"')
