@@ -425,12 +425,11 @@ def map(lat, lon, time=None, projection=ccrs.PlateCarree(), extent=None, ax=None
         raise ValueError('To plot starting point, a time array must be provided')
 
     ax.set_extent(extent, crs=ccrs.PlateCarree())
-    ax.legend(loc=4, bbox_to_anchor=(1.05, 1.0), fontsize=8)
     ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS)
+    # ax.add_feature(cfeature.BORDERS)
     ax.add_feature(cfeature.OCEAN)
-    ax.add_feature(cfeature.LAND)
-    ax.add_feature(cfeature.RIVERS)
+    # ax.add_feature(cfeature.LAND)
+    # ax.add_feature(cfeature.RIVERS)
 
     g = pltClass()
     g.fig = fig
