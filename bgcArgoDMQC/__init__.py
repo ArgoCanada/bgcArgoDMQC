@@ -32,7 +32,7 @@ from __future__ import absolute_import
 from . import configure
 configure.check_config()
 
-from .core import *
+from .core import set_dirs
 from . import fplt
 from . import unit
 from . import util
