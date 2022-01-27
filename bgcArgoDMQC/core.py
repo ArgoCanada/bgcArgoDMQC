@@ -1731,6 +1731,32 @@ def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10):
 
     return error
 
+def profile_qc(flags):
+    '''
+    Return overall profile quality flag via the following from the Argo User
+    Manual (v 3.41):
+
+    3.2.2 Reference table 2a: overall profile quality flag
+    https://vocab.nerc.ac.uk/collection/RP2/current
+    N is defined as the percentage of levels with good data where:
+    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
+    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
+    All other QC flag values are BAD data
+    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
+    <PARAM>_QC otherwise.
+    n Meaning
+    "" No QC performed
+    A N = 100%; All profile levels contain good data.
+    B 75% <= N < 100%
+    C 50% <= N < 75%
+    D 25% <= N < 50%
+    E 0% < N < 25%
+    F N = 0%; No profile levels have good data.
+    '''
+    
+
+    return
+
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)
     return 1/inv_b
