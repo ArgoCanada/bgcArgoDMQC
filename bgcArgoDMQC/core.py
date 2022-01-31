@@ -1752,10 +1752,40 @@ def profile_qc(flags):
     D 25% <= N < 50%
     E 0% < N < 25%
     F N = 0%; No profile levels have good data.
+
+    Args:
+        - flags (pandas.Series): quality flags for a given profile
+    Returns:
+        - grade (str): profile grade based on description above
     '''
     
+    n_good = flags.isin([1, 2, 5, 8]).sum()
+    n_exclude = flags.isin([9]).sum()
 
-    return
+    pct = 100*n_good/(flags.size - n_exclude)
+
+    grade = np.nan
+
+    if flags.isin([0]).sum() >= flags.size - n_exclude:
+        grade = ''
+
+    if pct == 100:
+        grade = 'A'
+    elif pct >= 75:
+        grade = 'B'
+    elif pct >= 50:
+        grade = 'C'
+    elif pct >= 25:
+        grade = 'D'
+    elif pct > 0:
+        grade = 'E'
+    elif pct == 0:
+        grade = 'F'
+
+    if not type(grade) == str and np.isnan(grade):
+        raise ValueError('No grade assigned, check input value of `flags`')
+
+    return grade
 
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)
