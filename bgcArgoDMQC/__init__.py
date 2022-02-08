@@ -52,6 +52,7 @@ if not io.index_exists():
 
 # get a dict with with config info
 config = configure.read_config()
+print(config)
 # set the directories within the config file
 dir_config = {k:v for k,v in config.items() if k in ['argo_path', 'woa_path', 'ncep_path']}
 set_dirs(**dir_config)
