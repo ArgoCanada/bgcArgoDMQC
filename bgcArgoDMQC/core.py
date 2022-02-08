@@ -117,23 +117,23 @@ def get_index(index='bgc', **kwargs):
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
 
-class traj:
-    '''
-    Class that loads Argo trajectory file data for a given float ID number
-    (wmo).
-    '''
+# class traj:
+#     '''
+#     Class that loads Argo trajectory file data for a given float ID number
+#     (wmo).
+#     '''
 
-    def __init__(self, wmo, keep_fillvalue=False, verbose=False):
+#     def __init__(self, wmo, keep_fillvalue=False, verbose=False):
 
-        self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
+#         self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
 
-        # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
+#         # local path info
+#         self.argo_path = ARGO_PATH
+#         self.woa_path  = WOA_PATH
+#         self.ncep_path = NCEP_PATH
 
-        if not keep_fillvalue:
-            self.rm_fillvalue()
+#         if not keep_fillvalue:
+#             self.rm_fillvalue()
 
 
 class sprof:
@@ -482,6 +482,14 @@ class sprof:
                 self.to_dataframe()
 
             g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
+        
+        elif kind == 'map':
+
+            lat  = self.__floatdict__['LATITUDE']
+            lon  = self.__floatdict__['LONGITUDE']
+            time = self.__floatdict__['SDN']
+
+            g = fplt.map(lat, lon, time, **kwargs)
 
         else:
             raise ValueError('Invalid input for keyword argument "kind"')
@@ -1034,9 +1042,9 @@ def organize_files(files):
 
     return sorted_files
 
-def load_traj(local_path, wmo):
+# def load_traj(local_path, wmo):
 
-    return trajData, trajFile
+#     return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
@@ -1722,6 +1730,62 @@ def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10):
     error = unit.pO2_to_doxy(np.array(S.shape[0]*[fix_err]), S, T, P=P)
 
     return error
+
+def profile_qc(flags):
+    '''
+    Return overall profile quality flag via the following from the Argo User
+    Manual (v 3.41):
+
+    3.2.2 Reference table 2a: overall profile quality flag
+    https://vocab.nerc.ac.uk/collection/RP2/current
+    N is defined as the percentage of levels with good data where:
+    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
+    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
+    All other QC flag values are BAD data
+    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
+    <PARAM>_QC otherwise.
+    n Meaning
+    "" No QC performed
+    A N = 100%; All profile levels contain good data.
+    B 75% <= N < 100%
+    C 50% <= N < 75%
+    D 25% <= N < 50%
+    E 0% < N < 25%
+    F N = 0%; No profile levels have good data.
+
+    Args:
+        - flags (pandas.Series): quality flags for a given profile
+    Returns:
+        - grade (str): profile grade based on description above
+    '''
+    
+    n_good = flags.isin([1, 2, 5, 8]).sum()
+    n_exclude = flags.isin([9]).sum()
+
+    pct = 100*n_good/(flags.size - n_exclude)
+
+    grade = np.nan
+
+    if flags.isin([0]).sum() >= flags.size - n_exclude:
+        grade = ''
+
+    if pct == 100:
+        grade = 'A'
+    elif pct >= 75:
+        grade = 'B'
+    elif pct >= 50:
+        grade = 'C'
+    elif pct >= 25:
+        grade = 'D'
+    elif pct > 0:
+        grade = 'E'
+    elif pct == 0:
+        grade = 'F'
+
+    if not type(grade) == str and np.isnan(grade):
+        raise ValueError('No grade assigned, check input value of `flags`')
+
+    return grade
 
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)

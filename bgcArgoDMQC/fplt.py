@@ -6,6 +6,9 @@ import matplotlib.dates as mdates
 import seaborn as sns
 sns.set(style='ticks', context='paper', palette='colorblind')
 
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+
 try:
     import cmocean.cm as cmo
     cmocean_flag = True
@@ -387,5 +390,50 @@ def qc_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabe
     g = pltClass()
     g.fig  = fig
     g.axes = axes
+
+    return g
+
+def map(lat, lon, time=None, projection=ccrs.PlateCarree(), extent=None, ax=None, start=True, color=sns.color_palette('colorblind')[1], **kwargs):
+
+    fig = plt.figure()
+    if ax is None:
+        ax = fig.add_subplot(projection=projection)
+    
+    if extent is None:
+        minlon, maxlon = np.nanmin(lon), np.nanmax(lon)
+        minlat, maxlat = np.nanmin(lat), np.nanmax(lat)
+        extent = [minlon, maxlon, minlat, maxlat]
+        for i in range(len(extent)):
+            if extent[i] < 0 and i % 2 == 0:
+                extent[i] = 1.1*extent[i]
+            elif extent[i] < 0 and i % 2 != 0:
+                extent[i] = 0.9*extent[i]
+            elif extent[i] > 0 and i % 2 == 0:
+                extent[i] = 0.9*extent[i]
+            elif extent[i] > 0 and i % 2 != 0:
+                extent[i] = 1.1*extent[i]
+        
+
+        extent[2] = extent[2] - 6
+        extent[3] = extent[3] + 6
+    
+    ax.plot(lon, lat, 'o', transform=projection, **kwargs)
+    if start and time is not None:
+        ix = time == np.min(time)
+        ax.plot(lon[ix], lat[ix], '*', **kwargs)
+    elif start and time is None:
+        raise ValueError('To plot starting point, a time array must be provided')
+
+    ax.set_extent(extent, crs=ccrs.PlateCarree())
+    ax.add_feature(cfeature.COASTLINE)
+    # ax.add_feature(cfeature.BORDERS)
+    ax.add_feature(cfeature.OCEAN)
+    # ax.add_feature(cfeature.LAND)
+    # ax.add_feature(cfeature.RIVERS)
+
+    g = pltClass()
+    g.fig = fig
+    g.ax = ax
+    g.axes = [ax]
 
     return g
