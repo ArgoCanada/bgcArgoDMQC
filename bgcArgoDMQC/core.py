@@ -117,23 +117,23 @@ def get_index(index='bgc', **kwargs):
 # FLOAT CLASS
 # ----------------------------------------------------------------------------
 
-class traj:
-    '''
-    Class that loads Argo trajectory file data for a given float ID number
-    (wmo).
-    '''
+# class traj:
+#     '''
+#     Class that loads Argo trajectory file data for a given float ID number
+#     (wmo).
+#     '''
 
-    def __init__(self, wmo, keep_fillvalue=False, verbose=False):
+#     def __init__(self, wmo, keep_fillvalue=False, verbose=False):
 
-        self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
+#         self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
 
-        # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
+#         # local path info
+#         self.argo_path = ARGO_PATH
+#         self.woa_path  = WOA_PATH
+#         self.ncep_path = NCEP_PATH
 
-        if not keep_fillvalue:
-            self.rm_fillvalue()
+#         if not keep_fillvalue:
+#             self.rm_fillvalue()
 
 
 class sprof:
@@ -1042,9 +1042,9 @@ def organize_files(files):
 
     return sorted_files
 
-def load_traj(local_path, wmo):
+# def load_traj(local_path, wmo):
 
-    return trajData, trajFile
+#     return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
