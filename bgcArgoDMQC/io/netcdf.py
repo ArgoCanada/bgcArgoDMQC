@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from pathlib import Path
+import numpy as np
 from netCDF4 import Dataset
 
 def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
@@ -20,13 +21,25 @@ def generate_comments_equations(variable, gain=None, operator='[operator name]',
         - 2021-07-05: initial commit
     '''
 
-def fill_string_array(s):
+def create_fillvalue_array(nc_var):
+
+    new_var = np.full(
+        nc_var.shape,
+        nc_var._FillValue,    
+        dtype=nc_var.datatype
+    )
+
+    return new_var
+
+def string_to_array(s, dim, encode='utf-8'):
     '''
     Args:
-        arg: description
+        s: input string or comment
+        dim: netCDF dimension which the string will be made to fill using trailing whitespace
+        encode (optional): encoding each character, default utf-8 (def. python netCDF format)
 
     Returns:
-        out: description
+        numpy.array of single letters
 
     Author:
         Christopher Gordon
@@ -36,6 +49,13 @@ def fill_string_array(s):
     Change log:
         - 2021-07-05: initial commit
     '''
+
+    N = len(s)
+    M = dim.size - N
+    full_string = s + M*''
+    str_array = np.array([f'{c}'.encode(encode) for c in full_string])
+
+    return str_array
 
 def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
     '''
