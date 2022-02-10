@@ -1213,3 +1213,58 @@ def get_optode_type(wmo):
         optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
         return optode_type
 
+def profile_qc(flags):
+    '''
+    Return overall profile quality flag via the following from the Argo User
+    Manual (v 3.41):
+
+    3.2.2 Reference table 2a: overall profile quality flag
+    https://vocab.nerc.ac.uk/collection/RP2/current
+    N is defined as the percentage of levels with good data where:
+    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
+    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
+    All other QC flag values are BAD data
+    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
+    <PARAM>_QC otherwise.
+    n Meaning
+    "" No QC performed
+    A N = 100%; All profile levels contain good data.
+    B 75% <= N < 100%
+    C 50% <= N < 75%
+    D 25% <= N < 50%
+    E 0% < N < 25%
+    F N = 0%; No profile levels have good data.
+
+    Args:
+        - flags (pandas.Series): quality flags for a given profile
+    Returns:
+        - grade (str): profile grade based on description above
+    '''
+    
+    n_good = flags.isin([1, 2, 5, 8]).sum()
+    n_exclude = flags.isin([9]).sum()
+
+    pct = 100*n_good/(flags.size - n_exclude)
+
+    grade = np.nan
+
+    if flags.isin([0]).sum() >= flags.size - n_exclude:
+        grade = ''
+
+    if pct == 100:
+        grade = 'A'
+    elif pct >= 75:
+        grade = 'B'
+    elif pct >= 50:
+        grade = 'C'
+    elif pct >= 25:
+        grade = 'D'
+    elif pct > 0:
+        grade = 'E'
+    elif pct == 0:
+        grade = 'F'
+
+    if not type(grade) == str and np.isnan(grade):
+        raise ValueError('No grade assigned, check input value of `flags`')
+
+    return grade
