@@ -78,7 +78,35 @@ def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
                 dst[name][:] = src[name][:]
     
     return Dataset(outfile, 'a')
-        
+
+def iterate_dimension(infile, outfile, iterated_dimension, n=1):
+    '''
+    Add 1 or optional argument `n` to the size limited dimension `dimension`
+    and fill the new dimension with the proper FillValue for each variable.
+    '''
+
+    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+        # copy global attributes all at once via dictionary
+        dst.setncatts(src.__dict__)
+        # copy dimensions except for the excluded
+        for name, dimension in src.dimensions.items():
+            if iterated_dimension == name:
+                dst.createDimension(name, (len(dimension)+n if not dimension.isunlimited() else None))
+            else:
+                dst.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
+        for name, variable in src.variables.items():
+            x = dst.createVariable(name, variable.datatype, variable.dimensions)
+            # copy variable attributes all at once via dictionary
+            dst[name].setncatts(src[name].__dict__)
+            if iterated_dimension in variable.dimensions:
+                # add FillValues along the added dimesion size
+                print('')
+            else:
+                # fill the variable with the same data as before
+                dst[name][:] = src[name][:]
+
+    return Dataset(outfile, 'a')
+
 def append_variable_to_file(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
