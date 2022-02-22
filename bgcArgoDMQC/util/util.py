@@ -42,58 +42,6 @@ def decode_woa_var(varname):
 
     return param, ftype, ftpdir
 
-def get_lat_index(lat, lat_bounds):
-        '''function to pull appropriate WOA latitude values'''
-
-        lat_ix = np.logical_and(lat >= lat_bounds[0], lat <= lat_bounds[1])
-
-        if not lat_ix.any():
-            lat_ix = np.where(np.abs(lat - np.mean(lat_bounds)) == np.min(np.abs(lat - np.mean(lat_bounds))))[0]
-        else:
-            lat_ix = np.where(lat_ix)[0]
-            
-        if lat_ix[0] != 0:
-            lat_ix = np.append(np.array([lat_ix[0]-1]), lat_ix)
-
-        if lat_ix[-1] != lat.shape[0] - 1:
-            lat_ix = np.append(lat_ix, np.array([lat_ix[-1]+1]))
-
-        return lat_ix
-
-def get_lon_index(lon, lon_bounds, cross180):
-    '''function to pull appropriate WOA longitude values, handles crossing 180'''
-    
-    if cross180:
-        lon_ix = np.logical_or(lon <= lon_bounds[0], lon >= lon_bounds[1])
-        lon_ix = np.where(lon_ix)[0]
-        diff_index = np.where(np.diff(lon_ix) != 1)[0]
-        if diff_index.shape[0] != 0:
-            diff_index = diff_index[0]
-            half1_lon_ix = np.append(lon_ix[:diff_index], np.array([lon_ix[diff_index]+1]))
-            half2_lon_ix = np.append(np.array([lon_ix[diff_index+1] - 1]), lon_ix[diff_index+1:])
-            lon_ix = np.append(half1_lon_ix, half2_lon_ix)
-
-        if lon_ix[0] != 0:
-            lon_ix = np.append(np.array([lon_ix[0]-1]), lon_ix)
-
-        if lon_ix[-1] != lon.shape[0] - 1:
-            lon_ix = np.append(lon_ix, np.array([lon_ix[-1]+1]))
-
-    else:
-        lon_ix = np.logical_and(lon >= lon_bounds[0], lon <= lon_bounds[1])
-        if not lon_ix.any():
-            lon_ix = np.where(np.abs(lon - np.mean(lon_bounds)) == np.min(np.abs(lon - np.mean(lon_bounds))))[0]
-        else:
-            lon_ix = np.where(lon_ix)[0]
-            
-        if lon_ix[0] != 0:
-            lon_ix = np.append(np.array([lon_ix[0]-1]), lon_ix)
-
-        if lon_ix[-1] != lon.shape[0] - 1:
-            lon_ix = np.append(lon_ix, np.array([lon_ix[-1]+1]))
-
-    return lon_ix
-
 def get_qctests(hex_code):
 
     # hex to numeric
@@ -242,92 +190,6 @@ def read_gain_value(fn, verbose=True):
 
     return G, equation, comment
 
-def aic(data, resid):
-    '''
-    Function to calculate the Akiake Information Criteria (AIC) as a metric
-    for assessing the appropriate number of breakpoints in the calculation of
-    drifts in O2 gains.
-    
-    Args:
-    
-    Returns:
-    
-    Author:   
-        Christopher Gordon
-        Fisheries and Oceans Canada
-        chris.gordon@dfo-mpo.gc.ca
-    
-    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    Last update: 2020-10-27
-    
-    Change log:
-        - 2020-10-27: fixed print output
-    '''
-
-    # calculate AIC
-    SSE = np.sum(resid**2) # sum square errors
-    n = resid.shape[0]
-    m = data.shape[0] - 1 # do not include first cycle
-    K = 2*m + 2
-
-    # valid data parameters? see Jones & Day (1995)
-    is_valid = n/4 - 1
-    if m > is_valid:
-        aic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate AIC, setting AIC = NaN\n')
-    else:
-        # formula ref. Jones & Day (1995), Owens & Wong (2009)
-        aic_value = np.log(SSE/n) + (n+K)/(n-K-2)
-
-    return aic_value
-
-
-def bic(data, resid):
-    '''
-    Function to calculate the Bayesian Information Criteria (BIC) as a metric
-    for assessing the appropriate number of breakpoints in the calculation of
-    drifts in O2 gains.
-    
-    Args:
-    
-    Returns:
-    
-    Author:   
-        Christopher Gordon
-        Fisheries and Oceans Canada
-        chris.gordon@dfo-mpo.gc.ca
-    
-    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    Last update: 2020-10-27
-    
-    Change log:
-        - 2020-10-27: fixed print output
-
-    '''
-
-    # calculate BIC
-    errorlim = 0 # cap on residuals, useful for noisy pH and nitrate data
-    SSE = np.sum(resid**2) # sum square errors
-    n = resid.shape[0]
-    m = data.shape[0] - 1 # do not include first cycle
-    K = 2*m + 2
-
-    # valid data parameters? see Jones & Day (1995)
-    is_valid = n/4 - 1
-    if m > is_valid:
-        bic_value = np.nan
-        sys.stdout.write('n >> K, cannot caclculate BIC, setting BIC = NaN\n')
-    else:
-        bic_value = np.log(1/(n*SSE) + errorlim**2) + K*np.log(n)/n
-
-    return bic_value
-
 def get_var_by(v1, v2, float_data):
     '''
     Function to calculate the mean of one variable (v1) indexed by a second
@@ -351,39 +213,6 @@ def get_var_by(v1, v2, float_data):
     
     return out_array
 
-def haversine(c1, c2):
-    '''
-    Calculate the distance between two coordinates using the Haversine formula.
-
-    Args:
-        c1 (tuple): first set of coordinates - (lat, long)
-        c2 (tuple): second set of coordinates - (lat, long)
-
-    Returns: 
-        Distnace between c1 and c2 in kilometers
-    '''
-
-    # approx radius of earth in km
-    R = 6373.0
-
-    # convert coordinates to radians
-    lat1 = np.radians(c1[0])
-    lon1 = np.radians(c1[1])
-    lat2 = np.radians(c2[0])
-    lon2 = np.radians(c2[1])
-
-    # difference in coords
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    # Haversine formula
-    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
-    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
-
-    distance = R * c
-
-    return distance
-
 def cycle_from_time(time, t_arr, c_arr):
     ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))
     return c_arr[ix][0]
@@ -402,21 +231,6 @@ def get_vars(files):
     varnames = list(varnames)
 
     return varnames
-
-def read_ncstr(arr):
-    decode_str = np.array([f.decode('utf-8') for f in arr])
-    out = ''.join(decode_str)
-
-    return out.strip()
-
-def read_qc(flags):
-
-    decode_flags = np.array([f.decode('utf-8') for f in flags])
-    decode_flags[decode_flags == ' '] = '4'
-
-    out_flags = np.array([int(f) for f in decode_flags])
-
-    return out_flags
 
 def get_worst_flag(*args):
     out_flags = np.ones(args[0].shape)

@@ -4,6 +4,25 @@ from pathlib import Path
 import numpy as np
 from netCDF4 import Dataset
 
+from ..util import refill_array
+
+def read_ncstr(arr):
+    decode_str = np.array([f.decode('utf-8') for f in arr])
+    out = ''.join(decode_str)
+
+    return out.strip()
+
+
+def read_qc(flags):
+
+    decode_flags = np.array([f.decode('utf-8') for f in flags])
+    decode_flags[decode_flags == ' '] = '4'
+
+    out_flags = np.array([int(f) for f in decode_flags])
+
+    return out_flags
+
+
 def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
     '''
     Args:
@@ -100,7 +119,6 @@ def iterate_dimension(infile, outfile, iterated_dimension, n=1):
             dst[name].setncatts(src[name].__dict__)
             if iterated_dimension in variable.dimensions:
                 # add FillValues along the added dimesion size
-                print('')
             else:
                 # fill the variable with the same data as before
                 dst[name][:] = src[name][:]
