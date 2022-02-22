@@ -12,7 +12,6 @@ def read_ncstr(arr):
 
     return out.strip()
 
-
 def read_qc(flags):
 
     decode_flags = np.array([f.decode('utf-8') for f in flags])
@@ -21,7 +20,6 @@ def read_qc(flags):
     out_flags = np.array([int(f) for f in decode_flags])
 
     return out_flags
-
 
 def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
     '''
@@ -119,6 +117,15 @@ def iterate_dimension(infile, outfile, iterated_dimension, n=1):
             dst[name].setncatts(src[name].__dict__)
             if iterated_dimension in variable.dimensions:
                 # add FillValues along the added dimesion size
+                arr = np.full(
+                    variable.shape,
+                    variable._FillValue,    
+                    dtype=variable.datatype
+                )
+                # get location of iterated dimension
+                loc = variable.dimensions.index(iterated_dimension)
+                n_index = len(variable.dimensions)
+                refill_array(loc, n_index, arr, src[name][:])
             else:
                 # fill the variable with the same data as before
                 dst[name][:] = src[name][:]
