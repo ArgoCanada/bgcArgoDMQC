@@ -21,6 +21,12 @@ def read_qc(flags):
 
     return out_flags
 
+def get_parameter_index(parameter_array, parameter):
+    str_arr = np.array([read_ncstr(s) for s in parameter_array])
+    index = np.where(str_arr == parameter)[0]
+
+    return index
+
 def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
     '''
     Args:
