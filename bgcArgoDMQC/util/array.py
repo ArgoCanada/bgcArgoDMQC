@@ -2,6 +2,10 @@
 import copy
 
 def refill_array(axis, dimension, new_array, old_array):
+    '''
+    Used when iterating a dimension of an array to backfill the previously
+    unelevated dimension. Mostly used within io.iterate_dimension()
+    '''
 
     output = copy.deepcopy(new_array)
 
