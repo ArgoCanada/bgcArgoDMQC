@@ -188,7 +188,7 @@ def variable_color_scatter(df, varname='DOXY', cmap=None, ax=None, ylim=(0,2000)
 
     return g
 
-def variable_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
         xlabels = [style.var_units[v] if v in style.var_units.keys() else '' for v in varlist]
