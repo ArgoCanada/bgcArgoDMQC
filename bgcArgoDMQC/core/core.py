@@ -1206,11 +1206,11 @@ def get_optode_type(wmo):
     local_file = Path(ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
     nc = Dataset(local_file)
 
-    doxy_index = util.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
+    doxy_index = io.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
     if doxy_index.shape[0] == 0:
         return 'NO_OPTODE_FOUND'
     else:
-        optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
+        optode_type = io.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
         return optode_type
 
 def profile_qc(flags):
@@ -1222,7 +1222,7 @@ def profile_qc(flags):
     https://vocab.nerc.ac.uk/collection/RP2/current
     N is defined as the percentage of levels with good data where:
     - QC flag values of 1, 2, 5, or 8 are considered GOOD data
-    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
+    - QC flag values of 9 (missing) or " " are NOT USED in the computation
     All other QC flag values are BAD data
     The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
     <PARAM>_QC otherwise.
