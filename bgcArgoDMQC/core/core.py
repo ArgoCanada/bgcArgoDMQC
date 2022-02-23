@@ -545,7 +545,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     qc_keys = [s for s in floatData.keys() if '_QC' in s and 'PROFILE' not in s]
     for qc in qc_keys:
-        floatData[qc] = util.read_qc(floatData[qc])
+        floatData[qc] = io.read_qc(floatData[qc])
 
     if grid:
         ftype = ''
@@ -677,19 +677,19 @@ def load_profiles(files, verbose=False):
 
         # load in variables that will be in every file
         floatData['PRES']           = np.append(floatData['PRES'], cc.variables['PRES'][:].data.flatten())
-        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], util.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
+        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], io.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
         floatData['TEMP']           = np.append(floatData['TEMP'], cc.variables['TEMP'][:].data.flatten())
-        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], util.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
+        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], io.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
         floatData['PSAL']           = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
-        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], util.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
+        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], io.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
         floatData['SDN']            = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))
-        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], util.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
+        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], io.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
         floatData['SDN_GRID']       = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))]))
         floatData['LATITUDE']       = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
         floatData['LATITUDE_GRID']  = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
         floatData['LONGITUDE']      = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())
         floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
-        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
+        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], io.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
         print(common_variables)
         # loop through other possible BGC variables
@@ -705,7 +705,7 @@ def load_profiles(files, verbose=False):
         for v in floatData.keys():
             v_qc = v + '_QC'
             if v_qc in common_variables:
-                floatData[v_qc] = np.append(floatData[v_qc], util.read_qc(nc.variables[v_qc][:].data.flatten()))
+                floatData[v_qc] = np.append(floatData[v_qc], io.read_qc(nc.variables[v_qc][:].data.flatten()))
 
         if 'DOXY' in floatData.keys():
             floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
