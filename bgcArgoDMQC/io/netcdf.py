@@ -99,7 +99,7 @@ def copy_netcdf(infile, outfile, exclude_vars=[], exclude_dims=[]):
                 dst[name].setncatts(src[name].__dict__)
                 dst[name][:] = src[name][:]
     
-    return Dataset(outfile, 'a')
+    return Dataset(outfile, 'r+')
 
 def iterate_dimension(infile, outfile, iterated_dimension, n=1):
     '''
@@ -117,21 +117,21 @@ def iterate_dimension(infile, outfile, iterated_dimension, n=1):
             else:
                 dst.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
         for name, variable in src.variables.items():
-            x = dst.createVariable(name, variable.datatype, variable.dimensions)
+            new_variable = dst.createVariable(name, variable.datatype, variable.dimensions)
             # copy variable attributes all at once via dictionary
             dst[name].setncatts(src[name].__dict__)
             if iterated_dimension in variable.dimensions:
                 # add FillValues along the added dimesion size
-                arr = create_fillvalue_array(variable)
+                arr = create_fillvalue_array(new_variable)
                 # get location of iterated dimension
-                loc = variable.dimensions.index(iterated_dimension)
+                axis = variable.dimensions.index(iterated_dimension)
                 n_index = len(variable.dimensions)
-                dst[name][:] = refill_array(loc, n_index, arr, src[name][:])
+                dst[name][:] = refill_array(axis, n_index, arr, src[name][:])
             else:
                 # fill the variable with the same data as before
                 dst[name][:] = src[name][:]
 
-    return Dataset(outfile, 'a')
+    return Dataset(outfile, 'r+')
 
 def append_variable(fn, *args):
     '''
@@ -160,7 +160,7 @@ def append_variable(fn, *args):
         )
     '''
 
-    nc = Dataset(fn, 'a')
+    nc = Dataset(fn, 'r+')
     
     for new_var in args:
         name = new_var.pop('name')
