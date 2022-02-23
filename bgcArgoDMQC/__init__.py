@@ -32,15 +32,14 @@ from __future__ import absolute_import
 from . import configure
 configure.check_config()
 
-from .core import set_dirs
-from . import fplt
+from . import plot
 from . import unit
 from . import util
 from . import io
 from . import interp
 from . import diagnostic
 
-__all__ = ['fplt', 'unit', 'util', 'io', 'interp', 'diagnostic', 'configure']
+__all__ = ['plot', 'unit', 'util', 'io', 'interp', 'diagnostic', 'configure']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
@@ -49,11 +48,5 @@ __version__ = '0.2.9'
 # check age of index file, or if it exists
 if not io.index_exists():
     io.update_index()
-
-# get a dict with with config info
-config = configure.read_config()
-# set the directories within the config file
-dir_config = {k:v for k,v in config.items() if k in ['argo_path', 'woa_path', 'ncep_path']}
-set_dirs(**dir_config)
 
 from .core import *

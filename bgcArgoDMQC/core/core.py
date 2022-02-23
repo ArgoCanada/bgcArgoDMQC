@@ -1,36 +1,22 @@
 import sys
 import copy
-import warnings
 from pathlib import Path
 import fnmatch
 
 import numpy as np
 from scipy.interpolate import interp1d, interp2d
 
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
-import datetime
-
-import seaborn as sns
-
-# try to import cartopy
-try:
-    map_flag = True
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
-except:
-    map_flag = False
 
 import gsw
 from netCDF4 import Dataset
 
-from . import io
-from . import interp
-from . import unit
-from . import util
-from . import fplt
-from . import configure
+from .. import io
+from .. import interp
+from .. import unit
+from .. import util
+from .. import configure
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
@@ -125,7 +111,7 @@ def get_index(index='bgc', **kwargs):
 
 #     def __init__(self, wmo, keep_fillvalue=False, verbose=False):
 
-#         self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
+        # self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
 
 #         # local path info
 #         self.argo_path = ARGO_PATH
@@ -134,595 +120,6 @@ def get_index(index='bgc', **kwargs):
 
 #         if not keep_fillvalue:
 #             self.rm_fillvalue()
-
-
-class sprof:
-    '''
-    Class that loads Argo synthetic profile data for a given float ID number
-    (wmo). 
-    
-    Uses locally downloaded files, which should be setup using the `set_dirs` 
-    method::
-
-        sprof.set_dirs(
-            argo_path='/data/path/Argo', 
-            ncep_path='/data/path/NCEP',
-            woa_path='/data/path/WOA18'
-        )
-
-    Then, load the individual variables into fields in the class, for
-    example::
-
-        syn = sprof(wmo)
-        print(syn.DOXY)
-    '''
-
-    
-    set_dirs = set_dirs
-
-    def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
-
-        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
-        self.__rawfloatdict__ = self.__floatdict__
-
-        # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
-
-        self.assign(self.__floatdict__)
-        if not keep_fillvalue:
-            self.rm_fillvalue()
-
-        if rcheck:
-            self.check_range('DOXY')
-
-    def assign(self, floatdict):
-        '''
-        Assign variables from float dictionary (output of load_argo(...))
-        to synthetic profile sprof() object.
-        '''
-
-        # metadata and dimension variables
-        self.floatType  = floatdict['floatType']
-        self.N_PROF     = floatdict['N_PROF']
-        self.N_LEVELS   = floatdict['N_LEVELS']
-        self.CYCLE      = floatdict['CYCLES']
-        self.CYCLE_GRID = floatdict['CYCLE_GRID']
-
-        # time and location data
-        self.SDN       = floatdict['SDN']
-        self.SDN_GRID  = floatdict['SDN_GRID']
-        self.LATITUDE  = floatdict['LATITUDE']
-        self.LATITUDE_GRID = floatdict['LATITUDE_GRID']
-        self.LONGITUDE = floatdict['LONGITUDE']
-        self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
-
-        self.WMO = floatdict['WMO']
-
-        # core variables
-        self.PRES    = floatdict['PRES']
-        self.PRES_QC = floatdict['PRES_QC']
-        self.TEMP    = floatdict['TEMP']
-        self.TEMP_QC = floatdict['TEMP_QC']
-        self.PSAL    = floatdict['PSAL']
-        self.PSAL_QC = floatdict['PSAL_QC']
-        # potential density
-        self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.PRES, 0) - 1000
-
-        # bgc variables - not necessarily all there so check if the fields exist
-        if 'DOXY' in floatdict.keys():
-            self.DOXY      = floatdict['DOXY']
-            self.DOXY_QC   = floatdict['DOXY_QC']
-        if 'CHLA' in floatdict.keys():
-            self.CHLA      = floatdict['CHLA']
-            self.CHLA_QC   = floatdict['CHLA_QC']
-        if 'BBP700' in floatdict.keys():
-            self.BBP700    = floatdict['BBP700']
-            self.BBP700_QC = floatdict['BBP700_QC']
-        if 'CDOM' in floatdict.keys():
-            self.CDOM      = floatdict['CDOM']
-            self.CDOM_QC   = floatdict['CDOM_QC']
-        
-        # adjusted variables
-        if 'DOXY_ADJUSTED' in floatdict.keys():
-            self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
-            self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
-        if 'CHLA_ADJUSTED' in floatdict.keys():
-            self.CHLA_ADJUSTED      = floatdict['CHLA_ADJUSTED']
-            self.CHLA_ADJUSTED_QC   = floatdict['CHLA_ADJUSTED_QC']
-        if 'BBP700_ADJUSTED' in floatdict.keys():
-            self.BBP700_ADJUSTED    = floatdict['BBP700_ADJUSTED']
-            self.BBP700_ADJUSTED_QC = floatdict['BBP700_ADJUSTED_QC']
-        if 'CDOM_ADJUSTED' in floatdict.keys():
-            self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
-            self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
-
-        if 'O2Sat' in floatdict.keys():
-            self.O2Sat = floatdict['O2Sat']
-            self.O2Sat_QC = floatdict['O2Sat_QC']
-
-    def get_gridded_var(self, *args):
-
-        if not hasattr(self, '__griddict__'):
-            self.__griddict__ = read_sprof_gridded_variables(Dataset())
-
-        varlist = list()
-        for v in args:
-            varlist.append(self.__griddict__[v])
-
-        return varlist
-
-    def rm_fillvalue(self):
-        '''
-        Remove FillValue from all variables.
-        '''
-        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
-        self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
-        self.assign(self.__nofillvaluefloatdict__)
-        self.to_dataframe()
-
-    def clean(self, bad_flags=None):
-        '''
-        Remove bad data from all variables, using <PARAM>_QC to determine bad data. 
-        Optional input `bad_flags` can be used to specify which flag values are bad,
-        with a default bad flags set to be 4, 6, 7.
-        '''
-        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
-        self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
-        self.assign(self.__cleanfloatdict__)
-        self.to_dataframe()
-
-    def reset(self):
-        '''
-        Reset all variables back to original loaded variables. Undoes the effect of
-        clean(), rm_fillvalue(), check_range().
-        '''
-        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
-        self.assign(self.__rawfloatdict__)
-        self.to_dataframe()
-
-    def check_range(self, key, verbose=False):
-        '''
-        Performs a range check for variables that have a RTQC range available.
-        Replaces values outside the range with NaN values. Takes string input
-        to do the range check on that variable. Available variables are
-        PRES, TEMP, PSAL, and DOXY. Can also take input 'all' to do the range
-        check on all four variables, or a list of strings to do each of those
-        variables.
-        '''
-        if key == 'all':
-            key = ['PRES', 'TEMP', 'PSAL', 'DOXY']
-        elif type(key) is not list:
-            key = [key]
-        
-        for k in key:
-            if k in self.__floatdict__.keys():
-                self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
-                self.__floatdict__ = self.__rangecheckdict__
-
-                # recalculate O2sat if its DOXY
-                if k == 'DOXY':
-                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], self.__rangecheckdict__['PDEN'], a4330=optode_flag)
-
-        self.assign(self.__rangecheckdict__)
-        self.to_dataframe()
-    
-    def to_dict(self):
-        '''
-        Returns a deepcopy of __floatdict__, which is the currect active
-        dictionary (i.e. subject to the effects of clean(), reset(), etc.)
-        '''
-        return copy.deepcopy(self.__floatdict__)
-    
-    def to_dataframe(self):
-        '''
-        Returns a pandas dataframe containing data from the synthetic oxygen
-        profile file.
-        '''
-        import pandas as pd
-
-        df = pd.DataFrame()
-        df['CYCLE']     = self.CYCLE_GRID
-        df['SDN']       = self.SDN_GRID
-        df['WMO']       = self.WMO
-        df['LATITUDE']  = self.LATITUDE_GRID
-        df['LONGITUDE'] = self.LONGITUDE_GRID
-        df['PRES']      = self.PRES
-        df['TEMP']      = self.TEMP
-        df['TEMP_QC']   = self.TEMP_QC
-        df['PSAL']      = self.PSAL
-        df['PSAL_QC']   = self.PSAL_QC
-        df['PDEN']      = self.PDEN
-        if 'DOXY' in self.__floatdict__.keys():
-            df['DOXY']      = self.DOXY
-            df['DOXY_QC']   = self.DOXY_QC
-        if 'CHLA' in self.__floatdict__.keys():
-            df['CHLA']      = self.CHLA
-            df['CHLA_QC']   = self.CHLA_QC
-        if 'BBP700' in self.__floatdict__.keys():
-            df['BBP700']    = self.BBP700
-            df['BBP700_QC'] = self.BBP700_QC
-        if 'CDOM' in self.__floatdict__.keys():
-            df['CDOM']      = self.CDOM
-            df['CDOM_QC']   = self.CDOM_QC
-        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
-            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
-        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
-            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
-        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
-            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
-        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
-            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
-        if 'O2Sat' in self.__floatdict__.keys():
-            df['O2Sat']      = self.O2Sat
-            df['O2Sat_QC']   = self.O2Sat_QC
-
-        exvals = [k for k,v in self.__floatdict__.items() if type(v) is not np.ndarray]
-        for key in list(set(self.__floatdict__.keys()) - set(df.columns) - set(exvals)):
-            if self.__floatdict__[key].shape[0] == df.shape[0]:
-                df[key] = self.__floatdict__[key]
-
-        self.df = df
-
-        return copy.deepcopy(self.df)
-
-    def get_track(self):
-        '''
-        Creates a track array with columns::
-
-            [serial datenum, latitude, longitude]
-
-        the track array is used for the interpolation of reference data along
-        the float track.
-        '''
-        self.track = track(self.__floatdict__)
-
-        return copy.deepcopy(self.track)
-
-    def get_ncep(self, verbose=True):
-        '''
-        Loads NCEP data along the float track
-        '''
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-
-        self.NCEP, self.__NCEPweights__ = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
-        
-        return copy.deepcopy(self.NCEP)
-
-    def get_woa(self, verbose=True):
-        '''
-        Loads WOA data along the float track
-        '''
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-        
-        self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path, verbose=verbose)
-
-        return copy.deepcopy(self.WOA)
-
-    def calc_gains(self, ref='NCEP', zlim=25., verbose=True):
-        '''
-        Calculate gain values using NCEP or WOA reference data. Uses function
-        calc_gain(). 
-        '''
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-
-        if ref == 'NCEP':
-            # check if reference data is already calculated
-            if not hasattr(self, 'NCEP'):
-                self.get_ncep(verbose=verbose)
-
-            pH2O = unit.pH2O(util.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
-
-            common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
-
-            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
-            self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX, verbose=verbose)
-            self.gains = self.__NCEPgains__
-
-        if ref == 'WOA':
-            # check if reference data is already calculated
-            if not hasattr(self, 'WOA'):
-                self.get_woa(verbose=verbose)
-
-            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
-            self.gains = self.__WOAgains__
-        
-        return copy.deepcopy(self.gains)
-
-    def calc_fixed_error(self, fix_err=10):
-
-        self.DOXY_ADJUSTED_ERROR = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err)
-        self.__floatdict__['DOXY_ADJUSTED_ERROR'] = self.DOXY_ADJUSTED_ERROR
-
-        return copy.deepcopy(self.DOXY_ADJUSTED_ERROR)
-
-    def plot(self, kind, **kwargs):
-
-        if kind == 'gain':
-            ref = kwargs['ref']
-            if ref == 'NCEP':
-                g = fplt.gainplot(self.SDN, self.__NCEPfloatref__[:,2], self.NCEP_PPOX, self.__NCEPgains__, ref)
-            elif ref == 'WOA':
-                g = fplt.gainplot(self.SDN, self.__WOAfloatref__[:,2], self.__WOAref__, self.__WOAgains__, ref)
-            else:
-                raise ValueError('Invalid input for keyword argument "ref"')
-
-        elif kind == 'cscatter':
-            var = kwargs.pop('varname')
-
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
-
-            g = fplt.var_cscatter(self.df, varname=var, **kwargs)
-
-        elif kind == 'profiles':
-            varlist = kwargs.pop('varlist')
-
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
-
-            g = fplt.profiles(self.df, varlist=varlist, **kwargs)
-
-        elif kind == 'qcprofiles':
-            varlist = kwargs.pop('varlist')
-
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
-
-            g = fplt.qc_profiles(self.df, varlist=varlist, **kwargs)
-        
-        elif kind == 'map':
-
-            lat  = self.__floatdict__['LATITUDE']
-            lon  = self.__floatdict__['LONGITUDE']
-            time = self.__floatdict__['SDN']
-
-            g = fplt.map(lat, lon, time, **kwargs)
-
-        else:
-            raise ValueError('Invalid input for keyword argument "kind"')
-
-        return g
-
-
-    def describe(self):
-        '''
-        Describe the dataframe of data stored in the sprof object.
-        '''
-
-        if not hasattr(self, 'df'):
-            self.to_dataframe()
-        
-        print('Data for synthetic profile file for float {}'.format(self.WMO))
-
-        sys.stdout.write('Variables:\n')
-        for k in self.__floatdict__.keys():
-            sys.stdout.write('{}\n'.format(k))
-        sys.stdout.write('\n')
-
-    def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
-        '''
-        Add independent data in order to easily plot and compare.
-
-        Args:
-            date (optional, str, float, or date):
-                Date as a string ('YYYY-MM-DD'), serial datenumber, or python
-                date object. 
-            data_dict(optional, dict): 
-                Dictionary containing variables to be added, key names should
-                match the naming convention to Argo variables
-            label (optional, str):
-                Label or name of the dataset being added, important when adding
-                more than one source of independent data
-            **kwargs:
-                Argo variable names and their values, essentailly the same as
-                inputting a dictionary without having to actually build one
-
-        Returns:
-            None
-        
-        Example::
-            syn = sprof(wmo_number)
-            df = pd.read_csv('my_winkler_data.csv')
-
-            syn.add_independent_data(
-                date='2020-10-04', # metadata arguments, optional, if no date matches to first profile
-                label='Winkler' # label to classify the data - for if you have more than one source
-                PRES=df.pressure, # data arguments, match naming to Argo variables
-                DOXY=df.dissolved_oxygen,
-                LATITUDE=df.lat, LONGITUDE=df.lon, # again, optional
-            )
-
-            data = dict(PRES=df.PRES, DOXY=df.DOXY)
-            syn.add_independent_data(data_dict=data, date='2020-10-04')
-        '''
-
-        if type(date) is str:
-            date = mdates.datestr2num(date)
-        if type(date) is datetime.datetime:
-            date = mdates.date2num(date)
-
-        meta_dict = dict(date=date)
-        if lat is None:
-            lat = np.nan
-        if lon is None:
-            lon = np.nan
-        meta_dict['lat'] = lat
-        meta_dict['lon'] = lon
-
-        if data_dict is None:
-            data_dict = dict(**kwargs)
-        elif data_dict is not None and len(kwargs) > 0:
-            # apppend kwargs to dict
-            for k in kwargs.keys():
-                data_dict[k] = kwargs[k]
-
-        # default label value        
-        if label is None:
-            label = ' '
-        # if there isn't already independent data, make a dict for it
-        if not hasattr(self, '__indepdict__'):
-            self.__indepdict__ = {label:data_dict}
-            self.__indepmeta__ = {label:meta_dict}
-        # if there is one already, append to it
-        else:
-            self.__indepdict__[label] = data_dict
-            self.__indepmeta__[label] = meta_dict
-
-    def compare_independent_data(self, fmt='*', **kwargs):
-        '''
-        Plot the independent data overtop of the nearest profile in time
-        '''
-
-        if not hasattr(self, 'df'):
-            self.df = self.to_dataframe()
-
-        plot_dict = copy.deepcopy(self.__indepdict__)
-        meta_dict = copy.deepcopy(self.__indepmeta__)
-
-        var_keys = []
-        for label in plot_dict.keys():
-            var_keys = var_keys + list(plot_dict[label].keys())
-        var_keys = list(set(var_keys))
-        var_keys.remove('PRES')
-
-        meta_keys = []
-        for label in meta_dict.keys():
-            meta_keys = meta_keys + list(meta_dict[label].keys())
-        meta_keys = set(meta_keys)
-
-        meta_data_string = ''
-        cyc = 1
-        for label in meta_dict.keys():
-            if label == ' ':
-                label = 'Observation'
-
-            if meta_dict[label]['date'] is None:
-                cyc = 1
-                dstr = 'N/A'
-            else:
-                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
-                dstr = mdates.num2date(meta_dict[label]['date']).strftime('%b %d, %Y')
-
-            meta_data_string = meta_data_string + '{} date: {}\n'.format(label, dstr)
-        meta_data_string = meta_data_string + 'Argo profile #{} date: {}'.format(cyc, mdates.num2date(self.SDN[self.CYCLE == cyc][0]).strftime('%b %d, %Y'))
-
-        map_num = 0
-        if 'lat' in meta_keys and 'lon' in meta_keys:
-            map_num = 1 # change to 1 later, just broken right now
-        
-        nvar = len(set(var_keys))
-        fig = plt.figure()
-        ax_list = [fig.add_subplot(1, nvar+map_num, n+1) for n in range(nvar)]
-        axes_dict = {v:ax for v, ax in zip(var_keys, ax_list)}
-        if map_num > 0:
-            ax_list.append(fig.add_subplot(1, nvar+map_num, nvar+1, projection=ccrs.PlateCarree()))
-        
-        ccount = 0
-        fcol = sns.color_palette('colorblind')[0]
-        clist = sns.color_palette('colorblind')[1:]
-        
-        for label in plot_dict.keys():
-            pres = plot_dict[label].pop('PRES')
-
-            if meta_dict[label]['date'] is None:
-                cyc = 1
-            else:
-                cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
-
-            varlist = list(plot_dict[label].keys())
-
-            for v in varlist:
-                fplt.profiles(self.df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
-                axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
-            
-            ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
-            ccount += 1
-
-        ccount = 0
-        if map_num > 0:
-            c = []
-            mx = ax_list[-1]
-            dist_str = ''
-            for label in meta_dict.keys():
-                if meta_dict[label]['date'] is None:
-                    cyc = 1
-                else:
-                    cyc = util.cycle_from_time(meta_dict[label]['date'], self.SDN, self.CYCLE)
-                c1 = (meta_dict[label]['lat'], meta_dict[label]['lon'])
-                c2 = (np.nanmean(self.LATITUDE[self.CYCLE == cyc]), np.nanmean(self.LONGITUDE[self.CYCLE == cyc]))
-                c.append(c1)
-                c.append(c2)
-                mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label, color=clist[ccount])
-                dist_str = dist_str + '\n{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
-                ccount += 1
-            
-                mx.plot(c2[1], c2[0], 'o', color=fcol, label=None, transform=ccrs.PlateCarree())
-            mx.plot(np.nan, np.nan, 'o', color=fcol, label='Float {}'.format(self.WMO))
-
-            c = np.array(c)
-            minlon, maxlon = np.nanmin(c[:,1]), np.nanmax(c[:,1])
-            minlat, maxlat = np.nanmin(c[:,0]), np.nanmax(c[:,0])
-
-            extent = [minlon, maxlon, minlat, maxlat]
-            for i in range(len(extent)):
-                if extent[i] < 0 and i % 2 == 0:
-                    extent[i] = 1.1*extent[i]
-                elif extent[i] < 0 and i % 2 != 0:
-                    extent[i] = 0.9*extent[i]
-                elif extent[i] > 0 and i % 2 == 0:
-                    extent[i] = 0.9*extent[i]
-                elif extent[i] > 0 and i % 2 != 0:
-                    extent[i] = 1.1*extent[i]
-            
-
-            extent[2] = extent[2] - 6
-            extent[3] = extent[3] + 6
-
-            mx.set_extent(extent, crs=ccrs.PlateCarree())
-            mx.legend(loc=4, bbox_to_anchor=(1.05, 1.0), fontsize=8)
-            mx.add_feature(cfeature.COASTLINE)
-            mx.add_feature(cfeature.BORDERS)
-            mx.add_feature(cfeature.OCEAN)
-            mx.add_feature(cfeature.LAND)
-            mx.add_feature(cfeature.RIVERS)
-
-            anc = AnchoredText('Distance between obs and float: ' + dist_str,
-                loc=1, frameon=True, prop=dict(size=8))
-            mx.add_artist(anc)
-        
-        if map_num == 0 and len(ax_list) > 1:
-            for ax in ax_list[1:]:
-                ax.set_title('')
-                ax.set_ylabel('')
-                ax.set_yticklabels([])
-        elif map_num == 1 and len(ax_list) > 2:
-            for ax in ax_list[1:-1]:
-                ax.set_title('')
-                ax.set_ylabel('')
-                ax.set_yticklabels([])
-
-        ax_list[0].legend(loc=2, fontsize=10)
-
-        anc = AnchoredText(meta_data_string,
-                loc=4, frameon=True, prop=dict(size=8))
-        ax_list[0].add_artist(anc)
-
-        fig.set_size_inches(10,6)
-
-        return fig, ax_list
 
 class profiles:
 
@@ -1044,7 +441,7 @@ def organize_files(files):
 
 # def load_traj(local_path, wmo):
 
-#     return trajData, trajFile
+    # return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
@@ -1148,7 +545,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     qc_keys = [s for s in floatData.keys() if '_QC' in s and 'PROFILE' not in s]
     for qc in qc_keys:
-        floatData[qc] = util.read_qc(floatData[qc])
+        floatData[qc] = io.read_qc(floatData[qc])
 
     if grid:
         ftype = ''
@@ -1280,19 +677,19 @@ def load_profiles(files, verbose=False):
 
         # load in variables that will be in every file
         floatData['PRES']           = np.append(floatData['PRES'], cc.variables['PRES'][:].data.flatten())
-        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], util.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
+        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], io.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
         floatData['TEMP']           = np.append(floatData['TEMP'], cc.variables['TEMP'][:].data.flatten())
-        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], util.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
+        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], io.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
         floatData['PSAL']           = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
-        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], util.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
+        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], io.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
         floatData['SDN']            = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))
-        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], util.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
+        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], io.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
         floatData['SDN_GRID']       = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))]))
         floatData['LATITUDE']       = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
         floatData['LATITUDE_GRID']  = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
         floatData['LONGITUDE']      = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())
         floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
-        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], util.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
+        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], io.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
 
         print(common_variables)
         # loop through other possible BGC variables
@@ -1308,7 +705,7 @@ def load_profiles(files, verbose=False):
         for v in floatData.keys():
             v_qc = v + '_QC'
             if v_qc in common_variables:
-                floatData[v_qc] = np.append(floatData[v_qc], util.read_qc(nc.variables[v_qc][:].data.flatten()))
+                floatData[v_qc] = np.append(floatData[v_qc], io.read_qc(nc.variables[v_qc][:].data.flatten()))
 
         if 'DOXY' in floatData.keys():
             floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
@@ -1797,7 +1194,7 @@ def oxy_a(dt, tau):
 # hard code the LUT table value so I don't have to 
 # ship the text file with the package
 ### is this the right/ok way to do this??? feels wrong ###
-from .lut import lut as lut_data
+from ..lut import lut as lut_data
 
 def correct_response_time(t, DO, T, thickness):
 
@@ -1865,10 +1262,65 @@ def get_optode_type(wmo):
     local_file = Path(ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
     nc = Dataset(local_file)
 
-    doxy_index = util.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
+    doxy_index = io.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
     if doxy_index.shape[0] == 0:
         return 'NO_OPTODE_FOUND'
     else:
-        optode_type = util.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
+        optode_type = io.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
         return optode_type
 
+def profile_qc(flags):
+    '''
+    Return overall profile quality flag via the following from the Argo User
+    Manual (v 3.41):
+
+    3.2.2 Reference table 2a: overall profile quality flag
+    https://vocab.nerc.ac.uk/collection/RP2/current
+    N is defined as the percentage of levels with good data where:
+    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
+    - QC flag values of 9 (missing) or " " are NOT USED in the computation
+    All other QC flag values are BAD data
+    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
+    <PARAM>_QC otherwise.
+    n Meaning
+    "" No QC performed
+    A N = 100%; All profile levels contain good data.
+    B 75% <= N < 100%
+    C 50% <= N < 75%
+    D 25% <= N < 50%
+    E 0% < N < 25%
+    F N = 0%; No profile levels have good data.
+
+    Args:
+        - flags (pandas.Series): quality flags for a given profile
+    Returns:
+        - grade (str): profile grade based on description above
+    '''
+    
+    n_good = flags.isin([1, 2, 5, 8]).sum()
+    n_exclude = flags.isin([9]).sum()
+
+    pct = 100*n_good/(flags.size - n_exclude)
+
+    grade = np.nan
+
+    if flags.isin([0]).sum() >= flags.size - n_exclude:
+        grade = ''
+
+    if pct == 100:
+        grade = 'A'
+    elif pct >= 75:
+        grade = 'B'
+    elif pct >= 50:
+        grade = 'C'
+    elif pct >= 25:
+        grade = 'D'
+    elif pct > 0:
+        grade = 'E'
+    elif pct == 0:
+        grade = 'F'
+
+    if not type(grade) == str and np.isnan(grade):
+        raise ValueError('No grade assigned, check input value of `flags`')
+
+    return grade
