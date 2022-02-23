@@ -80,7 +80,7 @@ def string_to_array(s, dim, encode='utf-8'):
 
     return str_array
 
-def copy_netcdf_except(infile, outfile, exclude_vars=[], exclude_dims=[]):
+def copy_netcdf(infile, outfile, exclude_vars=[], exclude_dims=[]):
     '''
     Copy data from a netCDF file with the exception of dimension and variable
     names listed in exclude_vars and exclude_dims.
@@ -123,22 +123,18 @@ def iterate_dimension(infile, outfile, iterated_dimension, n=1):
             dst[name].setncatts(src[name].__dict__)
             if iterated_dimension in variable.dimensions:
                 # add FillValues along the added dimesion size
-                arr = np.full(
-                    variable.shape,
-                    variable._FillValue,    
-                    dtype=variable.datatype
-                )
+                arr = create_fillvalue_array(variable)
                 # get location of iterated dimension
                 loc = variable.dimensions.index(iterated_dimension)
                 n_index = len(variable.dimensions)
-                refill_array(loc, n_index, arr, src[name][:])
+                dst[name][:] = refill_array(loc, n_index, arr, src[name][:])
             else:
                 # fill the variable with the same data as before
                 dst[name][:] = src[name][:]
 
     return Dataset(outfile, 'a')
 
-def append_variable_to_file(fn, *args):
+def append_variable(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
     input fn. The input structure for each variable should be a dictionary with
@@ -175,3 +171,16 @@ def append_variable_to_file(fn, *args):
         nc[name][:] = data
 
     return nc
+
+def check_for_empty_variables(fn, varlist):
+    '''
+    Return true if all variables in `varlist` are empty
+    '''
+
+    nc = Dataset(fn)
+
+    empty = True
+    for v in varlist:
+        empty = empty & all(nc[v][:].data.flat == nc[v]._FillValue)
+
+    return empty
