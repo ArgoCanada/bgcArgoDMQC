@@ -374,7 +374,7 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
         varlist = list(plot_dict[label].keys())
 
         for v in varlist:
-            variable_profiles(df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
+            profiles(df, varlist=[v], axes=axes_dict[v], Ncycle=cyc)
             axes_dict[v].plot(plot_dict[label][v], pres, fmt, label=None, color=clist[ccount])
         
         ax_list[0].plot(np.nan, np.nan, fmt, color=clist[ccount], label=label)
