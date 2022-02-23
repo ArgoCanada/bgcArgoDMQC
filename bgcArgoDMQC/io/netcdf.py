@@ -171,6 +171,16 @@ def append_variable(fn, *args):
 
     return nc
 
+def update_history(nc, dct):
+    '''
+    Update HISTORY_<PARAM> values in an Argo netCDF file
+    '''
+
+    hix = nc.dimensions['N_HISTORY'].size
+    for name, value in dct.items():
+        for i in range(nc.dimensions['N_PROF'].size):
+            nc[name][hix,i,:] = string_to_array(value, nc.dimensions[nc[name].dimensions[-1]])
+
 def check_for_empty_variables(fn, varlist):
     '''
     Return true if all variables in `varlist` are empty
