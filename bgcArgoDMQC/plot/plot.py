@@ -256,7 +256,7 @@ def variable_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES',
 
     return g
 
-def qcflag_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
+def qc_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=None, ylabel=None, axes=None, ylim=None, **kwargs):
 
     if xlabels is None:
         xlabels = [style.var_units[v] for v in varlist]
