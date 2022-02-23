@@ -73,9 +73,8 @@ def string_to_array(s, dim, encode='utf-8'):
         - 2021-07-05: initial commit
     '''
 
-    N = len(s)
-    M = dim.size - N
-    full_string = s + M*''
+    M = dim.size - len(s)
+    full_string = s + M*' '
     str_array = np.array([f'{c}'.encode(encode) for c in full_string])
 
     return str_array
