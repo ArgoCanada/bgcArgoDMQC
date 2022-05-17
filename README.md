@@ -29,6 +29,19 @@ pip install bgcArgoDMQC
 
 ## setup
 
+This package uses locally saved data, as it is designed for QC operators that will likely want to manipulate or export files. This includes accessing WOA and NCEP data. Therefore, the user must tell the package where to look for data. This can either be dont inline using the function `bgc.set_dirs(...)`, or permanently using the following code:
+
+```python
+from bgcArgoDMQC.configure import configure
+
+argo_dir = '/path/to/my/argo/data/'
+woa_dir  = '/path/to/woa/data/'
+ncep_dir = '/my/ncep/path/
+
+configure(argo_path=argo_dir, woa_path=woa_dir, ncep_path=ncep_dir)
+```
+
+Other items like `operator_name` and `operator_orcid` can be set in this matter as well to a `.config` file saved where the package exists on your machine. All required Argo and reference data can be downloaded using the `io` component of the package, see documentation for more details. All data paths should be structured as they are found. For example, the Argo path should follow the dac structure, so in this example, a profile might be found in `'/path/to/my/argo/data/dac/meds/4900869/profiles/BR4900869_024.nc'`.
 ## general description
 
 A `python` library of functions for quality controlling dissolved oxygen data.
@@ -41,18 +54,48 @@ calculate oxygen gains
 
 ## basic functionality
 
-## version history
+This section will show the two main components of DOXY DMQC, visually inspecting the data, and calculating the gain relative to a reference dataset. There are many more visualizations that are possible, refer to docs for full plotting reference. 
 
-0.1: April 20, 2020 - Initial creation
+```python
+# import package
+import bgcArgoDMQC as bgc
 
-0.2: May 13, 2020 - Major change to how end user would use module, change to more object-oriented, create argo class
+# define a WMO number you want to look at
+wmo = 4900869
+# load into a synthetic profile object
+syn = bgc.sprof(wmo)
+# look at the current state of QC flags for T, S, and DO
+g1 = syn.plot(kind='qcprofiles', varlist=['TEMP', 'PSAL', 'DOXY'])
+```
 
-0.2.1: June 23, 2020 - pandas is now required, makes reading of global index significantly easier and more efficient
+![png](README_files/README-code_3_1.png)
 
-0.2.2: August 28, 2020 - remove pylab dependency (is part of matplotlib), built and uploaded to PyPI, build conda-forge recipe
+We can see above that most T/S points are good, with a few obvious outliers in red. THe oxygen data also look all good. This is an old float, but for current floats the QC flag for unadjusted oxygen should be 3 (probably bad). 
 
-0.2.3 - 0.2.6: September 3, 2020 - updates to pass all checks on conda-forge pull request, updated on PyPI as well
+Since this is an older float, there are no in-air measurements made by the optode. Therefore we will calcualte the gain by comparing surface values to WOA data.
 
-0.2.7 - 0.2.8: September 29, 2020 - re-spun for PyPI and PR to conda-feedstock
+```python
+# calculate the gains
+gains = syn.calc_gains(ref='WOA')
+``` 
 
-0.2.9: November 9, 2020 - name change to bgcArgoDMQC, various other updates over the past month
+The `ref` keyword argument sets the reference dataset. In this case we set it to WOA data. By default `ref` is set to `'NCEP'`, but in this case that would return all `NaN` values since there is no in-air data for this float.
+
+Visualize the gains in a single line:
+
+```python
+# plot gains over time, show source data
+g3 = syn.plot('gain', ref='WOA')
+```
+    
+![png](README_files/README-code_9_0.png)
+
+I find this plot particularly useful, as sometimes it is a good indicator to go back and inspect certain profiles. We see a couple large spikes in the suface float data. Are those spikes real, or should we go back and have a closer look at those profiles? This could change our mean gain a little, and perhaps we would flag some data as bad that we didn't notice before.
+
+
+## future developments
+
+- improved netcdf exporting
+- gain calculation with drift, surface carryover for in-air gains
+- expanded capabilities for DMQC on other BGC variables
+- data access via internet (through a package like argopy or argopandas)
