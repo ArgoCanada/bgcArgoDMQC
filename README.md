@@ -5,6 +5,16 @@
 [![Documentation Status](https://readthedocs.org/projects/bgcargodmqc/badge/?version=latest)](https://bgcargodmqc.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC)
 
+## general description
+
+A `python` library of functions for quality controlling dissolved oxygen data.
+Heavily based on the [SOCCOM BGC Argo QC methods](https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING)
+program in `matlab`, uses either
+[NCEP](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html)
+or [World Ocean Atlas](https://www.nodc.noaa.gov/OC5/woa18/) data to
+calculate oxygen gains
+([*Johnson et al. 2015*](https://doi.org/10.1175/JTECH-D-15-0101.1)).
+
 ## installation
 
 The recommended install is through the conda-forge channel, via the command:
@@ -42,15 +52,6 @@ configure(argo_path=argo_dir, woa_path=woa_dir, ncep_path=ncep_dir)
 ```
 
 Other items like `operator_name` and `operator_orcid` can be set in this matter as well to a `.config` file saved where the package exists on your machine. All required Argo and reference data can be downloaded using the `io` component of the package, see documentation for more details. All data paths should be structured as they are found. For example, the Argo path should follow the dac structure, so in this example, a profile might be found in `'/path/to/my/argo/data/dac/meds/4900869/profiles/BR4900869_024.nc'`.
-## general description
-
-A `python` library of functions for quality controlling dissolved oxygen data.
-Heavily based on the [SOCCOM BGC Argo QC methods](https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING)
-program in `matlab`, uses either
-[NCEP](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html)
-or [World Ocean Atlas](https://www.nodc.noaa.gov/OC5/woa18/) data to
-calculate oxygen gains
-([*Johnson et al. 2015*](https://doi.org/10.1175/JTECH-D-15-0101.1)).
 
 ## basic functionality
 
