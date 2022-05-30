@@ -71,7 +71,7 @@ g1 = syn.plot(kind='qcprofiles', varlist=['TEMP', 'PSAL', 'DOXY'])
 
 ![png](README_files/README-code_3_1.png)
 
-We can see above that most T/S points are good, with a few obvious outliers in red. THe oxygen data also look all good. This is an old float, but for current floats the QC flag for unadjusted oxygen should be 3 (probably bad). 
+We can see above that most T/S points are good, with a few obvious outliers in red. The oxygen data also look all good. This is an old float, but for current floats the QC flag for unadjusted oxygen should be 3 (probably bad). 
 
 Since this is an older float, there are no in-air measurements made by the optode. Therefore we will calcualte the gain by comparing surface values to WOA data.
 
