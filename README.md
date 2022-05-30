@@ -39,7 +39,7 @@ pip install bgcArgoDMQC
 
 ## setup
 
-This package uses locally saved data, as it is designed for QC operators that will likely want to manipulate or export files. This includes accessing WOA and NCEP data. Therefore, the user must tell the package where to look for data. This can either be dont inline using the function `bgc.set_dirs(...)`, or permanently using the following code:
+This package uses locally saved data, as it is designed for QC operators that will likely want to manipulate or export files. This includes accessing WOA and NCEP data. Therefore, the user must tell the package where to look for data. This can either be done inline using the function `bgc.set_dirs(...)`, or permanently using the following code:
 
 ```python
 from bgcArgoDMQC.configure import configure
