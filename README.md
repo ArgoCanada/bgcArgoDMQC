@@ -39,7 +39,7 @@ pip install bgcArgoDMQC
 
 ## setup
 
-This package uses locally saved data, as it is designed for QC operators that will likely want to manipulate or export files. This includes accessing WOA and NCEP data. Therefore, the user must tell the package where to look for data. This can either be dont inline using the function `bgc.set_dirs(...)`, or permanently using the following code:
+This package uses locally saved data, as it is designed for QC operators that will likely want to manipulate or export files. This includes accessing WOA and NCEP data. Therefore, the user must tell the package where to look for data. This can either be done inline using the function `bgc.set_dirs(...)`, or permanently using the following code:
 
 ```python
 from bgcArgoDMQC.configure import configure
@@ -71,7 +71,7 @@ g1 = syn.plot(kind='qcprofiles', varlist=['TEMP', 'PSAL', 'DOXY'])
 
 ![png](README_files/README-code_3_1.png)
 
-We can see above that most T/S points are good, with a few obvious outliers in red. THe oxygen data also look all good. This is an old float, but for current floats the QC flag for unadjusted oxygen should be 3 (probably bad). 
+We can see above that most T/S points are good, with a few obvious outliers in red. The oxygen data also look all good. This is an old float, but for current floats the QC flag for unadjusted oxygen should be 3 (probably bad). 
 
 Since this is an older float, there are no in-air measurements made by the optode. Therefore we will calcualte the gain by comparing surface values to WOA data.
 
