@@ -97,12 +97,15 @@ def display_qctests(QCP, QCF):
 
         if i+1 in QCF_numbers:
             pfn = 'Failed'
+            c = '\x1b[0;0;41m'
         elif i+1 in QCP_numbers:
             pfn = 'Passed'
+            c = ''
         else:
             pfn = 'Not performed'
+            c = '\x1b[0;30;43m'
 
-        sys.stdout.write('| {:d}\t| {}\t| {} |\n'.format(i+1, pfn, t))
+        print(f'{c}| {i+1:d}\t| {pfn}\t| {t} |\x1b[0m')
 
     sys.stdout.write('---------------------------------------------------------------------------\n')
 
