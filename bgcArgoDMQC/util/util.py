@@ -105,7 +105,7 @@ def display_qctests(QCP, QCF):
             pfn = 'Not performed'
             c = '\x1b[0;30;43m'
 
-        print(f'{c}| {i+1:d}\t| {pfn}\t| {t} |\x1b[0m')
+        sys.stdout.write(f'{c}| {i+1:d}\t| {pfn}\t| {t} |\x1b[0m\n')
 
     sys.stdout.write('---------------------------------------------------------------------------\n')
 
