@@ -10,6 +10,8 @@ setuptools.setup(
     name='bgcArgoDMQC',
     version='0.2.11',
     license='The MIT License (MIT)',
+    author='Christopher Gordon',
+    maintainer='cgrdn',
     author_email='chris.gordon@dfo-mpo.gc.ca',
     description='A python library for quality control of BGC-Argo data',
     long_description=long_description,
