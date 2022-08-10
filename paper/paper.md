@@ -36,7 +36,19 @@ others. The primary function of the package is to perform DMQC on oxygen data
 via gain adjustment and visual inspection, and then to export the adjusted
 data to a delayed-mode file that complies with Argo file structure.
 
+`bgcArgoDMQC` was designed with expert Argo users in mind. For this reason,
+files must be saved locally to your machine in order to load, visualize, and
+manipulate them. If your primary goal is simply to load data for scientific
+use, there are more appropriate packages out there (see 
+[argopy](https://github.com/euroargodev/argopy), @maze:2020, 
+[argopandas](https://github.com/ArgoCanada/argopandas)).
+However, many functions contained with the `bgcArgoDMQC` package may be of use
+to the wider Argo community (ex. unit conversion, oxygen time response 
+correction, reference data access).
+
 # Setup
+
+
 
 # Using `bgcArgoDMQC`
 
