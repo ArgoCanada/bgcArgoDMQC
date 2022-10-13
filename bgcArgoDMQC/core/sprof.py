@@ -1,5 +1,10 @@
+
+import numpy as np
+import pandas as pd
+
 from .core import *
 from .. import plot
+from .. import io
 
 class sprof:
     '''
@@ -185,7 +190,6 @@ class sprof:
         Returns a pandas dataframe containing data from the synthetic oxygen
         profile file.
         '''
-        import pandas as pd
 
         df = pd.DataFrame()
         df['CYCLE']     = self.CYCLE_GRID
@@ -303,6 +307,8 @@ class sprof:
             self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
             self.gains = self.__WOAgains__
         
+        self.gain = np.nanmean(self.gains)
+        
         return copy.deepcopy(self.gains)
 
     def calc_fixed_error(self, fix_err=10):
@@ -367,6 +373,20 @@ class sprof:
         for k in self.__floatdict__.keys():
             sys.stdout.write('{}\n'.format(k))
         sys.stdout.write('\n')
+    
+    def update_field(self, field, value, where=None):
+
+        where = slice(None) if where is None else where
+        self.__floatdict__[field][where] = value
+        self.assign(self.__floatdict__)
+        self.to_dataframe()
+    
+    def export_files(self, data_mode='D', glob=None, **kwargs):
+
+        glob = 'BR*.nc' if glob is None else glob
+        r_files = (self.__Sprof__.parent / 'profiles').glob(glob)
+
+        io.export_files(self.__floatdict__, r_files, self.gain, data_mode=data_mode, **kwargs)
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''

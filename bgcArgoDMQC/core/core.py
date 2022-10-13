@@ -346,10 +346,6 @@ class profiles:
 
         return copy.deepcopy(self.DOXY_ADJUSTED_ERROR)
 
-    def reassign_flags(self):
-
-        return
-
     def assess_profile_flags(self):
 
         return
@@ -360,7 +356,7 @@ class profiles:
             self.to_dataframe()
 
         sys.stdout.write('Data for profile files for floats ')
-        for i,w in enumerate(self.df.WMO.unique()):
+        for i, w in enumerate(self.df.WMO.unique()):
             if i > 0:
                 sys.stdout.write(', ')
             sys.stdout.write('{}'.format(int(w)))
@@ -1114,75 +1110,15 @@ def range_check(key, floatdict, verbose=True):
 
     return cleandict
 
-def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10):
+def calc_fixed_doxy_adjusted_error(S, T, P, fix_err=10):
     '''
     Calculate DOXY_ADJUSTED_ERROR for fixed partial pressure of 10 mbar 
     PPOX_DOXY.
     '''
 
-    S = floatdict['PSAL']
-    T = floatdict['TEMP']
-    P = floatdict['PRES']
-
     error = unit.pO2_to_doxy(np.array(S.shape[0]*[fix_err]), S, T, P=P)
 
     return error
-
-def profile_qc(flags):
-    '''
-    Return overall profile quality flag via the following from the Argo User
-    Manual (v 3.41):
-
-    3.2.2 Reference table 2a: overall profile quality flag
-    https://vocab.nerc.ac.uk/collection/RP2/current
-    N is defined as the percentage of levels with good data where:
-    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
-    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
-    All other QC flag values are BAD data
-    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
-    <PARAM>_QC otherwise.
-    n Meaning
-    "" No QC performed
-    A N = 100%; All profile levels contain good data.
-    B 75% <= N < 100%
-    C 50% <= N < 75%
-    D 25% <= N < 50%
-    E 0% < N < 25%
-    F N = 0%; No profile levels have good data.
-
-    Args:
-        - flags (pandas.Series): quality flags for a given profile
-    Returns:
-        - grade (str): profile grade based on description above
-    '''
-    
-    n_good = flags.isin([1, 2, 5, 8]).sum()
-    n_exclude = flags.isin([9]).sum()
-
-    pct = 100*n_good/(flags.size - n_exclude)
-
-    grade = np.nan
-
-    if flags.isin([0]).sum() >= flags.size - n_exclude:
-        grade = ''
-
-    if pct == 100:
-        grade = 'A'
-    elif pct >= 75:
-        grade = 'B'
-    elif pct >= 50:
-        grade = 'C'
-    elif pct >= 25:
-        grade = 'D'
-    elif pct > 0:
-        grade = 'E'
-    elif pct == 0:
-        grade = 'F'
-
-    if not type(grade) == str and np.isnan(grade):
-        raise ValueError('No grade assigned, check input value of `flags`')
-
-    return grade
 
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)
