@@ -1,14 +1,10 @@
 /data/
 .vscode
-meds_doxy_floats.csv
-sagepy/__pycache__/
 *cpython*
 *.pyc
 *checkpoint*
-/owc_plots/
 /tmp/
 /dmqc/
-/ARVOR-asc-desc/
 .DS_Store
 .config
 admt/
