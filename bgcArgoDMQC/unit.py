@@ -240,3 +240,6 @@ def pO2_to_doxy(pO2, S, T, P=0):
     O2conc  = pO2/(xO2*(1013.25 - pH2Osat))*(Tcorr*Scorr)/np.exp(Vm*P/(R*Tk))
 
     return O2conc
+
+def oxy_saturation(doxy, psal, temp, pden, a4330=True):
+    return 100*doxy/oxy_sol(psal, temp, pden, a4330=a4330)

@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from .core import *
+from .. import unit
 from .. import plot
 from .. import io
 
@@ -378,15 +379,21 @@ class sprof:
 
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
+
+        if field == 'DOXY' or field == 'DOXY_QC':
+            optode_flag = get_optode_type(int(self.__floatdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+            self.__floatdict__['O2Sat'] = unit.oxy_saturation(self.__floatdict__['DOXY'], self.__floatdict__['PSAL'], self.__floatdict__['TEMP'], self.__floatdict__['PDEN'], a4330=optode_flag)
+            self.__floatdict__['O2Sat_QC'] = util.get_worst_flag(self.__floatdict__['TEMP_QC'], self.__floatdict__['PSAL_QC'], self.__floatdict__['DOXY_QC'])
+
         self.assign(self.__floatdict__)
         self.to_dataframe()
     
-    def export_files(self, data_mode='D', glob=None, **kwargs):
+    def export_files(self, data_mode='D', glob=None):
 
         glob = 'BR*.nc' if glob is None else glob
         r_files = (self.__Sprof__.parent / 'profiles').glob(glob)
 
-        io.export_files(self.__floatdict__, r_files, self.gain, data_mode=data_mode, **kwargs)
+        io.export_files(self.__floatdict__, r_files, self.gain, data_mode=data_mode)
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
@@ -438,12 +445,12 @@ class sprof:
         meta_dict['lat'] = lat
         meta_dict['lon'] = lon
 
-        if data_dict is None:
-            data_dict = dict(**kwargs)
-        elif data_dict is not None and len(kwargs) > 0:
+        if data_dict is not None and len(kwargs) > 0:
             # apppend kwargs to dict
             for k in kwargs.keys():
-                data_dict[k] = kwargs[k]
+                data_dict[k] = kwargs.pop(k)
+        data_dict = dict(**kwargs) if data_dict is None else data_dict
+        
 
         # default label value        
         if label is None:

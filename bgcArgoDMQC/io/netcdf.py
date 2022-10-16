@@ -30,23 +30,6 @@ def get_parameter_index(parameter_array, parameter):
 
     return index
 
-def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
-    '''
-    Args:
-        arg: description
-
-    Returns:
-        out: description
-
-    Author:
-        Christopher Gordon
-        Fisheries and Oceans Canada
-        chris.gordon@dfo-mpo.gc.ca
-
-    Change log:
-        - 2021-07-05: initial commit
-    '''
-
 def create_fillvalue_array(nc_var):
 
     new_var = np.full(
@@ -253,18 +236,14 @@ def profile_qc(flags):
 
     return grade
 
-def export_files(fdict, r_files, gain, comment=None, equation=None, coeff=None):
+def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=None, coeff=None):
 
     config = read_config()
     dmqc_date = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
 
     for fn in r_files:
-        # index for this cycle
-        cycle = int(fn.as_posix().split('_')[-1].split('.')[0])
-        ix = fdict['CYCLE_GRID'] == cycle
-
         # define path to file, make directory if it does not exist
-        D_file = Path(fn.as_posix().replace('BR', 'BD').\
+        D_file = Path(fn.as_posix().replace('BR', f'B{data_mode}').\
             replace('dac/meds/', 'dac/meds/D/'))
         if not D_file.parent.exists():
             D_file.parent.mkdir(parents=True)
@@ -273,14 +252,19 @@ def export_files(fdict, r_files, gain, comment=None, equation=None, coeff=None):
         D_nc = copy_netcdf(fn, D_file)
         last_calib = D_nc.dimensions['N_CALIB'].size-1
 
+        # index for this cycle
+        cycle = int(fn.as_posix().split('_')[-1].split('.')[0])
+        ix = fdict['CYCLE_GRID'] == cycle
+        N = D_nc.dimensions['N_LEVELS'].size
+
         # find index for DOXY along PARAMETER
         doxy_index = [read_ncstr(a) for a in D_nc['PARAMETER'][:].data[0,0,:,:]].index('DOXY')
 
         # fill in string info
-        temp_comment  = f'Oxygen gain calculated following Johnson et al. 2015, doi:10.1175/JTECH-D-15-0101.1, using comparison between float and WOA data. Adjustment applied by {config["operator_name"]} ({config["affiliation"]}, orcid: {config["orcid"]})'
+        temp_comment  = f'Oxygen gain calculated following Johnson et al. 2015, doi:10.1175/JTECH-D-15-0101.1, using comparison between float and WOA data. Adjustment applied by {config["operator"]} ({config["affiliation"]}, orcid: {config["orcid"]})'
         comment  = temp_comment if comment is None else comment
         equation = 'DOXY_ADJUSTED = G*DOXY' if equation is None else equation
-        coeff    = 'G = {}'.format(gain) if coeff is None else coeff
+        coeff    = f'G = {gain:f}' if coeff is None else coeff
  
         # apply info to all profiles in file (not sure if this would ever not apply 
         # take caution when N_PROF > 1)
@@ -289,10 +273,10 @@ def export_files(fdict, r_files, gain, comment=None, equation=None, coeff=None):
             D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,doxy_index,:] = string_to_array(equation, D_nc.dimensions['STRING256'])
             D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,doxy_index,:] =  string_to_array(coeff, D_nc.dimensions['STRING256'])
 
-        D_nc['DOXY_QC'][:] = fdict['DOXY_QC'][ix]
-        D_nc['DOXY_ADJUSTED'][:] = fdict['DOXY_ADJUSTED'][ix]
-        D_nc['DOXY_ADJUSTED_QC'][:] = fdict['DOXY_ADJUSTED_QC'][ix]
-        D_nc['DOXY_ADJUSTED_ERROR'][:] = fdict['DOXY_ADJUSTED_ERROR'][ix]
+        D_nc['DOXY_QC'][:] = fdict['DOXY_QC'][ix][:N]
+        D_nc['DOXY_ADJUSTED'][:] = fdict['DOXY_ADJUSTED'][ix][:N]
+        D_nc['DOXY_ADJUSTED_QC'][:] = fdict['DOXY_ADJUSTED_QC'][ix][:N]
+        D_nc['DOXY_ADJUSTED_ERROR'][:] = fdict['DOXY_ADJUSTED_ERROR'][ix][:N]
 
         for i in range(D_nc.dimensions['N_PROF'].size):
             flags = read_qc(D_nc['DOXY_ADJUSTED_QC'][:].data[i,:])
@@ -312,9 +296,8 @@ def export_files(fdict, r_files, gain, comment=None, equation=None, coeff=None):
             HISTORY_DATE=dmqc_date,
             HISTORY_ACTION='O2QC'
         )
-
         D_nc['DATE_UPDATE'][:] = string_to_array(dmqc_date, D_nc.dimensions['DATE_TIME'])
 
         update_history(D_nc, history_dict)
-
+        sys.stdout.write('done\n')
         D_nc.close()
