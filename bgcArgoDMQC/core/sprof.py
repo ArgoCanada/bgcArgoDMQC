@@ -32,7 +32,7 @@ class sprof:
 
     def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
+        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
@@ -95,6 +95,12 @@ class sprof:
             self.CDOM_QC   = floatdict['CDOM_QC']
         
         # adjusted variables
+        if 'TEMP_ADJUSTED' in floatdict.keys():
+            self.TEMP_ADJUSTED      = floatdict['TEMP_ADJUSTED']
+            self.TEMP_ADJUSTED_QC   = floatdict['TEMP_ADJUSTED_QC']
+        if 'PSAL_ADJUSTED' in floatdict.keys():
+            self.PSAL_ADJUSTED      = floatdict['PSAL_ADJUSTED']
+            self.PSAL_ADJUSTED_QC   = floatdict['PSAL_ADJUSTED_QC']
         if 'DOXY_ADJUSTED' in floatdict.keys():
             self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
             self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
@@ -387,6 +393,10 @@ class sprof:
 
         self.assign(self.__floatdict__)
         self.to_dataframe()
+
+    def set_fillvalue(self, field, where=None):
+
+        self.update_field(field, self.__fillvalue__[field], where)
     
     def export_files(self, data_mode='D', glob=None):
 
