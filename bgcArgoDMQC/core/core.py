@@ -309,7 +309,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     else:
         floatData['inair']          = False
 
-    return floatData, Sprof, BRtraj, meta
+    fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
+
+    return floatData, Sprof, BRtraj, meta, fillvalue
 
 def load_profiles(files, verbose=False):
 
