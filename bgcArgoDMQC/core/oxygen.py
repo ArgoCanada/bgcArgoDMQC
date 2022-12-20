@@ -185,3 +185,14 @@ def lookup_tau(thickness, T):
     tau_T = np.squeeze(f_thickness(T, thickness))[0,:]
 
     return tau_T
+
+def estimate_boundary_layer(vel):
+    """
+    Estimate boundary layer thickness based on platform velocity. Follows eq.
+    17 from Bittig et al. (2018).
+    """
+
+    if vel <= 0.095:
+        return 210 - (110/0.095)*np.abs(vel)
+    else:
+        return 20 + (80/0.905)*(1 - np.abs(vel))
