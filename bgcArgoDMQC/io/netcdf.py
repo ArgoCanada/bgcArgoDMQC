@@ -271,7 +271,7 @@ def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=Non
         for i in range(D_nc.dimensions['N_PROF'].size):
             D_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,doxy_index,:] = string_to_array(comment, D_nc.dimensions['STRING256'])
             D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,doxy_index,:] = string_to_array(equation, D_nc.dimensions['STRING256'])
-            D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,doxy_index,:] =  string_to_array(coeff, D_nc.dimensions['STRING256'])
+            D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,doxy_index,:] = string_to_array(coeff, D_nc.dimensions['STRING256'])
 
         D_nc['DOXY_QC'][:] = fdict['DOXY_QC'][ix][:N]
         D_nc['DOXY_ADJUSTED'][:] = fdict['DOXY_ADJUSTED'][ix][:N]
@@ -287,6 +287,18 @@ def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=Non
         for i in range(D_nc.dimensions['N_PROF'].size):
             data_state_indicator[i,:] = string_to_array('2C+', D_nc.dimensions['STRING4'])
         D_nc['DATA_STATE_INDICATOR'][:] = data_state_indicator
+
+        nc_data_mode = create_fillvalue_array(D_nc['DATA_MODE'])
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            nc_data_mode[i] = data_mode
+        D_nc['DATA_MODE'][:] = nc_data_mode
+
+        parameter_data_mode = create_fillvalue_array(D_nc['PARAMETER_DATA_MODE'])
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            tmp_pdm = D_nc['PARAMETER_DATA_MODE'][:].data
+            tmp_pdm[i, get_parameter_index(D_nc['PARAMETER'][:][i,0,:,:].data, 'DOXY')] = data_mode
+            parameter_data_mode[i,:] = tmp_pdm
+        D_nc['PARAMETER_DATA_MODE'][:] = parameter_data_mode
 
         history_dict = dict(
             HISTORY_INSTITUTION='BI',
