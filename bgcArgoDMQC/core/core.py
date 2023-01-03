@@ -429,7 +429,7 @@ def load_profiles(files, verbose=False):
 
         if 'DOXY' in floatData.keys():
             floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
-            floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+            floatData['O2Sat_QC'] = copy.deepcopy(floatData['DOXY_QC'])
         
     return floatData
 
