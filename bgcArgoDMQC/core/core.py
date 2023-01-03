@@ -255,6 +255,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # number of profile cycles
     M = Sprof_nc.dimensions['N_LEVELS'].size
     N = Sprof_nc.dimensions['N_PROF'].size
+
+    # fillvalue dict
+    fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
     
     floatData = read_all_variables(Sprof_nc)
     floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
@@ -282,8 +285,8 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         optode_flag = get_optode_type(int(wmo)) == 'AANDERAA_OPTODE_4330'
         floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], floatData['PDEN'], a4330=optode_flag)
         # match the fill values
-        ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
-        floatData['O2Sat'][ix] = 99999.
+        ix = np.logical_or(np.logical_or(floatData['PSAL'] == fillvalue['PSAL'], floatData['TEMP'] == fillvalue['TEMP']), floatData['DOXY'] == fillvalue['DOXY'])
+        floatData['O2Sat'][ix] = fillvalue['DOXY']
         # get the worst QC flag from each quantity that goes into the calculation
         floatData['O2Sat_QC'] = copy.deepcopy(floatData['DOXY_QC'])
 
@@ -309,7 +312,6 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     else:
         floatData['inair']          = False
 
-    fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
