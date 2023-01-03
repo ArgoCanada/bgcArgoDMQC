@@ -386,10 +386,11 @@ class sprof:
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
 
-        if field == 'DOXY' or field == 'DOXY_QC':
+        if field in ['DOXY', 'TEMP', 'PSAL']:
             optode_flag = get_optode_type(int(self.__floatdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
             self.__floatdict__['O2Sat'] = unit.oxy_saturation(self.__floatdict__['DOXY'], self.__floatdict__['PSAL'], self.__floatdict__['TEMP'], self.__floatdict__['PDEN'], a4330=optode_flag)
-            self.__floatdict__['O2Sat_QC'] = util.get_worst_flag(self.__floatdict__['TEMP_QC'], self.__floatdict__['PSAL_QC'], self.__floatdict__['DOXY_QC'])
+        elif field == 'DOXY_QC':
+            self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
 
         self.assign(self.__floatdict__)
         self.to_dataframe()

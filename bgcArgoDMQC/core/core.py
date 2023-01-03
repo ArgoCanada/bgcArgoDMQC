@@ -285,7 +285,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
         floatData['O2Sat'][ix] = 99999.
         # get the worst QC flag from each quantity that goes into the calculation
-        floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+        floatData['O2Sat_QC'] = copy.deepcopy(floatData['DOXY_QC'])
 
     if BRtraj_flag:
         if 'PPOX_DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
