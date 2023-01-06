@@ -1,13 +1,9 @@
 import sys
 import copy
 from pathlib import Path
-import fnmatch
 
 import numpy as np
-from scipy.interpolate import interp1d, interp2d
-
 import matplotlib.dates as mdates
-from matplotlib.offsetbox import AnchoredText
 
 import gsw
 from netCDF4 import Dataset
@@ -15,7 +11,6 @@ from netCDF4 import Dataset
 from .. import io
 from .. import interp
 from .. import unit
-from .. import util
 from .. import configure
 
 # ----------------------------------------------------------------------------
@@ -101,65 +96,6 @@ def get_index(index='bgc', **kwargs):
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
-
-def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
-    local_path = Path(local_path)
-
-    if mission == 'B':
-        if '__bgcindex__' not in globals():
-            global __bgcindex__
-            __bgcindex__ = get_index()
-        subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
-    elif mission == 'C':
-        if '__globalindex__' not in globals():
-            global __globalindex__
-            __globalindex__ = get_index(index='global')
-        subset_index = __globalindex__[__globalindex__.wmo.isin(wmo_numbers)]
-    else:
-        raise ValueError('Invalid input for parameter "mission"')
-    if cycles is not None:
-        subset_index = subset_index[subset_index.cycle.isin(cycles)]
-    wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
-    wcs = [w.replace('C','') for w in wcs]
-
-    matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
-    subset_index = subset_index[subset_index.file.isin(matches)]
-    local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]) for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
-
-    remove_ix = []
-    for i,fn in enumerate(local_files):
-        if not Path(fn).exists():
-            if verbose:
-                sys.stdout.write('File {} does not exists locally - removing from returned list, suggest the user downloads using bgcArgo.io.get_argo(...)\n'.format(fn))
-            remove_ix.append(i)
-    
-    if len(remove_ix) > 0:
-        for ix in remove_ix[::-1]:
-            local_files.pop(ix)
-
-    return local_files
-
-def organize_files(files):
-    '''
-    Sort files according to time they were recorded.
-    '''
-    lead_letter = files[0].name[0]
-    if lead_letter == 'R' or lead_letter == 'D':
-        index = get_index('global')
-    else:
-        if '__bgcindex__' not in globals():
-            global __bgcindex__
-            __bgcindex__ = get_index()
-        index = __bgcindex__
-    
-    dates = np.array([index[index.file.str.find(fn.name) != -1].date.iloc[0] for fn in files])
-    sorted_files = list(np.array(files)[np.argsort(dates)])
-
-    return sorted_files
-
-# def load_traj(local_path, wmo):
-
-    # return trajData, trajFile
 
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
@@ -259,7 +195,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # fillvalue dict
     fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
     
-    floatData = read_all_variables(Sprof_nc)
+    floatData = read_flat_variables(Sprof_nc)
     floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
     floatData['CYCLES'] = floatData['CYCLE_NUMBER']
     floatData['WMO'] = wmo
@@ -315,7 +251,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def read_all_variables(nc):
+def read_flat_variables(nc):
     '''
     Read all variables and dimensions from an Argo netCDF file.
 
@@ -334,7 +270,7 @@ def read_all_variables(nc):
 
     return floatData
 
-def read_sprof_gridded_variables(nc):
+def read_gridded_variables(nc):
     '''
     Read all variables and dimensions from an Argo Sprof file, do not flatten
     arrays, keep as 2D arrays.
@@ -649,7 +585,7 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
         e.g., from re-analysis data
         - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
         the optode at the water surface (in-water), e.g., MC = X+10 or profile 
-        MC = X–10
+        MC = X-10
         - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
         the observed optode in-air data.
 
@@ -725,74 +661,6 @@ def calc_fixed_doxy_adjusted_error(S, T, P, fix_err=10):
     error = unit.pO2_to_doxy(np.array(S.shape[0]*[fix_err]), S, T, P=P)
 
     return error
-
-def oxy_b(dt, tau):
-    inv_b = 1 + 2*(tau/dt)
-    return 1/inv_b
-
-def oxy_a(dt, tau):
-    return 1 - 2*oxy_b(dt, tau)
-
-# hard code the LUT table value so I don't have to 
-# ship the text file with the package
-### is this the right/ok way to do this??? feels wrong ###
-from ..lut import lut as lut_data
-
-def correct_response_time(t, DO, T, thickness):
-
-    # convert time to seconds
-    t_sec = t*24*60*60
-
-    # array for the loop
-    N = DO.shape[0]
-    mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = t_sec[:-1] + np.diff(t_sec)/2
-    mean_temp = T[:-1] + np.diff(T)/2
-
-    # load temperature, boundary layer thickness, and tau matrix from 
-    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_lL = lut_data[0,1:]
-    lut_T  = lut_data[1:,0]
-    tau100 = lut_data[1:,1:]
-    thickness = thickness*np.ones((N-1,))
-
-    # translate boundary layer thickness to temperature dependent tau
-    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
-    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
-    # loop through oxygen data 
-    for i in range(N-1):
-        dt = t_sec[i+1] - t_sec[i]
-
-        # do the correction using the mean filter, get the mean time
-        mean_oxy[i]  = (1/(2*oxy_b(dt, tau_T[i])))*(DO[i+1] - oxy_a(dt, tau_T[i])*DO[i])
-    
-    # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
-    DO_out = f(t_sec)
-
-    return DO_out
-
-def correct_response_time_Tconst(t, DO, tau):
-    # convert time to seconds
-    t_sec = t*24*60*60
-
-    # array for the loop
-    N = DO.shape[0]
-    mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = t_sec[:-1] + np.diff(t_sec)/2
-
-    # loop through oxygen data
-    for i in range(N-1):
-        dt = t_sec[i+1] - t_sec[i]
-
-        # do the correction using the mean filter, get the mean time
-        mean_oxy[i]  = (1/(2*oxy_b(dt, tau)))*(DO[i+1] - oxy_a(dt, tau)*DO[i])
-    
-    # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
-    DO_out = f(t_sec)
-
-    return DO_out
 
 def get_optode_type(wmo):
     if '__metaindex__' not in globals():

@@ -4,6 +4,7 @@ import pandas as pd
 
 from .core import *
 from .. import unit
+from .. import util
 from .. import plot
 from .. import io
 
@@ -40,94 +41,22 @@ class sprof:
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
-        self.assign(self.__floatdict__)
+        self.to_dataframe()
+
         if not keep_fillvalue:
             self.rm_fillvalue()
 
         if rcheck:
             self.check_range('DOXY')
 
-    def assign(self, floatdict):
-        '''
-        Assign variables from float dictionary (output of load_argo(...))
-        to synthetic profile sprof() object.
-        '''
+    def __getitem__(self, index):
+        return self.df[index]
+    
+    def __setitem__(self, index, value):
+        self.df[index] = value
 
-        # metadata and dimension variables
-        self.floatType  = floatdict['floatType']
-        self.N_PROF     = floatdict['N_PROF']
-        self.N_LEVELS   = floatdict['N_LEVELS']
-        self.CYCLE      = floatdict['CYCLES']
-        self.CYCLE_GRID = floatdict['CYCLE_GRID']
-
-        # time and location data
-        self.SDN       = floatdict['SDN']
-        self.SDN_GRID  = floatdict['SDN_GRID']
-        self.LATITUDE  = floatdict['LATITUDE']
-        self.LATITUDE_GRID = floatdict['LATITUDE_GRID']
-        self.LONGITUDE = floatdict['LONGITUDE']
-        self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
-
-        self.WMO = floatdict['WMO']
-
-        # core variables
-        self.PRES    = floatdict['PRES']
-        self.PRES_QC = floatdict['PRES_QC']
-        self.TEMP    = floatdict['TEMP']
-        self.TEMP_QC = floatdict['TEMP_QC']
-        self.PSAL    = floatdict['PSAL']
-        self.PSAL_QC = floatdict['PSAL_QC']
-        # potential density
-        self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.PRES, 0) - 1000
-
-        # bgc variables - not necessarily all there so check if the fields exist
-        if 'DOXY' in floatdict.keys():
-            self.DOXY      = floatdict['DOXY']
-            self.DOXY_QC   = floatdict['DOXY_QC']
-        if 'CHLA' in floatdict.keys():
-            self.CHLA      = floatdict['CHLA']
-            self.CHLA_QC   = floatdict['CHLA_QC']
-        if 'BBP700' in floatdict.keys():
-            self.BBP700    = floatdict['BBP700']
-            self.BBP700_QC = floatdict['BBP700_QC']
-        if 'CDOM' in floatdict.keys():
-            self.CDOM      = floatdict['CDOM']
-            self.CDOM_QC   = floatdict['CDOM_QC']
-        
-        # adjusted variables
-        if 'TEMP_ADJUSTED' in floatdict.keys():
-            self.TEMP_ADJUSTED      = floatdict['TEMP_ADJUSTED']
-            self.TEMP_ADJUSTED_QC   = floatdict['TEMP_ADJUSTED_QC']
-        if 'PSAL_ADJUSTED' in floatdict.keys():
-            self.PSAL_ADJUSTED      = floatdict['PSAL_ADJUSTED']
-            self.PSAL_ADJUSTED_QC   = floatdict['PSAL_ADJUSTED_QC']
-        if 'DOXY_ADJUSTED' in floatdict.keys():
-            self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
-            self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
-        if 'CHLA_ADJUSTED' in floatdict.keys():
-            self.CHLA_ADJUSTED      = floatdict['CHLA_ADJUSTED']
-            self.CHLA_ADJUSTED_QC   = floatdict['CHLA_ADJUSTED_QC']
-        if 'BBP700_ADJUSTED' in floatdict.keys():
-            self.BBP700_ADJUSTED    = floatdict['BBP700_ADJUSTED']
-            self.BBP700_ADJUSTED_QC = floatdict['BBP700_ADJUSTED_QC']
-        if 'CDOM_ADJUSTED' in floatdict.keys():
-            self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
-            self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
-
-        if 'O2Sat' in floatdict.keys():
-            self.O2Sat = floatdict['O2Sat']
-            self.O2Sat_QC = floatdict['O2Sat_QC']
-
-    def get_gridded_var(self, *args):
-
-        if not hasattr(self, '__griddict__'):
-            self.__griddict__ = read_sprof_gridded_variables(Dataset())
-
-        varlist = list()
-        for v in args:
-            varlist.append(self.__griddict__[v])
-
-        return varlist
+    def __getattr__(self, index):
+        return self.df[index]
 
     def rm_fillvalue(self):
         '''
@@ -135,7 +64,6 @@ class sprof:
         '''
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
-        self.assign(self.__nofillvaluefloatdict__)
         self.to_dataframe()
 
     def clean(self, bad_flags=None):
@@ -146,7 +74,6 @@ class sprof:
         '''
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
-        self.assign(self.__cleanfloatdict__)
         self.to_dataframe()
 
     def reset(self):
@@ -155,7 +82,6 @@ class sprof:
         clean(), rm_fillvalue(), check_range().
         '''
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
-        self.assign(self.__rawfloatdict__)
         self.to_dataframe()
 
     def check_range(self, key, verbose=False):
@@ -182,7 +108,6 @@ class sprof:
                     optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
                     self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], self.__rangecheckdict__['PDEN'], a4330=optode_flag)
 
-        self.assign(self.__rangecheckdict__)
         self.to_dataframe()
     
     def to_dict(self):
@@ -199,51 +124,18 @@ class sprof:
         '''
 
         df = pd.DataFrame()
-        df['CYCLE']     = self.CYCLE_GRID
-        df['SDN']       = self.SDN_GRID
-        df['WMO']       = self.WMO
-        df['LATITUDE']  = self.LATITUDE_GRID
-        df['LONGITUDE'] = self.LONGITUDE_GRID
-        df['PRES']      = self.PRES
-        df['TEMP']      = self.TEMP
-        df['TEMP_QC']   = self.TEMP_QC
-        df['PSAL']      = self.PSAL
-        df['PSAL_QC']   = self.PSAL_QC
-        df['PDEN']      = self.PDEN
-        if 'DOXY' in self.__floatdict__.keys():
-            df['DOXY']      = self.DOXY
-            df['DOXY_QC']   = self.DOXY_QC
-        if 'CHLA' in self.__floatdict__.keys():
-            df['CHLA']      = self.CHLA
-            df['CHLA_QC']   = self.CHLA_QC
-        if 'BBP700' in self.__floatdict__.keys():
-            df['BBP700']    = self.BBP700
-            df['BBP700_QC'] = self.BBP700_QC
-        if 'CDOM' in self.__floatdict__.keys():
-            df['CDOM']      = self.CDOM
-            df['CDOM_QC']   = self.CDOM_QC
-        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
-            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
-        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
-            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
-        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
-            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
-        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
-            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
-        if 'O2Sat' in self.__floatdict__.keys():
-            df['O2Sat']      = self.O2Sat
-            df['O2Sat_QC']   = self.O2Sat_QC
+        n_level = self.__floatdict__['N_LEVELS']        
+        priority_vars = ['PRES', 'PRES_QC', 'TEMP', 'TEMP_QC', 'PSAL', 'PSAL_QC']
+        bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
+        priority_vars = priority_vars + bgc_vars
 
-        exvals = [k for k,v in self.__floatdict__.items() if type(v) is not np.ndarray]
-        for key in list(set(self.__floatdict__.keys()) - set(df.columns) - set(exvals)):
-            if self.__floatdict__[key].shape[0] == df.shape[0]:
-                df[key] = self.__floatdict__[key]
+        for v in priority_vars:
+            df[v] = self.__floatdict__[v]
 
-        self.df = df
+        for k in set(self.__floatdict__.keys()) - set(df.columns):
+            dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
+            if dim == n_level:
+                df[k] = self.__floatdict__[k]
 
         return copy.deepcopy(self.df)
 
@@ -371,15 +263,7 @@ class sprof:
         Describe the dataframe of data stored in the sprof object.
         '''
 
-        if not hasattr(self, 'df'):
-            self.to_dataframe()
-        
-        print('Data for synthetic profile file for float {}'.format(self.WMO))
-
-        sys.stdout.write('Variables:\n')
-        for k in self.__floatdict__.keys():
-            sys.stdout.write('{}\n'.format(k))
-        sys.stdout.write('\n')
+        return self.df.describe()
     
     def update_field(self, field, value, where=None):
 
