@@ -244,6 +244,6 @@ def get_dac(wmo):
             global __globalindex__
             __globalindex__ = read_index(mission='C')
     
-    dac = __globalindex__[__globalindex__.wmo == wmo].dac.iloc[0]
+    dac = __globalindex__.loc[__globalindex__.wmo == wmo].dac.iloc[0]
 
     return dac
