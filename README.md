@@ -1,6 +1,6 @@
 # Argo Canada BGC Quality Control
 
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargo/badges/installer/conda.svg)](https://anaconda.org/conda-forge/bgcargodmqc)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/bgcargodmqc/badges/version.svg)](https://anaconda.org/conda-forge/bgcargodmqc)
 [![Build Status](https://travis-ci.com/ArgoCanada/bgcArgoDMQC.svg?branch=master)](https://travis-ci.com/ArgoCanada/bgcArgoDMQC)
 [![Documentation Status](https://readthedocs.org/projects/bgcargodmqc/badge/?version=latest)](https://bgcargodmqc.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC/branch/master/graph/badge.svg)](https://codecov.io/gh/ArgoCanada/bgcArgoDMQC)

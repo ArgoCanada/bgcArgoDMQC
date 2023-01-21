@@ -1,10 +1,13 @@
 #!/usr/bin/python
+import sys
 
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from netCDF4 import Dataset
 
 from ..util import refill_array
+from ..configure import read_config
 
 def read_ncstr(arr):
     decode_str = np.array([f.decode('utf-8') for f in arr])
@@ -26,23 +29,6 @@ def get_parameter_index(parameter_array, parameter):
     index = np.where(str_arr == parameter)[0]
 
     return index
-
-def generate_comments_equations(variable, gain=None, operator='[operator name]', affiliation='[operator affiliation]', orcid=''):
-    '''
-    Args:
-        arg: description
-
-    Returns:
-        out: description
-
-    Author:
-        Christopher Gordon
-        Fisheries and Oceans Canada
-        chris.gordon@dfo-mpo.gc.ca
-
-    Change log:
-        - 2021-07-05: initial commit
-    '''
 
 def create_fillvalue_array(nc_var):
 
@@ -193,3 +179,137 @@ def check_for_empty_variables(fn, varlist):
         empty = empty & all(nc[v][:].data.flat == nc[v]._FillValue)
 
     return empty
+
+def profile_qc(flags):
+    '''
+    Return overall profile quality flag via the following from the Argo User
+    Manual (v 3.41):
+
+    3.2.2 Reference table 2a: overall profile quality flag
+    https://vocab.nerc.ac.uk/collection/RP2/current
+    N is defined as the percentage of levels with good data where:
+    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
+    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
+    All other QC flag values are BAD data
+    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
+    <PARAM>_QC otherwise.
+    n Meaning
+    "" No QC performed
+    A N = 100%; All profile levels contain good data.
+    B 75% <= N < 100%
+    C 50% <= N < 75%
+    D 25% <= N < 50%
+    E 0% < N < 25%
+    F N = 0%; No profile levels have good data.
+
+    Args:
+        - flags (pandas.Series): quality flags for a given profile
+    Returns:
+        - grade (str): profile grade based on description above
+    '''
+    
+    n_good = flags.isin([1, 2, 5, 8]).sum()
+    n_exclude = flags.isin([9]).sum()
+
+    pct = 100*n_good/(flags.size - n_exclude)
+
+    grade = np.nan
+
+    if flags.isin([0]).sum() >= flags.size - n_exclude:
+        grade = ''
+
+    if pct == 100:
+        grade = 'A'
+    elif pct >= 75:
+        grade = 'B'
+    elif pct >= 50:
+        grade = 'C'
+    elif pct >= 25:
+        grade = 'D'
+    elif pct > 0:
+        grade = 'E'
+    elif pct == 0:
+        grade = 'F'
+
+    if not type(grade) == str and np.isnan(grade):
+        raise ValueError('No grade assigned, check input value of `flags`')
+
+    return grade
+
+def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=None, coeff=None):
+
+    config = read_config()
+    dmqc_date = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
+
+    for fn in r_files:
+        # define path to file, make directory if it does not exist
+        D_file = Path(fn.as_posix().replace('BR', f'B{data_mode}').\
+            replace('dac/meds/', 'dac/meds/D/'))
+        if not D_file.parent.exists():
+            D_file.parent.mkdir(parents=True)
+        sys.stdout.write(f'Working on D-mode file {D_file.as_posix()}...')
+
+        D_nc = copy_netcdf(fn, D_file)
+        last_calib = D_nc.dimensions['N_CALIB'].size-1
+
+        # index for this cycle
+        cycle = int(fn.as_posix().split('_')[-1].split('.')[0])
+        ix = fdict['CYCLE_GRID'] == cycle
+        N = D_nc.dimensions['N_LEVELS'].size
+
+        # find index for DOXY along PARAMETER
+        doxy_index = [read_ncstr(a) for a in D_nc['PARAMETER'][:].data[0,0,:,:]].index('DOXY')
+
+        # fill in string info
+        temp_comment  = f'Oxygen gain calculated following Johnson et al. 2015, doi:10.1175/JTECH-D-15-0101.1, using comparison between float and WOA data. Adjustment applied by {config["operator"]} ({config["affiliation"]}, orcid: {config["orcid"]})'
+        comment  = temp_comment if comment is None else comment
+        equation = 'DOXY_ADJUSTED = G*DOXY' if equation is None else equation
+        coeff    = f'G = {gain:f}' if coeff is None else coeff
+ 
+        # apply info to all profiles in file (not sure if this would ever not apply 
+        # take caution when N_PROF > 1)
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            D_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,doxy_index,:] = string_to_array(comment, D_nc.dimensions['STRING256'])
+            D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,doxy_index,:] = string_to_array(equation, D_nc.dimensions['STRING256'])
+            D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,doxy_index,:] = string_to_array(coeff, D_nc.dimensions['STRING256'])
+
+        D_nc['DOXY_QC'][:] = fdict['DOXY_QC'][ix][:N]
+        D_nc['DOXY_ADJUSTED'][:] = fdict['DOXY_ADJUSTED'][ix][:N]
+        D_nc['DOXY_ADJUSTED_QC'][:] = fdict['DOXY_ADJUSTED_QC'][ix][:N]
+        D_nc['DOXY_ADJUSTED_ERROR'][:] = fdict['DOXY_ADJUSTED_ERROR'][ix][:N]
+
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            flags = read_qc(D_nc['DOXY_ADJUSTED_QC'][:].data[i,:])
+            grade = profile_qc(pd.Series(flags)).encode('utf-8')
+            D_nc['PROFILE_DOXY_QC'][i] = grade
+        
+        data_state_indicator = create_fillvalue_array(D_nc['DATA_STATE_INDICATOR'])
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            data_state_indicator[i,:] = string_to_array('2C+', D_nc.dimensions['STRING4'])
+        D_nc['DATA_STATE_INDICATOR'][:] = data_state_indicator
+
+        nc_data_mode = create_fillvalue_array(D_nc['DATA_MODE'])
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            nc_data_mode[i] = data_mode
+        D_nc['DATA_MODE'][:] = nc_data_mode
+
+        parameter_data_mode = create_fillvalue_array(D_nc['PARAMETER_DATA_MODE'])
+        for i in range(D_nc.dimensions['N_PROF'].size):
+            tmp_pdm = D_nc['PARAMETER_DATA_MODE'][:].data
+            tmp_pdm[i, get_parameter_index(D_nc['PARAMETER'][:][i,0,:,:].data, 'DOXY')] = data_mode
+            parameter_data_mode[i,:] = tmp_pdm
+        D_nc['PARAMETER_DATA_MODE'][:] = parameter_data_mode
+
+        history_dict = dict(
+            HISTORY_INSTITUTION='BI',
+            HISTORY_STEP='ARSQ',
+            HISTORY_SOFTWARE='BGQC',
+            HISTORY_SOFTWARE_RELEASE='v0.2',
+            HISTORY_DATE=dmqc_date,
+            HISTORY_ACTION='O2QC'
+        )
+        D_nc['DATE_UPDATE'][:] = string_to_array(dmqc_date, D_nc.dimensions['DATE_TIME'])
+
+        update_history(D_nc, history_dict)
+        sys.stdout.write('done\n')
+        D_nc.close()

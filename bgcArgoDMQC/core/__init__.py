@@ -9,4 +9,5 @@ dir_config = {k:v for k,v in config.items() if k in ['argo_path', 'woa_path', 'n
 set_dirs(**dir_config)
 
 from .core import *
+from .oxygen import *
 from .sprof import sprof

@@ -98,291 +98,9 @@ def get_index(index='bgc', **kwargs):
     
     return return_index.reset_index()
 
-
-# ----------------------------------------------------------------------------
-# FLOAT CLASS
-# ----------------------------------------------------------------------------
-
-# class traj:
-#     '''
-#     Class that loads Argo trajectory file data for a given float ID number
-#     (wmo).
-#     '''
-
-#     def __init__(self, wmo, keep_fillvalue=False, verbose=False):
-
-        # self.__trajdict__, self.__trajfile__ = load_traj(ARGO_PATH, wmo, verbose=verbose)
-
-#         # local path info
-#         self.argo_path = ARGO_PATH
-#         self.woa_path  = WOA_PATH
-#         self.ncep_path = NCEP_PATH
-
-#         if not keep_fillvalue:
-#             self.rm_fillvalue()
-
-class profiles:
-
-    set_dirs = set_dirs
-
-    def __init__(self, floats, cycles=None, mission='B', mode='RD', keep_fillvalue=False, rcheck=True, verbose=False):
-        if type(floats) is int:
-            floats = [floats]
-
-        self.__argofiles__ = organize_files(get_files(ARGO_PATH, floats, cycles=cycles, mission=mission, mode=mode))
-        self.__floatdict__ = load_profiles(self.__argofiles__, verbose=verbose)
-        self.__rawfloatdict__ = self.__floatdict__
-
-        # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
-
-        self.assign(self.__floatdict__)
-        if not keep_fillvalue:
-            self.rm_fillvalue()
-
-        if rcheck:
-            self.check_range('all', verbose=verbose)
-
-    def assign(self, floatdict):
-
-        # metadata and dimension variables
-        self.floatType  = floatdict['floatType']
-        self.N_LEVELS   = floatdict['N_LEVELS']
-        self.CYCLE      = floatdict['CYCLES']
-        self.CYCLE_GRID = floatdict['CYCLE_GRID']
-
-        # time and location data
-        self.SDN       = floatdict['SDN']
-        self.SDN_GRID  = floatdict['SDN_GRID']
-        self.LATITUDE  = floatdict['LATITUDE']
-        self.LATITUDE_GRID  = floatdict['LATITUDE_GRID']
-        self.LONGITUDE = floatdict['LONGITUDE']
-        self.LONGITUDE_GRID = floatdict['LONGITUDE_GRID']
-
-        self.WMO = floatdict['WMO']
-
-        # core variables
-        self.PRES    = floatdict['PRES']
-        # self.PRES_QC = floatdict['PRES_QC']
-        if 'TEMP' in floatdict.keys():
-            self.TEMP    = floatdict['TEMP']
-            self.TEMP_QC = floatdict['TEMP_QC']
-            self.PSAL    = floatdict['PSAL']
-            self.PSAL_QC = floatdict['PSAL_QC']
-            # potential density
-            self.PDEN = gsw.pot_rho_t_exact(gsw.SA_from_SP(self.PSAL, self.PRES, self.LONGITUDE_GRID, self.LATITUDE_GRID), self.TEMP, self.LONGITUDE_GRID, self.LATITUDE_GRID) - 1000
-
-        # bgc variables - not necessarily all there so check if the fields exist
-        if 'DOXY' in floatdict.keys():
-            self.DOXY      = floatdict['DOXY']
-            self.DOXY_QC   = floatdict['DOXY_QC']
-        if 'CHLA' in floatdict.keys():
-            self.CHLA      = floatdict['CHLA']
-            self.CHLA_QC   = floatdict['CHLA_QC']
-        if 'BBP700' in floatdict.keys():
-            self.BBP700    = floatdict['BBP700']
-            self.BBP700_QC = floatdict['BBP700_QC']
-        if 'CDOM' in floatdict.keys():
-            self.CDOM      = floatdict['CDOM']
-            self.CDOM_QC   = floatdict['CDOM_QC']
-        
-        # adjusted variables
-        if 'DOXY_ADJUSTED' in floatdict.keys():
-            self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
-            self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
-        if 'CHLA_ADJUSTED' in floatdict.keys():
-            self.CHLA_ADJUSTED      = floatdict['CHLA_ADJUSTED']
-            self.CHLA_ADJUSTED_QC   = floatdict['CHLA_ADJUSTED_QC']
-        if 'BBP700_ADJUSTED' in floatdict.keys():
-            self.BBP700_ADJUSTED    = floatdict['BBP700_ADJUSTED']
-            self.BBP700_ADJUSTED_QC = floatdict['BBP700_ADJUSTED_QC']
-        if 'CDOM_ADJUSTED' in floatdict.keys():
-            self.CDOM_ADJUSTED      = floatdict['CDOM_ADJUSTED']
-            self.CDOM_ADJUSTED_QC   = floatdict['CDOM_ADJUSTED_QC']
-
-        if 'O2Sat' in floatdict.keys():
-            self.O2Sat = floatdict['O2Sat']
-            self.O2Sat_QC = floatdict['O2Sat_QC']
-
-    def rm_fillvalue(self):
-        self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
-        self.__floatdict__ = self.__nofillvaluefloatdict__
-        self.assign(self.__nofillvaluefloatdict__)
-        self.to_dataframe()
-
-    def clean(self, bad_flags=None):
-        self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
-        self.__floatdict__ = self.__cleanfloatdict__
-        self.assign(self.__cleanfloatdict__)
-        self.to_dataframe()
-
-    def reset(self):
-        self.__floatdict__ = self.__rawfloatdict__
-        self.assign(self.__rawfloatdict__)
-        self.to_dataframe()
-
-    def check_range(self, key, verbose=False):
-        '''
-        Performs a range check for variables that have a RTQC range available.
-        Replaces values outside the range with NaN values. Takes string input
-        to do the range check on that variable. Available variables are
-        PRES, TEMP, PSAL, and DOXY. Can also take input 'all' to do the range
-        check on all four variables, or a list of strings to do each of those
-        variables.
-        '''
-        if key == 'all':
-            key = ['PRES', 'TEMP', 'PSAL', 'DOXY']
-        elif type(key) is not list:
-            key = [key]
-        
-        for k in key:
-            if k in self.__floatdict__.keys():
-                self.__rangecheckdict__ = range_check(k, self.__floatdict__, verbose=verbose)
-                self.__floatdict__ = self.__rangecheckdict__
-
-                # recalculate O2sat if its DOXY
-                if k == 'DOXY':
-                    optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
-                    self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], a4330=optode_flag)
-
-        self.assign(self.__rangecheckdict__)
-             
-    def to_dict(self):
-        return copy.deepcopy(self.__floatdict__)
-    
-    def to_dataframe(self):
-        import pandas as pd
-
-        df = pd.DataFrame()
-        df['CYCLE']     = self.CYCLE_GRID
-        df['SDN']       = self.SDN_GRID
-        df['WMO']       = self.WMO
-        df['LATITUDE']  = self.LATITUDE_GRID
-        df['LONGITUDE'] = self.LONGITUDE_GRID
-        df['PRES']      = self.PRES
-        df['TEMP']      = self.TEMP
-        df['TEMP_QC']   = self.TEMP_QC
-        df['PSAL']      = self.PSAL
-        df['PSAL_QC']   = self.PSAL_QC
-        df['PDEN']      = self.PDEN
-        if 'DOXY' in self.__floatdict__.keys():
-            df['DOXY']      = self.DOXY
-            df['DOXY_QC']   = self.DOXY_QC
-        if 'CHLA' in self.__floatdict__.keys():
-            df['CHLA']      = self.CHLA
-            df['CHLA_QC']   = self.CHLA_QC
-        if 'BBP700' in self.__floatdict__.keys():
-            df['BBP700']    = self.BBP700
-            df['BBP700_QC'] = self.BBP700_QC
-        if 'CDOM' in self.__floatdict__.keys():
-            df['CDOM']      = self.CDOM
-            df['CDOM_QC']   = self.CDOM_QC
-        if 'DOXY_ADJUSTED' in self.__floatdict__.keys():
-            df['DOXY_ADJUSTED']      = self.DOXY_ADJUSTED
-            df['DOXY_ADJUSTED_QC']   = self.DOXY_ADJUSTED_QC
-        if 'CHLA_ADJUSTED' in self.__floatdict__.keys():
-            df['CHLA_ADJUSTED']      = self.CHLA_ADJUSTED
-            df['CHLA_ADJUSTED_QC']   = self.CHLA_ADJUSTED_QC
-        if 'BBP700_ADJUSTED' in self.__floatdict__.keys():
-            df['BBP700_ADJUSTED']    = self.BBP700_ADJUSTED
-            df['BBP700_ADJUSTED_QC'] = self.BBP700_ADJUSTED_QC
-        if 'CDOM_ADJUSTED' in self.__floatdict__.keys():
-            df['CDOM_ADJUSTED']      = self.CDOM_ADJUSTED
-            df['CDOM_ADJUSTED_QC']   = self.CDOM_ADJUSTED_QC
-        if 'O2Sat' in self.__floatdict__.keys():
-            df['O2Sat']      = self.O2Sat
-            df['O2Sat_QC']   = self.O2Sat_QC
-
-        self.df = df
-
-        return copy.deepcopy(self.df)
-
-    def get_track(self):
-        self.track = track(self.__floatdict__)
-        return self.track
-
-    def get_ncep(self):
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-        self.NCEP = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
-        
-        return self.NCEP
-
-    def get_woa(self):
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-        
-        self.z_WOA, self.WOA, self.__WOAweights__  = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path)
-
-        return self.WOA
-
-    def calc_gains(self, ref='WOA'):
-
-        if not hasattr(self, 'track'):
-            self.get_track()
-
-        if ref == 'NCEP':
-            sys.stdout.write('In-air data contained in BRtraj file, NCEP not a valid reference for individual profile files, returning None\n')
-            self.gains = None
-
-        if ref == 'WOA':
-            # check if reference data is already calculated
-            if not hasattr(self, 'WOA'):
-                self.get_woa()
-
-            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False)
-            self.gains = self.__WOAgains__
-        
-        return self.gains
-
-    def calc_fixed_error(self, fix_err=10):
-
-        self.DOXY_ADJUSTED_ERROR = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err)
-        self.__floatdict__['DOXY_ADJUSTED_ERROR'] = self.DOXY_ADJUSTED_ERROR
-
-        return copy.deepcopy(self.DOXY_ADJUSTED_ERROR)
-
-    def reassign_flags(self):
-
-        return
-
-    def assess_profile_flags(self):
-
-        return
-
-    def describe(self):
-
-        if not hasattr(self, 'df'):
-            self.to_dataframe()
-
-        sys.stdout.write('Data for profile files for floats ')
-        for i,w in enumerate(self.df.WMO.unique()):
-            if i > 0:
-                sys.stdout.write(', ')
-            sys.stdout.write('{}'.format(int(w)))
-        sys.stdout.write('\n')
-        
-        sys.stdout.write('Variables:\n')
-        for k in self.__floatdict__.keys():
-            sys.stdout.write('{}\n'.format(k))
-        sys.stdout.write('\n')
 # ----------------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------------
-
-def apply_gain(DOXY, G):
-
-    DOXY_ADJUSTED = G*DOXY
-
-    return DOXY_ADJUSTED
-
-def calc_doxy_error(DOXY, G, eG):
-
-    return None
 
 def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
     local_path = Path(local_path)
@@ -537,6 +255,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # number of profile cycles
     M = Sprof_nc.dimensions['N_LEVELS'].size
     N = Sprof_nc.dimensions['N_PROF'].size
+
+    # fillvalue dict
+    fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
     
     floatData = read_all_variables(Sprof_nc)
     floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
@@ -564,10 +285,10 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         optode_flag = get_optode_type(int(wmo)) == 'AANDERAA_OPTODE_4330'
         floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'], floatData['PDEN'], a4330=optode_flag)
         # match the fill values
-        ix = np.logical_or(np.logical_or(floatData['PSAL'] >= 99999., floatData['TEMP'] >= 99999.), floatData['DOXY'] >= 99999.)
-        floatData['O2Sat'][ix] = 99999.
+        ix = np.logical_or(np.logical_or(floatData['PSAL'] == fillvalue['PSAL'], floatData['TEMP'] == fillvalue['TEMP']), floatData['DOXY'] == fillvalue['DOXY'])
+        floatData['O2Sat'][ix] = fillvalue['DOXY']
         # get the worst QC flag from each quantity that goes into the calculation
-        floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
+        floatData['O2Sat_QC'] = copy.deepcopy(floatData['DOXY_QC'])
 
     if BRtraj_flag:
         if 'PPOX_DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
@@ -591,127 +312,8 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     else:
         floatData['inair']          = False
 
-    return floatData, Sprof, BRtraj, meta
 
-def load_profiles(files, verbose=False):
-
-    common_variables = util.get_vars(files)
-    core_files = len(files)*[' ']
-    for i,f in enumerate(files):
-        data_mode = f.name[1]
-        if data_mode == 'D':
-            core_files[i] = f.parent / f.name.replace('B','')
-        else:
-            test_file = f.parent / f.name.replace('B','')
-            if not test_file.exists():
-                test_file = f.parent / f.name.replace('BR', 'D')
-                if not test_file.exists():
-                    raise FileNotFoundError('Corresponding core file not found')
-            core_files[i] = test_file
-
-
-    floatData = dict(
-        floatName=[], N_LEVELS=[], N_PROF=[], CYCLES=np.array([], dtype=int), floatType=[]
-    )
-
-    for v in ['PRES', 'TEMP', 'PSAL', 'SDN']:
-        floatData[v] = np.array([])
-        floatData[v + '_QC'] = np.array([])
-    
-    for v in ['WMO', 'LATITUDE', 'LONGITUDE', 'POSITION_QC', 'SDN_GRID', 'LATITUDE_GRID', 'LONGITUDE_GRID', 'CYCLE_GRID']:
-        floatData[v] = np.array([])
-
-    for v in common_variables:
-        floatData[v] = np.array([])
-        floatData[v + '_QC'] = np.array([])
-        if v + '_ADJUSTED' in common_variables:
-            floatData[v + '_ADJUSTED'] = np.array([])
-            floatData[v + '_ADJUSTED' + '_QC'] = np.array([])
-
-    for fn, cn in zip(files, core_files):
-        if verbose:
-            print(fn, cn)
-        # try to load the profile as absolute path or relative path
-        try:
-            nc = Dataset(fn, 'r')
-        except:
-            try:
-                nc = Dataset(Path(ARGO_PATH) / fn, 'r')
-            except:
-                raise FileNotFoundError('No such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
-
-        try:
-            cc = Dataset(cn, 'r')
-        except:
-            try:
-                cc = Dataset(Path(ARGO_PATH) / cn, 'r')
-            except:
-                raise ValueError('Cannot get core Argo data, no such file {} or {}'.format(fn, str(Path(ARGO_PATH) / fn)))
-
-        # number of profile cycles
-        M = cc.dimensions['N_LEVELS'].size
-        N = cc.dimensions['N_PROF'].size
-
-        wmo = ''
-        if N > 1:
-            for let in nc.variables['PLATFORM_NUMBER'][:][0,:].compressed():
-                wmo = wmo + let.decode('UTF-8')
-        else:
-            for let in nc.variables['PLATFORM_NUMBER'][:].compressed():
-                wmo = wmo + let.decode('UTF-8')
-
-        cycle = nc.variables['CYCLE_NUMBER'][:].data.flatten()
-
-        ftype = ''
-        if 'PLATFORM_TYPE' in nc.variables.keys():
-            for let in nc.variables['PLATFORM_TYPE'][:].compressed():
-                ftype = ftype + let.decode('UTF-8')
-
-        floatData['floatName']  = floatData['floatName'] + [int(wmo)]
-        floatData['N_LEVELS']   = floatData['N_LEVELS']  + [M]
-        floatData['N_PROF']     = floatData['N_PROF']    + [N]
-        floatData['CYCLES']     = np.append(floatData['CYCLES'], cycle)
-        floatData['CYCLE_GRID'] = np.append(floatData['CYCLE_GRID'], np.array(N*M*[cycle[0]]))
-        floatData['floatType']  = floatData['floatType'] + [ftype]
-        floatData['WMO']        = np.append(floatData['WMO'], np.array(M*N*[wmo]))
-
-        # load in variables that will be in every file
-        floatData['PRES']           = np.append(floatData['PRES'], cc.variables['PRES'][:].data.flatten())
-        floatData['PRES_QC']        = np.append(floatData['PRES_QC'], io.read_qc(cc.variables['PRES_QC'][:].data.flatten()))
-        floatData['TEMP']           = np.append(floatData['TEMP'], cc.variables['TEMP'][:].data.flatten())
-        floatData['TEMP_QC']        = np.append(floatData['TEMP_QC'], io.read_qc(cc.variables['TEMP_QC'][:].data.flatten()))
-        floatData['PSAL']           = np.append(floatData['PSAL'], cc.variables['PSAL'][:].data.flatten())
-        floatData['PSAL_QC']        = np.append(floatData['PSAL_QC'], io.read_qc(cc.variables['PSAL_QC'][:].data.flatten()))
-        floatData['SDN']            = np.append(floatData['SDN'], cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))
-        floatData['SDN_QC']         = np.append(floatData['SDN_QC'], io.read_qc(cc.variables['JULD_QC'][:].data.flatten()))
-        floatData['SDN_GRID']       = np.append(floatData['SDN_GRID'], np.array(N*M*[np.nanmean(cc.variables['JULD'][:].data.flatten() + mdates.datestr2num('1950-01-01'))]))
-        floatData['LATITUDE']       = np.append(floatData['LATITUDE'], cc.variables['LATITUDE'][:].data.flatten())
-        floatData['LATITUDE_GRID']  = np.append(floatData['LATITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LATITUDE'][:].data.flatten())]))
-        floatData['LONGITUDE']      = np.append(floatData['LONGITUDE'], cc.variables['LONGITUDE'][:].data.flatten())
-        floatData['LONGITUDE_GRID'] = np.append(floatData['LONGITUDE_GRID'], np.array(N*M*[np.nanmean(cc.variables['LONGITUDE'][:].data.flatten())]))
-        floatData['POSITION_QC']    = np.append(floatData['POSITION_QC'], io.read_qc(cc.variables['POSITION_QC'][:].data.flatten()))
-
-        print(common_variables)
-        # loop through other possible BGC variables
-        for v in common_variables:
-            var_check   = v in nc.variables.keys() and 'N_LEVELS' in nc.variables[v].dimensions
-            dtype_check = nc.variables[v].dtype == 'float32' or nc.variables[v].dtype == 'float64'
-            check = var_check and dtype_check
-            if check:
-                floatData[v] = np.append(floatData[v], vertically_align(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten(), nc.variables[v][:].data.flatten()))
-
-        floatData['dPRES'] = delta_pres(cc.variables['PRES'][:].data.flatten(), nc.variables['PRES'][:].data.flatten())
-
-        for v in floatData.keys():
-            v_qc = v + '_QC'
-            if v_qc in common_variables:
-                floatData[v_qc] = np.append(floatData[v_qc], io.read_qc(nc.variables[v_qc][:].data.flatten()))
-
-        if 'DOXY' in floatData.keys():
-            floatData['O2Sat'] = 100*floatData['DOXY']/unit.oxy_sol(floatData['PSAL'], floatData['TEMP'])
-            floatData['O2Sat_QC'] = util.get_worst_flag(floatData['TEMP_QC'], floatData['PSAL_QC'], floatData['DOXY_QC'])
-        
-    return floatData
+    return floatData, Sprof, BRtraj, meta, fillvalue
 
 def read_all_variables(nc):
     '''
@@ -1114,75 +716,15 @@ def range_check(key, floatdict, verbose=True):
 
     return cleandict
 
-def calc_fixed_doxy_adjusted_error(floatdict, fix_err=10):
+def calc_fixed_doxy_adjusted_error(S, T, P, fix_err=10):
     '''
     Calculate DOXY_ADJUSTED_ERROR for fixed partial pressure of 10 mbar 
     PPOX_DOXY.
     '''
 
-    S = floatdict['PSAL']
-    T = floatdict['TEMP']
-    P = floatdict['PRES']
-
     error = unit.pO2_to_doxy(np.array(S.shape[0]*[fix_err]), S, T, P=P)
 
     return error
-
-def profile_qc(flags):
-    '''
-    Return overall profile quality flag via the following from the Argo User
-    Manual (v 3.41):
-
-    3.2.2 Reference table 2a: overall profile quality flag
-    https://vocab.nerc.ac.uk/collection/RP2/current
-    N is defined as the percentage of levels with good data where:
-    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
-    - QC flag values of 9 (missing) or “ “ are NOT USED in the computation
-    All other QC flag values are BAD data
-    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
-    <PARAM>_QC otherwise.
-    n Meaning
-    "" No QC performed
-    A N = 100%; All profile levels contain good data.
-    B 75% <= N < 100%
-    C 50% <= N < 75%
-    D 25% <= N < 50%
-    E 0% < N < 25%
-    F N = 0%; No profile levels have good data.
-
-    Args:
-        - flags (pandas.Series): quality flags for a given profile
-    Returns:
-        - grade (str): profile grade based on description above
-    '''
-    
-    n_good = flags.isin([1, 2, 5, 8]).sum()
-    n_exclude = flags.isin([9]).sum()
-
-    pct = 100*n_good/(flags.size - n_exclude)
-
-    grade = np.nan
-
-    if flags.isin([0]).sum() >= flags.size - n_exclude:
-        grade = ''
-
-    if pct == 100:
-        grade = 'A'
-    elif pct >= 75:
-        grade = 'B'
-    elif pct >= 50:
-        grade = 'C'
-    elif pct >= 25:
-        grade = 'D'
-    elif pct > 0:
-        grade = 'E'
-    elif pct == 0:
-        grade = 'F'
-
-    if not type(grade) == str and np.isnan(grade):
-        raise ValueError('No grade assigned, check input value of `flags`')
-
-    return grade
 
 def oxy_b(dt, tau):
     inv_b = 1 + 2*(tau/dt)

@@ -1,5 +1,11 @@
+
+import numpy as np
+import pandas as pd
+
 from .core import *
+from .. import unit
 from .. import plot
+from .. import io
 
 class sprof:
     '''
@@ -26,7 +32,7 @@ class sprof:
 
     def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
+        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
@@ -89,6 +95,12 @@ class sprof:
             self.CDOM_QC   = floatdict['CDOM_QC']
         
         # adjusted variables
+        if 'TEMP_ADJUSTED' in floatdict.keys():
+            self.TEMP_ADJUSTED      = floatdict['TEMP_ADJUSTED']
+            self.TEMP_ADJUSTED_QC   = floatdict['TEMP_ADJUSTED_QC']
+        if 'PSAL_ADJUSTED' in floatdict.keys():
+            self.PSAL_ADJUSTED      = floatdict['PSAL_ADJUSTED']
+            self.PSAL_ADJUSTED_QC   = floatdict['PSAL_ADJUSTED_QC']
         if 'DOXY_ADJUSTED' in floatdict.keys():
             self.DOXY_ADJUSTED      = floatdict['DOXY_ADJUSTED']
             self.DOXY_ADJUSTED_QC   = floatdict['DOXY_ADJUSTED_QC']
@@ -185,7 +197,6 @@ class sprof:
         Returns a pandas dataframe containing data from the synthetic oxygen
         profile file.
         '''
-        import pandas as pd
 
         df = pd.DataFrame()
         df['CYCLE']     = self.CYCLE_GRID
@@ -303,6 +314,8 @@ class sprof:
             self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
             self.gains = self.__WOAgains__
         
+        self.gain = np.nanmean(self.gains)
+        
         return copy.deepcopy(self.gains)
 
     def calc_fixed_error(self, fix_err=10):
@@ -367,6 +380,31 @@ class sprof:
         for k in self.__floatdict__.keys():
             sys.stdout.write('{}\n'.format(k))
         sys.stdout.write('\n')
+    
+    def update_field(self, field, value, where=None):
+
+        where = slice(None) if where is None else where
+        self.__floatdict__[field][where] = value
+
+        if field in ['DOXY', 'TEMP', 'PSAL']:
+            optode_flag = get_optode_type(int(self.__floatdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
+            self.__floatdict__['O2Sat'] = unit.oxy_saturation(self.__floatdict__['DOXY'], self.__floatdict__['PSAL'], self.__floatdict__['TEMP'], self.__floatdict__['PDEN'], a4330=optode_flag)
+        elif field == 'DOXY_QC':
+            self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
+
+        self.assign(self.__floatdict__)
+        self.to_dataframe()
+
+    def set_fillvalue(self, field, where=None):
+
+        self.update_field(field, self.__fillvalue__[field], where)
+    
+    def export_files(self, data_mode='D', glob=None):
+
+        glob = 'BR*.nc' if glob is None else glob
+        r_files = (self.__Sprof__.parent / 'profiles').glob(glob)
+
+        io.export_files(self.__floatdict__, r_files, self.gain, data_mode=data_mode)
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
@@ -418,12 +456,12 @@ class sprof:
         meta_dict['lat'] = lat
         meta_dict['lon'] = lon
 
-        if data_dict is None:
-            data_dict = dict(**kwargs)
-        elif data_dict is not None and len(kwargs) > 0:
+        if data_dict is not None and len(kwargs) > 0:
             # apppend kwargs to dict
             for k in kwargs.keys():
-                data_dict[k] = kwargs[k]
+                data_dict[k] = kwargs.pop(k)
+        data_dict = dict(**kwargs) if data_dict is None else data_dict
+        
 
         # default label value        
         if label is None:
