@@ -4,20 +4,15 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-
 import seaborn as sns
 sns.set(style='ticks', context='paper', palette='colorblind')
 
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-
 try:
-    import cmocean.cm as cmo
-    cmocean_flag = True
-except:
-    cmocean_flag = False
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    carto_flag = True
+except ImportError:
+    carto_flag = False
 
 from . import style
 from .. import util
@@ -352,8 +347,8 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
     meta_data_string = meta_data_string + 'Argo profile #{} date: {}'.format(cyc, mdates.num2date(df.SDN[df.CYCLE == cyc][0]).strftime('%b %d, %Y'))
 
     map_num = 0
-    if 'lat' in meta_keys and 'lon' in meta_keys:
-        map_num = 1 # change to 1 later, just broken right now
+    if 'lat' in meta_keys and 'lon' in meta_keys and carto_flag:
+        map_num = 1 
     
     nvar = len(set(var_keys))
     fig = plt.figure()

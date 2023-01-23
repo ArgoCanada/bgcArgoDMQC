@@ -8,7 +8,7 @@ with open('requirements.txt') as fr:
 
 setuptools.setup(
     name='bgcArgoDMQC',
-    version='0.2.12',
+    version='0.2.13',
     license='The MIT License (MIT)',
     author='Christopher Gordon',
     maintainer='cgrdn',
