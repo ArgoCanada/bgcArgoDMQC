@@ -8,7 +8,7 @@ with open('requirements.txt') as fr:
 
 setuptools.setup(
     name='bgcArgoDMQC',
-    version='0.2.11',
+    version='0.2.12',
     license='The MIT License (MIT)',
     author='Christopher Gordon',
     maintainer='cgrdn',
@@ -28,6 +28,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Scientific/Engineering',
         'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',
