@@ -231,7 +231,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
 
             if greyflag:
                 c = cm(0.75*(CYCNUM[Ncycle-1 + n-1]/CYCNUM[-1])+0.25)
-            axes[i].plot(subset_df[v], subset_df[zvar], color=c, **kwargs)
+            axes[i].plot(subset_df[v].loc[subset_df[v].notna()], subset_df[zvar].loc[subset_df[v].notna()], color=c, **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
