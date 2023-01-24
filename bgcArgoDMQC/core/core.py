@@ -107,27 +107,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         wmo: float ID number
     
     Returns:
-        floatData: python dict() object with the following fields
-            - floatName: WMO number, from input
-            - floatType: Kind of float (APEX, ARVOR, etc.)
-            - N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
-            - N_PROF: Number of profiles, Argo dimension N_PROF
-            - LATITUDE: Latitude (-90, 90) for each profile
-            - LONGITUDE: Longitude (-180, 180) for each profile
-            - SDN: Serial Date Number for each profile
-            - PRES: Pressure (dbar), compressed to vector (1D array)
-            - TEMP: Temperature (deg C)
-            - PSAL: Salinity (psu)
-        if the variables are available, it will also contain:
-            - DOXY: Dissolved Oxygen (micromole/kg)
-            - O2sat: Oxygen percent saturation (%)
-            - PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
-            - TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
-            - inair: Boolean to indicate if in-air data exists
-            
-        for all the variables listen above, there will also exist
-        <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
-        fields if they exist.
+        floatData: python dict() object with Argo variables
     
         CYCLES, LATITUDE, LONGITUDE, and SDN all also have
         analogous <VAR>_GRID fields that match the    
@@ -137,16 +117,6 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         Christopher Gordon
         Fisheries and Oceans Canada
         chris.gordon@dfo-mpo.gc.ca
-    
-    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    Change log:
-    
-        - 2020-04-22: updated so that pressure mask determines all variables - need to add all quality flags to output
-        - 2020-04-29: switched file/path handling from os module to pathlib
-        - 2020-10-28: read variable DOXY from BRtraj file and convert to PPOX_DOXY if PPOX_DOXY not in file
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -250,6 +220,23 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
 
     return floatData, Sprof, BRtraj, meta, fillvalue
+
+def dict_append(d1, d2):
+    
+    result = copy.deepcopy(d1)
+    for k in d1.keys():
+        result[k] = np.append(d1[k], d2[k])
+
+def read_profiles(files):
+
+    floatdict = None
+    for fn in files:
+        nc = Dataset(fn)
+        data = read_flat_variables(nc)
+
+        floatdict = data if floatdict is None else dict_append(floatdict, data)
+
+    return floatdict
 
 def read_flat_variables(nc):
     '''
@@ -678,59 +665,3 @@ def get_optode_type(wmo):
     else:
         optode_type = io.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
         return optode_type
-
-def profile_qc(flags):
-    '''
-    Return overall profile quality flag via the following from the Argo User
-    Manual (v 3.41):
-
-    3.2.2 Reference table 2a: overall profile quality flag
-    https://vocab.nerc.ac.uk/collection/RP2/current
-    N is defined as the percentage of levels with good data where:
-    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
-    - QC flag values of 9 (missing) or " " are NOT USED in the computation
-    All other QC flag values are BAD data
-    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
-    <PARAM>_QC otherwise.
-    n Meaning
-    "" No QC performed
-    A N = 100%; All profile levels contain good data.
-    B 75% <= N < 100%
-    C 50% <= N < 75%
-    D 25% <= N < 50%
-    E 0% < N < 25%
-    F N = 0%; No profile levels have good data.
-
-    Args:
-        - flags (pandas.Series): quality flags for a given profile
-    Returns:
-        - grade (str): profile grade based on description above
-    '''
-    
-    n_good = flags.isin([1, 2, 5, 8]).sum()
-    n_exclude = flags.isin([9]).sum()
-
-    pct = 100*n_good/(flags.size - n_exclude)
-
-    grade = np.nan
-
-    if flags.isin([0]).sum() >= flags.size - n_exclude:
-        grade = ''
-
-    if pct == 100:
-        grade = 'A'
-    elif pct >= 75:
-        grade = 'B'
-    elif pct >= 50:
-        grade = 'C'
-    elif pct >= 25:
-        grade = 'D'
-    elif pct > 0:
-        grade = 'E'
-    elif pct == 0:
-        grade = 'F'
-
-    if not type(grade) == str and np.isnan(grade):
-        raise ValueError('No grade assigned, check input value of `flags`')
-
-    return grade
