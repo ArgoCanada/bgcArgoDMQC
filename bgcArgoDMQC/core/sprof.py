@@ -23,7 +23,7 @@ class sprof:
 
         df = syn.to_dataframe()
 
-    THe main function serves to minimize the onus on the user to organize
+    The main function serves to minimize the onus on the user to organize
     variables for quality control. Calculating an oxygen gain becomes simple::
 
         gains = syn.calc_gains(ref='NCEP')
@@ -136,6 +136,8 @@ class sprof:
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
             if dim == n_level:
                 df[k] = self.__floatdict__[k]
+        
+        self.df = df
 
         return copy.deepcopy(self.df)
 
@@ -210,7 +212,7 @@ class sprof:
         
         return copy.deepcopy(self.gains)
 
-    def calc_fixed_error(self, fix_err=10):
+    def calc_fixed_error(self, fix_err=6):
 
         self.DOXY_ADJUSTED_ERROR = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err)
         self.__floatdict__['DOXY_ADJUSTED_ERROR'] = self.DOXY_ADJUSTED_ERROR
