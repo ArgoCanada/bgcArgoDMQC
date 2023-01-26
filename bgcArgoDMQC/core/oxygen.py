@@ -56,7 +56,7 @@ def correct_response_time_Tconst(t, O2, tau):
         mean_time[i] = t_sec[i] + dt/2
     
     # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_falue='extrapolate')
+    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
     O2_out = f(t_sec)
 
     return O2_out
