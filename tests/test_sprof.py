@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 from pathlib import Path
-import shutil
 
 from netCDF4 import Dataset
 
@@ -12,27 +11,17 @@ import numpy as np
 import pandas as pd
 import bgcArgoDMQC as bgc
 
-global wmo
-wmo = 4902481
-
-global data_path
-data_path = Path('/Users/gordonc/Documents/data')
-
-bgc.set_dirs(
-    argo_path=data_path / 'Argo',
-    ncep_path=data_path / 'NCEP',
-    woa_path=data_path / 'WOA18'
-)
-
 class sprofTest(unittest.TestCase):
 
+    tmp = Path('./tmp')
     bgc.set_dirs(
-        argo_path=data_path / 'Argo',
-        ncep_path=data_path / 'NCEP',
-        woa_path=data_path / 'WOA18'
+        argo_path=tmp / 'Argo',
+        ncep_path=tmp / 'NCEP',
+        woa_path=tmp / 'WOA18'
     )
 
     def test_sprof(self):
+        wmo = 4901784
         sprof = bgc.sprof(wmo)
         sprof.clean()
         sprof.reset()
@@ -46,6 +35,7 @@ class sprofTest(unittest.TestCase):
         self.assertIs(type(df), pd.core.frame.DataFrame)
 
     def test_calc_gains(self):
+        wmo = 4901784
         sprof = bgc.sprof(wmo)
         ncep_gains = sprof.calc_gains()
         woa_gains  = sprof.calc_gains(ref='WOA')

@@ -13,7 +13,7 @@ class coreTest(unittest.TestCase):
 
     tmp = Path('./tmp')
     bgc.set_dirs(
-        argo_path=tmp / 'Argo',
+        argo_path=tmp / 'Argo/dac',
         ncep_path=tmp / 'NCEP',
         woa_path=tmp / 'WOA18'
     )
@@ -34,7 +34,7 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         # read QC test
-        nc = Dataset(Path('tmp/Argo/aoml/3900407/profiles/D3900407_001.nc'))
+        nc = Dataset(Path('tmp/Argo/dac/meds/4901784/profiles/BD4901784_001.nc'))
         qcp, qcf = bgc.read_history_qctest(nc)
         bgc.util.display_qctests(qcp, qcf)
 
@@ -44,16 +44,16 @@ class coreTest(unittest.TestCase):
     def test_information_criteria(self):
         # aic and bic
         data  = np.random.randn(30)
-        resid = np.random.randn(20)
+        resid = np.random.randn(10)/10
         aic = bgc.util.aic(data, resid)
 
-        self.assertIs(type(aic), np.float)
+        self.assertIs(type(aic), float)
 
         data  = np.random.randn(30)
-        resid = np.random.randn(20)
+        resid = np.random.randn(10)/10
         bic = bgc.util.bic(data, resid)
 
-        self.assertIs(type(bic), np.float)   
+        self.assertIs(type(bic), float)   
 
     def test_response_time_correction(self):
         # time correction
@@ -68,12 +68,12 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(doxy_adj_Tconst), np.ndarray)
 
     def test_pO2(self):
-        syn = bgc.sprof(4902480)
+        syn = bgc.sprof(4901784)
         pO2 = bgc.unit.pO2(syn.DOXY, syn.PSAL, syn.TEMP)
         self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/aoml/4900345/profiles/BD4900345_001.nc'))
+        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/dac/meds/4901784/profiles/BD4901784_001.nc'))
 
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(eq[0]), np.str_)
@@ -82,13 +82,11 @@ class coreTest(unittest.TestCase):
     def test_unit_conversion(self):
         S = np.random.rand(20)
         T = np.random.rand(20)
+        P = np.random.rand(20)
 
-        sol = bgc.unit.oxy_sol(S, T, unit='millimole/m3')
+        sol = bgc.unit.oxy_sol(S, T, P)
 
         self.assertIs(type(sol), np.ndarray)
-
-        with self.assertRaises(ValueError):
-            sol = bgc.unit.oxy_sol(S, T, unit='deg C')
 
     def test_SCOR_conversion(self):
         doxy = 150 + 50*np.random.rand(30)
@@ -99,3 +97,6 @@ class coreTest(unittest.TestCase):
 
         self.assertIs(type(pO2), np.ndarray)
         self.assertIs(type(doxy_back), np.ndarray)
+
+if __name__ == '__main__':
+    unittest.main()
