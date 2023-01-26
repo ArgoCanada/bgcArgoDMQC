@@ -37,10 +37,6 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
         This code is adapted from the SOCCOM SAGE_O2Argo matlab
         code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
         written by Tanya Maurer & Josh Plant
-
-    Change log:
-        23-04-2020: changed zlim to optional input argument
-        29-04-2020: switched file/path handling from os module to pathlib
     '''
 
     # make local_path a Path() object from a string, account for windows path

@@ -130,7 +130,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # need Sprof and meta files
     BRtraj = local_path / dac / wmo / '{}_BRtraj.nc'.format(wmo)
     Sprof  = local_path / dac / wmo / '{}_Sprof.nc'.format(wmo)
-    meta   = local_path / dac /wmo / '{}_meta.nc'.format(wmo)
+    meta   = local_path / dac / wmo / '{}_meta.nc'.format(wmo)
 
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
