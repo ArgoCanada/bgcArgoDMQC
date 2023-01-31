@@ -22,10 +22,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest pytest-cov build numpy gsw netCDF4 matplotlib
+          pip install flake8 unittest coverage build numpy gsw netCDF4 matplotlib
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test coverage
         run: |
-          python -m pytest --cov ./bgcArgoDMQC
+          python -m coverage run -m unittest
+          python -m coverage report
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v1
