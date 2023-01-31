@@ -7,15 +7,18 @@ import bgcArgoDMQC as bgc
 
 class plottingTest(unittest.TestCase):
 
-    bgc.set_dirs(
-        argo_path=bgc.resource.path('Argo'),
-        ncep_path=bgc.resource.path('NCEP'),
-        woa_path=bgc.resource.path('WOA18')
-    )
+    def __init__(self):
+        wmo = 4901784
+        self.wmo = wmo
+
+        bgc.set_dirs(
+            argo_path=bgc.resource.path('Argo'),
+            ncep_path=bgc.resource.path('NCEP'),
+            woa_path=bgc.resource.path('WOA18')
+        )
 
     def test_gain_plot(self):
-
-        syn  = bgc.sprof()
+        syn  = bgc.sprof(self.wmo)
 
         syn.calc_gains()
         syn.calc_gains(ref='WOA')
@@ -29,8 +32,7 @@ class plottingTest(unittest.TestCase):
         plt.close(g_woa.fig)
 
     def test_scatter_plot(self):
-
-        syn = bgc.sprof()
+        syn = bgc.sprof(self.wmo)
         g = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
 
         self.assertIsInstance(g, bgc.fplt.pltClass)
@@ -38,7 +40,7 @@ class plottingTest(unittest.TestCase):
         plt.close(g.fig)
 
     def test_profile_plot(self):
-        syn = bgc.sprof()
+        syn = bgc.sprof(self.wmo)
 
         g_pres = syn.plot('profiles', varlist=['TEMP', 'DOXY'])
         self.assertIsInstance(g_pres, bgc.fplt.pltClass)

@@ -11,17 +11,20 @@ import bgcArgoDMQC as bgc
 
 class coreTest(unittest.TestCase):
 
-    bgc.set_dirs(
-        argo_path=bgc.resource.path('Argo'),
-        ncep_path=bgc.resource.path('NCEP'),
-        woa_path=bgc.resource.path('WOA18')
-    )
+    def __init__(self):
 
-    bgc.io.check_index(mode='install')
-    bgc.io.check_index()
-    bgc.io.update_index()
+        bgc.set_dirs(
+            argo_path=bgc.resource.path('Argo'),
+            ncep_path=bgc.resource.path('NCEP'),
+            woa_path=bgc.resource.path('WOA18')
+        )
 
     def test_index_files(self):
+
+        bgc.io.check_index(mode='install')
+        bgc.io.check_index()
+        bgc.io.update_index()
+        
         # get index files
         bgc_index  = bgc.get_index('bgc')
         core_index = bgc.get_index('global')
