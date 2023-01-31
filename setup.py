@@ -8,7 +8,7 @@ with open('requirements.txt') as fr:
 
 setuptools.setup(
     name='bgcArgoDMQC',
-    version='0.2.11',
+    version='0.2.13',
     license='The MIT License (MIT)',
     author='Christopher Gordon',
     maintainer='cgrdn',
@@ -23,8 +23,6 @@ setuptools.setup(
     data_files=[('global_argo_index', ['bgcArgoDMQC/ref/ar_index_global_meta.txt.gz','bgcArgoDMQC/ref/ar_index_global_prof.txt.gz', 'bgcArgoDMQC/ref/argo_bio-profile_index.txt.gz', 'bgcArgoDMQC/ref/argo_synthetic-profile_index.txt.gz']),
                 ('T_lL_tau_LUT',['bgcArgoDMQC/ref/T_lL_tau_3830_4330.dat'])],
     classifiers=[
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
