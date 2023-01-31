@@ -31,7 +31,7 @@ class plottingTest(unittest.TestCase):
 
     def test_scatter_plot(self):
         wmo = 4901784
-        syn = bgc.sprof(self.wmo)
+        syn = bgc.sprof(wmo)
         g = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
 
         self.assertIsInstance(g, bgc.fplt.pltClass)
@@ -40,7 +40,7 @@ class plottingTest(unittest.TestCase):
 
     def test_profile_plot(self):
         wmo = 4901784
-        syn = bgc.sprof(self.wmo)
+        syn = bgc.sprof(wmo)
 
         g_pres = syn.plot('profiles', varlist=['TEMP', 'DOXY'])
         self.assertIsInstance(g_pres, bgc.fplt.pltClass)
