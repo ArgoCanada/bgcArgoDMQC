@@ -15,6 +15,8 @@ class sprofTest(unittest.TestCase):
 
     def setUp(self):
 
+        print(bgc.resource.path('Argo'))
+
         bgc.set_dirs(
             argo_path=bgc.resource.path('Argo'),
             ncep_path=bgc.resource.path('NCEP'),
