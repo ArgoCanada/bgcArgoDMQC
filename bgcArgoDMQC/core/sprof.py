@@ -51,13 +51,19 @@ class sprof:
             self.check_range('DOXY')
 
     def __getitem__(self, index):
-        return self.df[index]
+        try:
+            return self.df[index]
+        except KeyError:
+            return pd.Series(self.__floatdict__[index])
     
     def __setitem__(self, index, value):
         self.df[index] = value
 
     def __getattr__(self, index):
-        return self.df[index]
+        try:
+            return self.df[index]
+        except KeyError:
+            return pd.Series(self.__floatdict__[index])
 
     def rm_fillvalue(self):
         '''
@@ -181,11 +187,11 @@ class sprof:
 
         if ref == 'NCEP':
             pH2O = unit.pH2O(util.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
-            _, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
+            _, c1, c2 = np.intersect1d(self.CYCLE_NUMBER, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
 
             try:
                 self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
-            except AttributeError:
+            except KeyError:
                 self.get_ncep(verbose=verbose)
                 self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
 
@@ -195,7 +201,7 @@ class sprof:
         if ref == 'WOA':
             try:
                 self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
-            except AttributeError:
+            except KeyError:
                 self.get_woa()
                 self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
             self.gains = self.__WOAgains__
@@ -339,7 +345,7 @@ class sprof:
         try:
             self.__indepdict__[label] = data_dict
             self.__indepmeta__[label] = meta_dict
-        except AttributeError:
+        except KeyError:
             self.__indepdict__ = {label:data_dict}
             self.__indepmeta__ = {label:meta_dict}
 
