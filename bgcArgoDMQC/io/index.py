@@ -12,6 +12,7 @@ from .. import configure
 
 global index_path
 index_path = Path(__file__).parent.parent.absolute() / 'ref'
+index_path.mkdir(exist_ok=True)
 
 global URL_DICT
 URL_DICT = {
