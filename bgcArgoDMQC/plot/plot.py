@@ -8,10 +8,11 @@ import seaborn as sns
 sns.set(style='ticks', context='paper', palette='colorblind')
 
 try:
-    import cmocean.cm as cmo
-    cmocean_flag = True
-except:
-    cmocean_flag = False
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    carto_flag = True
+except ImportError:
+    carto_flag = False
 
 try:
     import cartopy.crs as ccrs
@@ -237,7 +238,7 @@ def profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabels=
 
             if greyflag:
                 c = cm(0.75*(CYCNUM[Ncycle-1 + n-1]/CYCNUM[-1])+0.25)
-            axes[i].plot(subset_df[v], subset_df[zvar], color=c, **kwargs)
+            axes[i].plot(subset_df[v].loc[subset_df[v].notna()], subset_df[zvar].loc[subset_df[v].notna()], color=c, **kwargs)
             
         axes[i].set_ylim(ylim[::-1])
         axes[i].set_xlabel(xlabels[i])
@@ -355,6 +356,7 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
     map_num = 0
     if 'lat' in meta_keys and 'lon' in meta_keys and carto_flag:
         map_num = 1 # change to 1 later, just broken right now
+
     
     nvar = len(set(var_keys))
     fig = plt.figure()

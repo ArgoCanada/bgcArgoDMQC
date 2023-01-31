@@ -1,6 +1,5 @@
 {% set name = "bgcArgoDMQC" %}
-{% set version = "0.2.11" %}
-
+{% set version = "0.2.13" %}
 
 package:
   name: {{ name|lower }}
@@ -8,12 +7,12 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/bgcArgoDMQC-{{ version }}.tar.gz
-  sha256: 9e69abd3e75c3e673c7a31ace9b3e72401ea5b478475dba211705936562fab53
+  sha256: d107d761e9284f6a2ec0f38f41addee70d122fd87302f92e4d73e9e9715f3383
 
 build:
-  number: 0
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv
+  number: 0
 
 requirements:
   host:
@@ -42,7 +41,8 @@ about:
   home: https://github.com/ArgoCanada/bgcArgoDMQC
   summary: A python library for quality control of BGC-Argo data
   license: MIT
-  license_file: LICENSE.txt
+  license_file:
+    - LICENSE.txt
 
 extra:
   recipe-maintainers:
