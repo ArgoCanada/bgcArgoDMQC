@@ -19,10 +19,6 @@ class downloadTest(unittest.TestCase):
         bgc.io.get_argo(wmo, local_path='tmp/Argo/dac/', overwrite=True, nfiles=2)
 
 if __name__ == '__main__':
-    Path('./tmp/Argo/aoml').mkdir(parents=True, exist_ok=True)
-    Path('./tmp/NCEP/pres').mkdir(parents=True, exist_ok=True)
-    Path('./tmp/NCEP/land').mkdir(parents=True, exist_ok=True)
-    Path('./tmp/WOA18/o2sat').mkdir(parents=True, exist_ok=True)
 
     unittest.main()
     

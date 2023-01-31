@@ -38,8 +38,8 @@ class coreTest(unittest.TestCase):
         qcp, qcf = bgc.read_history_qctest(nc)
         bgc.util.display_qctests(qcp, qcf)
 
-        self.assertIs(type(qcp), np.str_)
-        self.assertIs(type(qcf), np.str_)
+        self.assertIs(type(qcp), str)
+        self.assertIs(type(qcf), str)
 
     def test_information_criteria(self):
         # aic and bic
