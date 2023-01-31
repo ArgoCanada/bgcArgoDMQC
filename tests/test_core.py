@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from pathlib import Path
+import warnings
 
 from netCDF4 import Dataset
 
@@ -12,8 +12,9 @@ import bgcArgoDMQC as bgc
 class coreTest(unittest.TestCase):
 
     def setUp(self):
+        warnings.filterwarnings(action='ignore')
 
-        bgc.configure.configure(
+        bgc.set_dirs(
             argo_path=bgc.resource.path('Argo'),
             ncep_path=bgc.resource.path('NCEP'),
             woa_path=bgc.resource.path('WOA18')
@@ -46,16 +47,16 @@ class coreTest(unittest.TestCase):
     def test_information_criteria(self):
         # aic and bic
         data  = np.random.randn(30)
-        resid = np.random.randn(10)/10
+        resid = np.random.randn(150)
         aic = bgc.util.aic(data, resid)
 
-        self.assertIs(type(aic), float)
+        self.assertIs(type(aic), np.float64)
 
         data  = np.random.randn(30)
-        resid = np.random.randn(10)/10
+        resid = np.random.randn(150)
         bic = bgc.util.bic(data, resid)
 
-        self.assertIs(type(bic), float)   
+        self.assertIs(type(bic), np.float64)   
 
     def test_response_time_correction(self):
         # time correction
@@ -72,10 +73,10 @@ class coreTest(unittest.TestCase):
     def test_pO2(self):
         syn = bgc.sprof(4901784)
         pO2 = bgc.unit.pO2(syn.DOXY, syn.PSAL, syn.TEMP)
-        self.assertIs(type(pO2), np.ndarray)
+        self.assertIs(type(pO2), pd.core.series.Series)
 
     def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
+        g, eq, comment = bgc.util.read_gain_value(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc', verbose=False)
 
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(eq[0]), np.str_)

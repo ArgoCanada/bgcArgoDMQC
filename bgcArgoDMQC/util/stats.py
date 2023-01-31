@@ -20,11 +20,6 @@ def aic(data, resid):
     Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
     code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
     written by Tanya Maurer & Josh Plant
-    
-    Last update: 2020-10-27
-    
-    Change log:
-        - 2020-10-27: fixed print output
     '''
 
     # calculate AIC
@@ -65,10 +60,6 @@ def bic(data, resid):
     written by Tanya Maurer & Josh Plant
     
     Last update: 2020-10-27
-    
-    Change log:
-        - 2020-10-27: fixed print output
-
     '''
 
     # calculate BIC
