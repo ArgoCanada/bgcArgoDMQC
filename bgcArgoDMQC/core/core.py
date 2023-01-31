@@ -1,13 +1,9 @@
 import sys
 import copy
 from pathlib import Path
-import fnmatch
 
 import numpy as np
-from scipy.interpolate import interp1d, interp2d
-
 import matplotlib.dates as mdates
-from matplotlib.offsetbox import AnchoredText
 
 import gsw
 from netCDF4 import Dataset
@@ -15,7 +11,6 @@ from netCDF4 import Dataset
 from .. import io
 from .. import interp
 from .. import unit
-from .. import util
 from .. import configure
 
 # ----------------------------------------------------------------------------
@@ -102,65 +97,6 @@ def get_index(index='bgc', **kwargs):
 # FUNCTIONS
 # ----------------------------------------------------------------------------
 
-def get_files(local_path, wmo_numbers, cycles=None, mission='B', mode='RD', verbose=True):
-    local_path = Path(local_path)
-
-    if mission == 'B':
-        if '__bgcindex__' not in globals():
-            global __bgcindex__
-            __bgcindex__ = get_index()
-        subset_index = __bgcindex__[__bgcindex__.wmo.isin(wmo_numbers)]
-    elif mission == 'C':
-        if '__globalindex__' not in globals():
-            global __globalindex__
-            __globalindex__ = get_index(index='global')
-        subset_index = __globalindex__[__globalindex__.wmo.isin(wmo_numbers)]
-    else:
-        raise ValueError('Invalid input for parameter "mission"')
-    if cycles is not None:
-        subset_index = subset_index[subset_index.cycle.isin(cycles)]
-    wcs = ['*' + a + b + '*.nc' for a in mission for b in mode]
-    wcs = [w.replace('C','') for w in wcs]
-
-    matches = [fn for sub in [fnmatch.filter(subset_index.file, w) for w in wcs] for fn in sub]
-    subset_index = subset_index[subset_index.file.isin(matches)]
-    local_files = [(local_path / dac / str(wmo) / 'profiles' / fn.split('/')[-1]) for dac, wmo, fn in zip(subset_index.dac, subset_index.wmo, subset_index.file)]
-
-    remove_ix = []
-    for i,fn in enumerate(local_files):
-        if not Path(fn).exists():
-            if verbose:
-                sys.stdout.write('File {} does not exists locally - removing from returned list, suggest the user downloads using bgcArgo.io.get_argo(...)\n'.format(fn))
-            remove_ix.append(i)
-    
-    if len(remove_ix) > 0:
-        for ix in remove_ix[::-1]:
-            local_files.pop(ix)
-
-    return local_files
-
-def organize_files(files):
-    '''
-    Sort files according to time they were recorded.
-    '''
-    lead_letter = files[0].name[0]
-    if lead_letter == 'R' or lead_letter == 'D':
-        index = get_index('global')
-    else:
-        if '__bgcindex__' not in globals():
-            global __bgcindex__
-            __bgcindex__ = get_index()
-        index = __bgcindex__
-    
-    dates = np.array([index[index.file.str.find(fn.name) != -1].date.iloc[0] for fn in files])
-    sorted_files = list(np.array(files)[np.argsort(dates)])
-
-    return sorted_files
-
-# def load_traj(local_path, wmo):
-
-    # return trajData, trajFile
-
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
@@ -171,27 +107,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         wmo: float ID number
     
     Returns:
-        floatData: python dict() object with the following fields
-            - floatName: WMO number, from input
-            - floatType: Kind of float (APEX, ARVOR, etc.)
-            - N_LEVELS: Number of depth levels, Argo dimension N_LEVELS
-            - N_PROF: Number of profiles, Argo dimension N_PROF
-            - LATITUDE: Latitude (-90, 90) for each profile
-            - LONGITUDE: Longitude (-180, 180) for each profile
-            - SDN: Serial Date Number for each profile
-            - PRES: Pressure (dbar), compressed to vector (1D array)
-            - TEMP: Temperature (deg C)
-            - PSAL: Salinity (psu)
-        if the variables are available, it will also contain:
-            - DOXY: Dissolved Oxygen (micromole/kg)
-            - O2sat: Oxygen percent saturation (%)
-            - PPOX_DOXY: Oxygen partial pressure (mbar) [if avail.]
-            - TRAJ_CYCLE: Cycle number for PPOX_DOXY [if avail.]
-            - inair: Boolean to indicate if in-air data exists
-            
-        for all the variables listen above, there will also exist
-        <PARAM>_QC fields for quality flags, and <PARAM>_ADJUSTED
-        fields if they exist.
+        floatData: python dict() object with Argo variables
     
         CYCLES, LATITUDE, LONGITUDE, and SDN all also have
         analogous <VAR>_GRID fields that match the    
@@ -201,16 +117,6 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         Christopher Gordon
         Fisheries and Oceans Canada
         chris.gordon@dfo-mpo.gc.ca
-    
-    Acknowledgement: this code is adapted from the SOCCOM SAGE_O2Argo matlab
-    code, available via https://github.com/SOCCOM-BGCArgo/ARGO_PROCESSING,
-    written by Tanya Maurer & Josh Plant
-    
-    Change log:
-    
-        - 2020-04-22: updated so that pressure mask determines all variables - need to add all quality flags to output
-        - 2020-04-29: switched file/path handling from os module to pathlib
-        - 2020-10-28: read variable DOXY from BRtraj file and convert to PPOX_DOXY if PPOX_DOXY not in file
     '''
 
     # make local_path a Path() object from a string, account for windows path
@@ -224,7 +130,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # need Sprof and meta files
     BRtraj = local_path / dac / wmo / '{}_BRtraj.nc'.format(wmo)
     Sprof  = local_path / dac / wmo / '{}_Sprof.nc'.format(wmo)
-    meta   = local_path / dac /wmo / '{}_meta.nc'.format(wmo)
+    meta   = local_path / dac / wmo / '{}_meta.nc'.format(wmo)
 
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
@@ -259,7 +165,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # fillvalue dict
     fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
     
-    floatData = read_all_variables(Sprof_nc)
+    floatData = read_flat_variables(Sprof_nc)
     floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
     floatData['CYCLES'] = floatData['CYCLE_NUMBER']
     floatData['WMO'] = wmo
@@ -315,7 +221,24 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def read_all_variables(nc):
+def dict_append(d1, d2):
+    
+    result = copy.deepcopy(d1)
+    for k in d1.keys():
+        result[k] = np.append(d1[k], d2[k])
+
+def read_profiles(files):
+
+    floatdict = None
+    for fn in files:
+        nc = Dataset(fn)
+        data = read_flat_variables(nc)
+
+        floatdict = data if floatdict is None else dict_append(floatdict, data)
+
+    return floatdict
+
+def read_flat_variables(nc):
     '''
     Read all variables and dimensions from an Argo netCDF file.
 
@@ -334,7 +257,7 @@ def read_all_variables(nc):
 
     return floatData
 
-def read_sprof_gridded_variables(nc):
+def read_gridded_variables(nc):
     '''
     Read all variables and dimensions from an Argo Sprof file, do not flatten
     arrays, keep as 2D arrays.
@@ -649,7 +572,7 @@ def calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water):
         e.g., from re-analysis data
         - pO2^{optode}_{surf in-water} is the oxygen partial pressure observed by 
         the optode at the water surface (in-water), e.g., MC = X+10 or profile 
-        MC = X–10
+        MC = X-10
         - c is the slope of the 'carry-over' effect, i.e., the water-fraction of 
         the observed optode in-air data.
 
@@ -726,74 +649,6 @@ def calc_fixed_doxy_adjusted_error(S, T, P, fix_err=10):
 
     return error
 
-def oxy_b(dt, tau):
-    inv_b = 1 + 2*(tau/dt)
-    return 1/inv_b
-
-def oxy_a(dt, tau):
-    return 1 - 2*oxy_b(dt, tau)
-
-# hard code the LUT table value so I don't have to 
-# ship the text file with the package
-### is this the right/ok way to do this??? feels wrong ###
-from ..lut import lut as lut_data
-
-def correct_response_time(t, DO, T, thickness):
-
-    # convert time to seconds
-    t_sec = t*24*60*60
-
-    # array for the loop
-    N = DO.shape[0]
-    mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = t_sec[:-1] + np.diff(t_sec)/2
-    mean_temp = T[:-1] + np.diff(T)/2
-
-    # load temperature, boundary layer thickness, and tau matrix from 
-    # look-up table provided in the supplement to Bittig and Kortzinger (2017)
-    lut_lL = lut_data[0,1:]
-    lut_T  = lut_data[1:,0]
-    tau100 = lut_data[1:,1:]
-    thickness = thickness*np.ones((N-1,))
-
-    # translate boundary layer thickness to temperature dependent tau
-    f_thickness = interp2d(lut_T, lut_lL, tau100.T, bounds_error=False)
-    tau_T = np.squeeze(f_thickness(mean_temp, thickness))[0,:]
-    # loop through oxygen data 
-    for i in range(N-1):
-        dt = t_sec[i+1] - t_sec[i]
-
-        # do the correction using the mean filter, get the mean time
-        mean_oxy[i]  = (1/(2*oxy_b(dt, tau_T[i])))*(DO[i+1] - oxy_a(dt, tau_T[i])*DO[i])
-    
-    # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
-    DO_out = f(t_sec)
-
-    return DO_out
-
-def correct_response_time_Tconst(t, DO, tau):
-    # convert time to seconds
-    t_sec = t*24*60*60
-
-    # array for the loop
-    N = DO.shape[0]
-    mean_oxy  = np.array((N-1)*[np.nan])
-    mean_time = t_sec[:-1] + np.diff(t_sec)/2
-
-    # loop through oxygen data
-    for i in range(N-1):
-        dt = t_sec[i+1] - t_sec[i]
-
-        # do the correction using the mean filter, get the mean time
-        mean_oxy[i]  = (1/(2*oxy_b(dt, tau)))*(DO[i+1] - oxy_a(dt, tau)*DO[i])
-    
-    # interpolate back to original times for output
-    f = interp1d(mean_time, mean_oxy, kind='linear', bounds_error=False, fill_value='extrapolate')
-    DO_out = f(t_sec)
-
-    return DO_out
-
 def get_optode_type(wmo):
     if '__metaindex__' not in globals():
         global __metaindex__
@@ -810,59 +665,3 @@ def get_optode_type(wmo):
     else:
         optode_type = io.read_ncstr(nc['SENSOR_MODEL'][:].data[doxy_index[0], :])
         return optode_type
-
-def profile_qc(flags):
-    '''
-    Return overall profile quality flag via the following from the Argo User
-    Manual (v 3.41):
-
-    3.2.2 Reference table 2a: overall profile quality flag
-    https://vocab.nerc.ac.uk/collection/RP2/current
-    N is defined as the percentage of levels with good data where:
-    - QC flag values of 1, 2, 5, or 8 are considered GOOD data
-    - QC flag values of 9 (missing) or " " are NOT USED in the computation
-    All other QC flag values are BAD data
-    The computation should be taken from <PARAM_ADJUSTED>_QC if available and from 
-    <PARAM>_QC otherwise.
-    n Meaning
-    "" No QC performed
-    A N = 100%; All profile levels contain good data.
-    B 75% <= N < 100%
-    C 50% <= N < 75%
-    D 25% <= N < 50%
-    E 0% < N < 25%
-    F N = 0%; No profile levels have good data.
-
-    Args:
-        - flags (pandas.Series): quality flags for a given profile
-    Returns:
-        - grade (str): profile grade based on description above
-    '''
-    
-    n_good = flags.isin([1, 2, 5, 8]).sum()
-    n_exclude = flags.isin([9]).sum()
-
-    pct = 100*n_good/(flags.size - n_exclude)
-
-    grade = np.nan
-
-    if flags.isin([0]).sum() >= flags.size - n_exclude:
-        grade = ''
-
-    if pct == 100:
-        grade = 'A'
-    elif pct >= 75:
-        grade = 'B'
-    elif pct >= 50:
-        grade = 'C'
-    elif pct >= 25:
-        grade = 'D'
-    elif pct > 0:
-        grade = 'E'
-    elif pct == 0:
-        grade = 'F'
-
-    if not type(grade) == str and np.isnan(grade):
-        raise ValueError('No grade assigned, check input value of `flags`')
-
-    return grade
