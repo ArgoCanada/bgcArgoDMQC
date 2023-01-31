@@ -13,7 +13,7 @@ class coreTest(unittest.TestCase):
 
     def setUp(self):
 
-        bgc.set_dirs(
+        bgc.configure.configure(
             argo_path=bgc.resource.path('Argo'),
             ncep_path=bgc.resource.path('NCEP'),
             woa_path=bgc.resource.path('WOA18')
