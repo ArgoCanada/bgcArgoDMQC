@@ -21,8 +21,9 @@ from . import unit
 from . import util
 from . import io
 from . import interp
+from . import resource
 
-__all__ = ['plot', 'unit', 'util', 'io', 'interp', 'configure']
+__all__ = ['plot', 'unit', 'util', 'io', 'interp', 'configure', 'resource']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
