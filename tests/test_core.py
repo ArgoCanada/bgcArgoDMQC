@@ -36,6 +36,9 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(syn_index), pd.core.frame.DataFrame)
 
     def test_qc_read(self):
+        wmo = 4901784
+        bgc.resource.path('Argo').mkdir(exist_ok=True)
+        bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=True, nfiles=2)
         # read QC test
         nc = Dataset(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
         qcp, qcf = bgc.read_history_qctest(nc)
@@ -71,11 +74,17 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(doxy_adj_Tconst), np.ndarray)
 
     def test_pO2(self):
-        syn = bgc.sprof(4901784)
-        pO2 = bgc.unit.pO2(syn.DOXY, syn.PSAL, syn.TEMP)
-        self.assertIs(type(pO2), pd.core.series.Series)
+        time = np.arange(0,20,1)
+        psal = 35*np.random.rand(time.shape[0])
+        temp = 12*np.random.rand(time.shape[0])
+        doxy = 200*np.random.rand(time.shape[0])
+        pO2 = bgc.unit.pO2(doxy, psal, temp)
+        self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
+        wmo = 4901784
+        bgc.resource.path('Argo').mkdir(exist_ok=True)
+        bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=True, nfiles=2)
         g, eq, comment = bgc.util.read_gain_value(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc', verbose=False)
 
         self.assertIs(type(g[0]), np.str_)
