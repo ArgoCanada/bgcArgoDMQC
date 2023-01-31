@@ -86,7 +86,7 @@ def get_index(index='bgc', **kwargs):
             __trajindex__ = io.read_index(mission='T')
         return_index = __trajindex__
     else:
-        raise ValueError('Input "{}" is unrecognized'.format(index))
+        raise ValueError(f'Input "{index}" is unrecognized')
 
     for arg, val in kwargs.items():
         return_index = return_index[return_index[arg] == val]
@@ -128,9 +128,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
-    BRtraj = local_path / dac / wmo / '{}_BRtraj.nc'.format(wmo)
-    Sprof  = local_path / dac / wmo / '{}_Sprof.nc'.format(wmo)
-    meta   = local_path / dac / wmo / '{}_meta.nc'.format(wmo)
+    BRtraj = local_path / dac / wmo / f'{wmo}_BRtraj.nc'
+    Sprof  = local_path / dac / wmo / f'{wmo}_Sprof.nc'
+    meta   = local_path / dac / wmo / f'{wmo}_meta.nc'
 
     # check if BRtraj is there, flag for moving forward if not
     BRtraj_flag = True
@@ -150,9 +150,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     # Sprof and meta are required, so raise error if they are not there
     if not Sprof.exists():
-        raise FileNotFoundError('No such Sprof file: {}'.format(Sprof))
+        raise FileNotFoundError(f'No such Sprof file: {Sprof.absolute()}')
     if not meta.exists():
-        raise FileNotFoundError('No such meta file: {}'.format(meta))
+        raise FileNotFoundError(f'No such meta file: {meta.absolute()}')
 
     # load synthetic and meta profiles
     Sprof_nc = Dataset(Sprof, 'r')
