@@ -34,7 +34,7 @@ jobs:
         run: |
           cd tests
           pip install $(ls ../dist/bgcArgoDMQC-*.whl)
-          python -m unittest discover
+          pytest
       - name: Upload dist
         uses: actions/upload-artifact@main
         with:
