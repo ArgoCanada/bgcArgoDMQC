@@ -11,7 +11,7 @@ import bgcArgoDMQC as bgc
 
 class coreTest(unittest.TestCase):
 
-    def __init__(self):
+    def setUp(self):
 
         bgc.set_dirs(
             argo_path=bgc.resource.path('Argo'),
