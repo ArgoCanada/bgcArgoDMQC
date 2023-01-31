@@ -13,11 +13,10 @@ import bgcArgoDMQC as bgc
 
 class sprofTest(unittest.TestCase):
 
-    tmp = Path('./tmp')
     bgc.set_dirs(
-        argo_path=tmp / 'Argo',
-        ncep_path=tmp / 'NCEP',
-        woa_path=tmp / 'WOA18'
+        argo_path=bgc.resource.path('Argo'),
+        ncep_path=bgc.resource.path('NCEP'),
+        woa_path=bgc.resource.path('WOA18')
     )
 
     def test_sprof(self):

@@ -11,11 +11,10 @@ import bgcArgoDMQC as bgc
 
 class coreTest(unittest.TestCase):
 
-    tmp = Path('./tmp')
     bgc.set_dirs(
-        argo_path=tmp / 'Argo/dac',
-        ncep_path=tmp / 'NCEP',
-        woa_path=tmp / 'WOA18'
+        argo_path=bgc.resource.path('Argo'),
+        ncep_path=bgc.resource.path('NCEP'),
+        woa_path=bgc.resource.path('WOA18')
     )
 
     bgc.io.check_index(mode='install')
@@ -34,7 +33,7 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         # read QC test
-        nc = Dataset(Path('tmp/Argo/dac/meds/4901784/profiles/BD4901784_001.nc'))
+        nc = Dataset(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
         qcp, qcf = bgc.read_history_qctest(nc)
         bgc.util.display_qctests(qcp, qcf)
 
@@ -73,7 +72,7 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(Path('tmp/Argo/dac/meds/4901784/profiles/BD4901784_001.nc'))
+        g, eq, comment = bgc.util.read_gain_value(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
 
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(eq[0]), np.str_)
