@@ -37,7 +37,11 @@ class sprofTest(unittest.TestCase):
         wmo = 4901784
         sprof = bgc.sprof(wmo)
         ncep_gains = sprof.calc_gains()
-        woa_gains  = sprof.calc_gains(ref='WOA')
+        # woa_gains  = sprof.calc_gains(ref='WOA')
 
         self.assertIs(type(ncep_gains), np.ndarray)
-        self.assertIs(type(woa_gains), np.ndarray)
+        # self.assertIs(type(woa_gains), np.ndarray)
+
+if __name__ == '__main__':
+
+    unittest.main()

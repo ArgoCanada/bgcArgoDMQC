@@ -41,6 +41,7 @@ class sprof:
         self.woa_path  = WOA_PATH
         self.ncep_path = NCEP_PATH
 
+        self.get_track()
         self.to_dataframe()
 
         if not keep_fillvalue:
@@ -159,9 +160,6 @@ class sprof:
         Loads NCEP data along the float track
         '''
 
-        if not hasattr(self, 'track'):
-            self.get_track()
-
         self.NCEP, self.__NCEPweights__ = ncep_to_float_track('pres', self.track, local_path=self.ncep_path)
         
         return copy.deepcopy(self.NCEP)
@@ -171,9 +169,6 @@ class sprof:
         Loads WOA data along the float track
         '''
 
-        if not hasattr(self, 'track'):
-            self.get_track()
-        
         self.z_WOA, self.WOA, self.__WOAweights__ = woa_to_float_track(self.track, 'O2sat', local_path=self.woa_path, verbose=verbose)
 
         return copy.deepcopy(self.WOA)
@@ -184,28 +179,25 @@ class sprof:
         calc_gain(). 
         '''
 
-        if not hasattr(self, 'track'):
-            self.get_track()
-
         if ref == 'NCEP':
-            # check if reference data is already calculated
-            if not hasattr(self, 'NCEP'):
-                self.get_ncep(verbose=verbose)
-
             pH2O = unit.pH2O(util.get_var_by('TEMP_DOXY', 'TRAJ_CYCLE', self.__floatdict__))
+            _, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
 
-            common_cycles, c1, c2 = np.intersect1d(self.CYCLE, np.unique(self.__floatdict__['TRAJ_CYCLE']), assume_unique=True, return_indices=True)
+            try:
+                self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
+            except AttributeError:
+                self.get_ncep(verbose=verbose)
+                self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
 
-            self.NCEP_PPOX = unit.atmos_pO2(self.NCEP[c1], pH2O[c2])/100
             self.__NCEPgains__, self.__NCEPfloatref__ = calc_gain(self.__floatdict__, self.NCEP_PPOX, verbose=verbose)
             self.gains = self.__NCEPgains__
 
         if ref == 'WOA':
-            # check if reference data is already calculated
-            if not hasattr(self, 'WOA'):
-                self.get_woa(verbose=verbose)
-
-            self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
+            try:
+                self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
+            except AttributeError:
+                self.get_woa()
+                self.__WOAgains__, self.__WOAfloatref__, self.__WOAref__ = calc_gain(self.__floatdict__, dict(z=self.z_WOA, WOA=self.WOA), inair=False, zlim=zlim, verbose=verbose)
             self.gains = self.__WOAgains__
         
         self.gain = np.nanmean(self.gains)
@@ -233,24 +225,15 @@ class sprof:
         elif kind == 'cscatter':
             var = kwargs.pop('varname')
 
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
-
             g = plot.var_cscatter(self.df, varname=var, **kwargs)
 
         elif kind == 'profiles':
             varlist = kwargs.pop('varlist')
 
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
-
             g = plot.profiles(self.df, varlist=varlist, **kwargs)
 
         elif kind == 'qcprofiles':
             varlist = kwargs.pop('varlist')
-
-            if not hasattr(self, 'df'):
-                self.to_dataframe()
 
             g = plot.qc_profiles(self.df, varlist=varlist, **kwargs)
 
@@ -352,22 +335,18 @@ class sprof:
         # default label value        
         if label is None:
             label = ' '
-        # if there isn't already independent data, make a dict for it
-        if not hasattr(self, '__indepdict__'):
-            self.__indepdict__ = {label:data_dict}
-            self.__indepmeta__ = {label:meta_dict}
-        # if there is one already, append to it
-        else:
+            
+        try:
             self.__indepdict__[label] = data_dict
             self.__indepmeta__[label] = meta_dict
+        except AttributeError:
+            self.__indepdict__ = {label:data_dict}
+            self.__indepmeta__ = {label:meta_dict}
 
     def compare_independent_data(self, fmt='*', **kwargs):
         '''
         Plot the independent data overtop of the nearest profile in time
         '''
-
-        if not hasattr(self, 'df'):
-            self.df = self.to_dataframe()
 
         plot_dict = copy.deepcopy(self.__indepdict__)
         meta_dict = copy.deepcopy(self.__indepmeta__)
