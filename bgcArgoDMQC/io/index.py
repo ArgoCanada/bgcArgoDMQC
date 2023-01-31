@@ -11,9 +11,7 @@ import pandas as pd
 from .. import configure
 
 global index_path
-index_path = Path('../../').absolute() / 'ref'
-if not index_path.exists():
-    index_path.mkdir()
+index_path = Path(__file__).parent.absolute() / 'ref'
 
 global URL_DICT
 URL_DICT = {
