@@ -3,7 +3,7 @@ from pathlib import Path
 
 def path(loc):
 
-    local_absolute = Path(__file__).parent.absolute() / 'data'
     loc = 'Argo/dac' if loc=='Argo' else loc
+    local_absolute = Path(__file__).parent.absolute() / 'data'
 
     return local_absolute / loc
