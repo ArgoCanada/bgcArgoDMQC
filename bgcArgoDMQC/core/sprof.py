@@ -31,13 +31,13 @@ class sprof:
     
     def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
+        self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(io.Path.ARGO_PATH, wmo, grid=True, verbose=verbose)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
+        self.argo_path = io.Path.ARGO_PATH
+        self.woa_path  = io.Path.WOA_PATH
+        self.ncep_path = io.Path.NCEP_PATH
 
         self.get_track()
         self.to_dataframe()

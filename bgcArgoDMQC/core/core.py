@@ -11,30 +11,15 @@ from netCDF4 import Dataset
 from .. import io
 from .. import interp
 from .. import unit
-from .. import configure
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
 
-def get_config_dirs():
+def set_dirs(**kwargs):
     '''
-    Get previously set local directories to look for Argo, WOA, and NCEP data.
-    '''
+    Convenience wrapper for bgcArgoDMQC.io.PathHandler().set_dirs()
 
-    config = configure.read_config()
-    if 'argo_path' in config.keys():
-        global ARGO_PATH
-        ARGO_PATH = config['argo_path']
-    if 'ncep_path' in config.keys():
-        global NCEP_PATH
-        NCEP_PATH = config['ncep_path']
-    if 'woa_path' in config.keys():
-        global WOA_PATH
-        WOA_PATH = config['woa_path']
-
-def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
-    '''
     Set local directories to look for Argo, WOA, and NCEP data.
 
     Args:
@@ -43,12 +28,7 @@ def set_dirs(argo_path='./', woa_path=None, ncep_path=None):
         woa_path (str or path-like): location of local World Ocean Atlas data
     '''
 
-    global ARGO_PATH
-    ARGO_PATH = argo_path
-    global WOA_PATH
-    WOA_PATH  = woa_path
-    global NCEP_PATH
-    NCEP_PATH = ncep_path
+    io.Path.set_dirs(**kwargs)
 
 def get_index(index='bgc', **kwargs):
     '''

@@ -22,7 +22,7 @@ if 'default_url' in config.keys():
     URL = URL_DICT[url_name]
 else:
     URL = 'ftp.ifremer.fr'
-    
+
 def path(loc):
 
     loc = 'Argo/dac' if loc=='Argo' else loc
