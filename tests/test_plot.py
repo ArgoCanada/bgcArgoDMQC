@@ -20,9 +20,9 @@ class plottingTest(unittest.TestCase):
         syn = bgc.sprof(wmo)
 
         g_pres = syn.plot('profiles', varlist=['TEMP', 'DOXY'])
-        self.assertIsInstance(g_pres, bgc.fplt.pltClass)
+        self.assertIsInstance(g_pres, bgc.plot.pltClass)
         plt.close(g_pres.fig)
 
         g_pden = syn.plot('profiles', varlist=['PSAL', 'DOXY'], Nprof=5, Ncycle=3, zvar='PDEN')
-        self.assertIsInstance(g_pden, bgc.fplt.pltClass)
+        self.assertIsInstance(g_pden, bgc.plotlt.pltClass)
         plt.close(g_pden.fig)
