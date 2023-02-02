@@ -633,7 +633,7 @@ def get_optode_type(wmo):
     
     ix = __metaindex__[__metaindex__.wmo == wmo]
 
-    local_file = Path(ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
+    local_file = Path(io.Path.ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
     nc = Dataset(local_file)
 
     doxy_index = io.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
