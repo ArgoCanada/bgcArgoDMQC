@@ -27,7 +27,7 @@ __all__ = ['plot', 'unit', 'util', 'io', 'interp', 'configure', 'resource']
 
 __author__ = ['Christopher Gordon <chris.gordon@dfo-mpo.gc.ca>']
 
-__version__ = '0.2.13'
+__version__ = '0.2.14'
 
 # check age of index file, or if it exists
 if not io.index_exists():

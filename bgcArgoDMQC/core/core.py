@@ -17,9 +17,6 @@ from .. import configure
 # LOCAL MACHINE SETUP
 # ----------------------------------------------------------------------------
 
-global REF_PATH
-REF_PATH = Path(__file__).parent.absolute() / 'ref'
-
 def get_config_dirs():
     '''
     Get previously set local directories to look for Argo, WOA, and NCEP data.

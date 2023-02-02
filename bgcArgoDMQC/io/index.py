@@ -8,35 +8,7 @@ from time import time
 import numpy as np
 import pandas as pd
 
-from .. import configure
-
-global index_path
-index_path = Path(__file__).parent.parent.absolute() / 'ref'
-index_path.mkdir(exist_ok=True)
-
-global URL_DICT
-URL_DICT = {
-    'ftp.ifremer.fr':'ftp.ifremer.fr', 
-    'ifremer':'ftp.ifremer.fr', 
-    'coriolis':'ftp.ifremer.fr', 
-    'usgodae.org':'usgodae.org', 
-    'godae':'usgodae.org', 
-    'us':'usgodae.org'
-}
-
-global URL_DIR_DICT
-URL_DIR_DICT = {
-    'ftp.ifremer.fr':'/ifremer/argo/', 
-    'usgodae.org':'/pub/outgoing/argo/', 
-}
-
-global URL
-config = configure.read_config()
-if 'default_url' in config.keys():
-    url_name = config.pop('default_url')
-    URL = URL_DICT[url_name]
-else:
-    URL = 'ftp.ifremer.fr'
+from .. import resource
 
 def index_exists():
 
@@ -44,14 +16,14 @@ def index_exists():
     index = 'ar_index_global_prof.txt.gz'
     bgc   = 'argo_bio-profile_index.txt.gz'
     synth = 'argo_synthetic-profile_index.txt.gz'
-    local_meta  = index_path / meta
-    local_index = index_path / index
-    local_bgc   = index_path / bgc
-    local_synth = index_path / synth
+    local_meta  = resource.path('Index') / meta
+    local_index = resource.path('Index') / index
+    local_bgc   = resource.path('Index') / bgc
+    local_synth = resource.path('Index') / synth
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists()])
 
-def read_index(mission='B', remote=False, url=URL):
+def read_index(mission='B', remote=False, url=resource.URL):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
@@ -60,21 +32,21 @@ def read_index(mission='B', remote=False, url=URL):
         mission (str): *B*, *C*, *S*, or *M* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
     '''
 
-    url_dir = URL_DIR_DICT[url]
+    url_dir = resource.URL_DIR_DICT[url]
     if mission == 'B':
-        local_filename = index_path / 'argo_bio-profile_index.txt.gz'
+        local_filename = resource.path('Index') / 'argo_bio-profile_index.txt.gz'
         remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_bio-profile_index.txt.gz').as_posix()
     elif mission == 'C':
-        local_filename = index_path / 'ar_index_global_prof.txt.gz'
+        local_filename = resource.path('Index') / 'ar_index_global_prof.txt.gz'
         remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_prof.txt.gz').as_posix()
     elif mission == 'S':
-        local_filename = index_path / 'argo_synthetic-profile_index.txt.gz'
+        local_filename = resource.path('Index') / 'argo_synthetic-profile_index.txt.gz'
         remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_synthetic-profile_index.txt.gz').as_posix()
     elif mission == 'M':
-        local_filename = index_path / 'ar_index_global_meta.txt.gz'
+        local_filename = resource.path('Index') / 'ar_index_global_meta.txt.gz'
         remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_meta.txt.gz').as_posix()
     elif mission == 'T':
-        local_filename = index_path / 'ar_index_global_traj.txt.gz'
+        local_filename = resource.path('Index') / 'ar_index_global_traj.txt.gz'
         remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
     else:
         raise ValueError('Input {} not recognized'.format(mission))
@@ -96,14 +68,14 @@ def read_index(mission='B', remote=False, url=URL):
 
     return df
 
-def update_index(ftype=None, url=URL):
+def update_index(ftype=None, url=resource.URL):
     '''
     Function to access FTP server to download Argo metadata and profile global
     index files
     '''
 
     ftp = ftplib.FTP(url)
-    url_dir = URL_DIR_DICT[url]
+    url_dir = resource.URL_DIR_DICT[url]
     ftp.login()
     ftp.cwd(url_dir)
 
@@ -114,31 +86,31 @@ def update_index(ftype=None, url=URL):
     synth = 'argo_synthetic-profile_index.txt.gz'
 
 
-    local_meta = index_path / meta
+    local_meta = resource.path('Index') / meta
     if ftype is None or ftype == 'meta':
         lf = open(local_meta, 'wb')
         ftp.retrbinary('RETR ' + meta, lf.write)
         lf.close()
 
-    local_traj = index_path / traj
+    local_traj = resource.path('Index') / traj
     if ftype is None or ftype == 'traj':
         lf = open(local_traj, 'wb')
         ftp.retrbinary('RETR ' + traj, lf.write)
         lf.close()
 
-    local_index = index_path / index
+    local_index = resource.path('Index') / index
     if ftype is None or ftype =='profile' or ftype == 'C':
         lf = open(local_index, 'wb')
         ftp.retrbinary('RETR ' + index, lf.write)
         lf.close()
 
-    local_bgc = index_path / bgc
+    local_bgc = resource.path('Index') / bgc
     if ftype is None or ftype =='bgc' or ftype == 'B':
         lf = open(local_bgc, 'wb')
         ftp.retrbinary('RETR ' + bgc, lf.write)
         lf.close()
 
-    local_synth = index_path / synth
+    local_synth = resource.path('Index') / synth
     if ftype is None or ftype =='synthetic' or ftype == 'S':
         lf = open(local_synth, 'wb')
         ftp.retrbinary('RETR ' + synth, lf.write)
@@ -157,10 +129,10 @@ def check_index(mode=None):
         index = 'ar_index_global_prof.txt.gz'
         bgc   = 'argo_bio-profile_index.txt.gz'
         synth = 'argo_synthetic-profile_index.txt.gz'
-        local_meta  = index_path / meta
-        local_index = index_path / index
-        local_bgc   = index_path / bgc
-        local_synth = index_path / synth
+        local_meta  = resource.path('Index') / meta
+        local_index = resource.path('Index') / index
+        local_bgc   = resource.path('Index') / bgc
+        local_synth = resource.path('Index') / synth
 
         meta_mtime  = local_meta.stat().st_mtime
         index_mtime = local_index.stat().st_mtime
@@ -195,10 +167,10 @@ def check_index(mode=None):
         index = 'ar_index_global_prof.txt.gz'
         bgc   = 'argo_bio-profile_index.txt.gz'
         synth = 'argo_synthetic-profile_index.txt.gz'
-        local_meta  = index_path / meta
-        local_index = index_path / index
-        local_bgc   = index_path / bgc
-        local_synth = index_path / synth
+        local_meta  = resource.path('Index') / meta
+        local_index = resource.path('Index') / index
+        local_bgc   = resource.path('Index') / bgc
+        local_synth = resource.path('Index') / synth
 
         if not ((local_meta.exists() and local_index.exists()) and (local_bgc.exists() and local_synth.exists())):
             sys.stdout.write('At least one index file does not exist - downloading now - this may take some time depending on your internet connection\n')

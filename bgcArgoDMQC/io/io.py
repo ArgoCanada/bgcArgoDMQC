@@ -5,7 +5,8 @@ import ftplib
 import numpy as np
 
 from .. import util
-from .index import get_dac, URL_DIR_DICT, URL
+from .index import get_dac
+from ..resource import URL_DIR_DICT, URL
 
 def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, nfiles=None):
     '''
