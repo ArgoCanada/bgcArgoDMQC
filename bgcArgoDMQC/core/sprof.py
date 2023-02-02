@@ -29,8 +29,6 @@ class sprof:
         gains = syn.calc_gains(ref='NCEP')
     '''
     
-    set_dirs = set_dirs
-
     def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
