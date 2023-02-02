@@ -20,9 +20,9 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_dir={'bgcArgoDMQC': 'bgcArgoDMQC'},
     install_requires=requirements,
-    data_files=[('global_argo_index', ['bgcArgoDMQC/ref/ar_index_global_meta.txt.gz','bgcArgoDMQC/ref/ar_index_global_prof.txt.gz', 'bgcArgoDMQC/ref/argo_bio-profile_index.txt.gz', 'bgcArgoDMQC/ref/argo_synthetic-profile_index.txt.gz']),
-                ('T_lL_tau_LUT',['bgcArgoDMQC/ref/T_lL_tau_3830_4330.dat']),
-                ('resource_files', ['bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_BRtraj.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_meta.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_prof.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_Rtraj.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_Sprof.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/4901784_tech.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/profiles/BD4901784_000.nc', 'bgcArgoDMQC/resource/Argo/dac/meds/4901784/profiles/BD4901784_001.nc', 'bgcArgoDMQC/resource/NCEP/rhum/rhum.sig995.2019.nc', 'bgcArgoDMQC/resource/NCEP/rhum/rhum.sig995.2020.nc', 'bgcArgoDMQC/resource/WOA18/o2sat/ghost.txt'])],
+    include_package_data=True,
+    package_data=[('global_argo_index', ['ref/*']),
+                ('resource_files', ['resource/data/*'])],
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
