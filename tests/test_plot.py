@@ -24,5 +24,5 @@ class plottingTest(unittest.TestCase):
         plt.close(g_pres.fig)
 
         g_pden = syn.plot('profiles', varlist=['PSAL', 'DOXY'], Nprof=5, Ncycle=3, zvar='PDEN')
-        self.assertIsInstance(g_pden, bgc.plotlt.pltClass)
+        self.assertIsInstance(g_pden, bgc.plot.pltClass)
         plt.close(g_pden.fig)
