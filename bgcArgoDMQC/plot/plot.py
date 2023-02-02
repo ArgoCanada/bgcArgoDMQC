@@ -14,13 +14,6 @@ try:
 except ImportError:
     carto_flag = False
 
-try:
-    import cartopy.crs as ccrs
-    import cartopy.feature as cfeature
-    carto_flag = True
-except:
-    carto_flag = False
-
 from . import style
 from .. import util
 

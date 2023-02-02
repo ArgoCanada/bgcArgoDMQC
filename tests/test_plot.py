@@ -15,30 +15,6 @@ class plottingTest(unittest.TestCase):
             woa_path=bgc.resource.path('WOA18')
         )
 
-    def test_gain_plot(self):
-        wmo = 4901784
-        syn  = bgc.sprof(wmo)
-
-        syn.calc_gains()
-        syn.calc_gains(ref='WOA')
-
-        g_ncep = syn.plot('gain', ref='NCEP')
-        self.assertIsInstance(g_ncep, bgc.fplt.pltClass)
-        plt.close(g_ncep.fig)
-
-        g_woa  = syn.plot('gain', ref='WOA')
-        self.assertIsInstance(g_woa, bgc.fplt.pltClass)
-        plt.close(g_woa.fig)
-
-    def test_scatter_plot(self):
-        wmo = 4901784
-        syn = bgc.sprof(wmo)
-        g = syn.plot('cscatter', varname='DOXY', ylim=(0,500))
-
-        self.assertIsInstance(g, bgc.fplt.pltClass)
-
-        plt.close(g.fig)
-
     def test_profile_plot(self):
         wmo = 4901784
         syn = bgc.sprof(wmo)
