@@ -37,7 +37,7 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         wmo = 4901784
-        bgc.resource.path('Argo').mkdir(exist_ok=True)
+        bgc.resource.path('Argo').mkdir(exist_ok=True, parents=True)
         bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=True, nfiles=2)
         # read QC test
         nc = Dataset(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
