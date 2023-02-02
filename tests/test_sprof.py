@@ -16,8 +16,8 @@ class sprofTest(unittest.TestCase):
     def setUp(self):
 
         wmo = 4901784
-        bgc.resource.path('Argo').mkdir(exist_ok=True)
-        bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=True, nfiles=2)
+        bgc.resource.path('Argo').mkdir(exist_ok=True, parents=True)
+        bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=False, nfiles=2)
 
         bgc.set_dirs(
             argo_path=bgc.resource.path('Argo'),
