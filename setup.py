@@ -21,9 +21,7 @@ setuptools.setup(
     package_dir={'bgcArgoDMQC': 'bgcArgoDMQC'},
     install_requires=requirements,
     include_package_data=True,
-    package_data={'global_argo_index' : ['ref/*.txt.gz'],
-                'time_response_lut' : ['ref/T*.dat'],
-                'resource_files' : ['resource/data/*']},
+    package_data={'' : ['ref/*', 'resource/data/*']},
     classifiers=[
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
