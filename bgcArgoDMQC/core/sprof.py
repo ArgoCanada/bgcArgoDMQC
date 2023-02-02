@@ -129,7 +129,6 @@ class sprof:
         '''
 
         df = pd.DataFrame()
-        n_level = self.__floatdict__['N_LEVELS']        
         priority_vars = ['PRES', 'PRES_QC', 'TEMP', 'TEMP_QC', 'PSAL', 'PSAL_QC']
         bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
         priority_vars = priority_vars + bgc_vars
@@ -137,10 +136,13 @@ class sprof:
         for v in priority_vars:
             df[v] = self.__floatdict__[v]
 
+        n_level = df.shape[0]
+
         for k in set(self.__floatdict__.keys()) - set(df.columns):
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
+            print(k, dim)
             if dim == n_level:
-                df[k] = self.__floatdict__[k]
+                df[k.replace('_GRID', '')] = self.__floatdict__[k]
         
         self.df = df
 
