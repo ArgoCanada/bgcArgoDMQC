@@ -33,7 +33,7 @@ jobs:
           python -m build
       - name: Test coverage
         run: |
-          pip install $(ls ../dist/bgcArgoDMQC-*.whl)
+          pip install $(ls dist/bgcArgoDMQC-*.whl)
           coverage run -m unittest
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v2
