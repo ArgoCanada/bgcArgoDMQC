@@ -10,9 +10,9 @@ class plottingTest(unittest.TestCase):
     def setUp(self):
 
         bgc.set_dirs(
-            argo_path=bgc.resource.path('Argo'),
-            ncep_path=bgc.resource.path('NCEP'),
-            woa_path=bgc.resource.path('WOA18')
+            argo_path='test_data/Argo/dac',
+            ncep_path='test_data/NCEP',
+            woa_path='test_data/WOA18'
         )
 
     def test_profile_plot(self):

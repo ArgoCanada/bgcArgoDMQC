@@ -15,9 +15,9 @@ class coreTest(unittest.TestCase):
         warnings.filterwarnings(action='ignore')
 
         bgc.set_dirs(
-            argo_path=bgc.resource.path('Argo'),
-            ncep_path=bgc.resource.path('NCEP'),
-            woa_path=bgc.resource.path('WOA18')
+            argo_path='test_data/Argo/dac',
+            ncep_path='test_data/NCEP',
+            woa_path='test_data/WOA18'
         )
 
     def test_index_files(self):
