@@ -34,6 +34,6 @@ jobs:
       - name: Test coverage
         run: |
           pip install $(ls dist/bgcArgoDMQC-*.whl)
-          coverage run -m unittest
+          pytest --cov -v
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v2
