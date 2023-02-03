@@ -10,9 +10,7 @@ on:
 
 jobs:
   code-coverage:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -35,7 +33,6 @@ jobs:
           python -m build
       - name: Test coverage
         run: |
-          cd tests
           pip install $(ls ../dist/bgcArgoDMQC-*.whl)
           coverage run -m unittest
       - name: "Upload coverage to Codecov"
