@@ -1,6 +1,4 @@
 include requirements.txt
 include LICENSE.txt
-include bgcArgoDMQC/resource/data/Argo/dac/meds/4901784/*.nc
-include bgcArgoDMQC/resource/data/Argo/dac/meds/4901784/profiles/*.nc
-include bgcArgoDMQC/ref/*.txt.gz
-include bgcArgoDMQC/ref/*.dat
+include bgcArgoDMQC/resource/Index/*.txt.gz
+include bgcArgoDMQC/resource/*.dat
