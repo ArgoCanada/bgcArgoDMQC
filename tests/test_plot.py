@@ -27,3 +27,6 @@ class plottingTest(unittest.TestCase):
         g_pden = syn.plot('profiles', varlist=['PSAL', 'DOXY'], Nprof=5, Ncycle=3, zvar='PDEN')
         self.assertIsInstance(g_pden, bgc.plot.pltClass)
         plt.close(g_pden.fig)
+
+if __name__ == '__main__':
+    unittest.main()
