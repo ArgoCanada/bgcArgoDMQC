@@ -2,6 +2,7 @@
 
 import warnings
 
+from pathlib import Path
 from netCDF4 import Dataset
 
 import unittest
@@ -15,9 +16,9 @@ class coreTest(unittest.TestCase):
         warnings.filterwarnings(action='ignore')
 
         bgc.set_dirs(
-            argo_path=bgc.resource.path('Argo'),
-            ncep_path=bgc.resource.path('NCEP'),
-            woa_path=bgc.resource.path('WOA18')
+            argo_path=Path('test_data/Argo/dac').absolute(),
+            ncep_path=Path('test_data/NCEP').absolute(),
+            woa_path=Path('test_data/WOA18').absolute()
         )
 
     def test_index_files(self):
@@ -37,7 +38,7 @@ class coreTest(unittest.TestCase):
 
     def test_qc_read(self):
         # read QC test
-        nc = Dataset(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc')
+        nc = Dataset(bgc.io.Path.ARGO_PATH / 'meds/4901784/profiles/BD4901784_001.nc')
         qcp, qcf = bgc.read_history_qctest(nc)
         bgc.util.display_qctests(qcp, qcf)
 
@@ -79,7 +80,7 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(pO2), np.ndarray)
 
     def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(bgc.resource.path('Argo') / 'meds/4901784/profiles/BD4901784_001.nc', verbose=False)
+        g, eq, comment = bgc.util.read_gain_value(bgc.io.Path.ARGO_PATH / 'meds/4901784/profiles/BD4901784_001.nc', verbose=False)
 
         self.assertIs(type(g[0]), np.str_)
         self.assertIs(type(eq[0]), np.str_)

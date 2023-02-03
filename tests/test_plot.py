@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
 import matplotlib.pyplot as plt
-
 import unittest
+from pathlib import Path
+
 import bgcArgoDMQC as bgc
 
 class plottingTest(unittest.TestCase):
@@ -10,9 +11,9 @@ class plottingTest(unittest.TestCase):
     def setUp(self):
 
         bgc.set_dirs(
-            argo_path=bgc.resource.path('Argo'),
-            ncep_path=bgc.resource.path('NCEP'),
-            woa_path=bgc.resource.path('WOA18')
+            argo_path=Path('test_data/Argo/dac').absolute(),
+            ncep_path=Path('test_data/NCEP').absolute(),
+            woa_path=Path('test_data/WOA18').absolute()
         )
 
     def test_profile_plot(self):
