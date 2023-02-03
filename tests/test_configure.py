@@ -10,12 +10,12 @@ class configureTest(unittest.TestCase):
         bgc.configure.configure(operator='Christopher Gordon', affiliation='DFO')
         config = bgc.configure.read_config()
 
-        unittest.assertTrue(config['operator'] == 'Christopher Gordon')
-        unittest.assertTrue(config['affiliation'] == 'DFO')
+        self.assertTrue(config['operator'] == 'Christopher Gordon')
+        self.assertTrue(config['affiliation'] == 'DFO')
 
         bgc.configure.reset_config()
         config = bgc.configure.read_config()
-        unittest.assertTrue(len(config.keys() == 0))
+        self.assertEqual(len(config.keys() == 0))
 
 if __name__ == '__main__':
     unittest.main()
