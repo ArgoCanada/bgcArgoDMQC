@@ -8,8 +8,8 @@ class downloadTest(unittest.TestCase):
 
     def test_download_refdata(self):
 
-        ncep_path = Path('test_data/NCEP')
-        woa_path = Path('test_data/WOA18')
+        ncep_path = Path('test_data/NCEP').absolute()
+        woa_path = Path('test_data/WOA18').absolute()
 
         ncep_path.mkdir(exist_ok=True)
         woa_path.mkdir(exist_ok=True)
@@ -20,7 +20,7 @@ class downloadTest(unittest.TestCase):
     def test_download_argo(self):
 
         wmo = 4901784
-        argo_path = Path('test_data/Argo/dac')
+        argo_path = Path('test_data/Argo/dac').absolute()
         argo_path.mkdir(exist_ok=True)
         bgc.io.get_argo(wmo, local_path=argo_path, overwrite=True, nfiles=2)
 

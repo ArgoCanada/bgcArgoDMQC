@@ -15,15 +15,15 @@ class sprofTest(unittest.TestCase):
 
     def setUp(self):
 
-        wmo = 4901784
-        bgc.resource.path('Argo').mkdir(exist_ok=True, parents=True)
-        bgc.io.get_argo(wmo, local_path=bgc.resource.path('Argo'), overwrite=False, nfiles=2)
-
         bgc.set_dirs(
-            argo_path='test_data/Argo/dac',
-            ncep_path='test_data/NCEP',
-            woa_path='test_data/WOA18'
+            argo_path=Path('test_data/Argo/dac').absolute(),
+            ncep_path=Path('test_data/NCEP').absolute(),
+            woa_path=Path('test_data/WOA18').absolute()
         )
+
+        wmo = 4901784
+        bgc.io.Path.ARGO_PATH.mkdir(exist_ok=True, parents=True)
+        bgc.io.get_argo(wmo, local_path=bgc.io.Path.ARGO_PATH, overwrite=False, nfiles=2)
 
     def test_sprof(self):
         wmo = 4901784
