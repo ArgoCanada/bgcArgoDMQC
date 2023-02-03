@@ -20,7 +20,7 @@ class plottingTest(unittest.TestCase):
         wmo = 4901784
         syn = bgc.sprof(wmo)
 
-        g_pres = syn.plot('profiles', varlist=['TEMP', 'DOXY'])
+        g_pres = syn.plot('qcprofiles', varlist=['TEMP', 'DOXY'])
         self.assertIsInstance(g_pres, bgc.plot.pltClass)
         plt.close(g_pres.fig)
 
