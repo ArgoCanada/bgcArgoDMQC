@@ -89,7 +89,7 @@ def display_qctests(QCP, QCF):
         'Near-surface mixed air/water test\t\t '
     ]
 
-    sys.stdout.write('---------------------------------------------------------------------------\n')
+    sys.stdout.write('\n---------------------------------------------------------------------------\n')
     sys.stdout.write('| Test\t| Pass/Fail\t| Test name\t\t\t\t\t  |\n')
     sys.stdout.write('---------------------------------------------------------------------------\n')
 

@@ -1,13 +1,13 @@
-from time import time
 from pathlib import Path
 import ftplib
 
 import numpy as np
 
 from .. import util
-from .index import get_dac, URL_DIR_DICT, URL
+from .index import get_dac
+from ..resource import URL_DIR_DICT, URL
 
-def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, __nfiles__=None):
+def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, nfiles=None):
     '''
     Function to download WOA data for a given variable
 
@@ -45,11 +45,11 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, __nfile
     '''
 
     local_path = Path(local_path)
-    url = 'ftp.nodc.noaa.gov'
+    url = 'ftp-oceans.ncei.noaa.gov'
     param, dtype, ftpdir = util.decode_woa_var(varname)
 
     ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
-    ftp.cwd('pub/woa/WOA18/DATA/{}/{}/{}/1.00/'.format(ftpdir, ftype, dtype))
+    ftp.cwd(f'pub/woa/WOA18/DATA/{ftpdir}/{ftype}/{dtype}/1.00/')
 
     local_path = local_path / ftpdir
 
@@ -57,8 +57,8 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, __nfile
         local_path.mkdir()
 
     file_list = ftp.nlst()
-    if __nfiles__ is not None and __nfiles__< len(file_list):
-        file_list = file_list[:__nfiles__]
+    if nfiles  is not None and nfiles < len(file_list):
+        file_list = file_list[:nfiles]
 
     for fn in file_list:
         local_file = local_path / fn
@@ -177,7 +177,7 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', __nfiles__=None):
+def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', nfiles=None):
     '''
     Function to download all data from a single float, or individual
     profiles
@@ -335,8 +335,8 @@ def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite
                             files = ftp.nlst('BD*.nc')
 
 
-                    if __nfiles__ is not None and __nfiles__ < len(files):
-                        files = files[:__nfiles__]
+                    if nfiles is not None and nfiles < len(files):
+                        files = files[:nfiles]
                     profile_path = wmo_path / 'profiles'
                     if not profile_path.exists():
                         profile_path.mkdir()
@@ -395,8 +395,8 @@ def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite
                 ftp.cwd('profiles')
                 files = ftp.nlst('*.nc')
 
-                if __nfiles__ is not None and __nfiles__ < len(files):
-                    files = files[:__nfiles__]
+                if nfiles is not None and nfiles < len(files):
+                    files = files[:nfiles]
 
                 profile_path = wmo_path / 'profiles'
                 if not profile_path.exists():

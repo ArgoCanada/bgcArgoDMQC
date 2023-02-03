@@ -348,7 +348,8 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
 
     map_num = 0
     if 'lat' in meta_keys and 'lon' in meta_keys and carto_flag:
-        map_num = 1 
+        map_num = 1 # change to 1 later, just broken right now
+
     
     nvar = len(set(var_keys))
     fig = plt.figure()
