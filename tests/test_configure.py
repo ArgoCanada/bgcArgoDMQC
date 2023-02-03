@@ -7,6 +7,7 @@ class configureTest(unittest.TestCase):
     def test_configure(self):
 
         bgc.configure.reset_config()
+        bgc.configure.configure(operator='Chris Gordon')
         bgc.configure.configure(
             operator='Christopher Gordon', 
             affiliation='Fisheries and Oceans Canada',
