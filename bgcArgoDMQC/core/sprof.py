@@ -261,7 +261,6 @@ class sprof:
         elif field == 'DOXY_QC':
             self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
 
-        self.assign(self.__floatdict__)
         self.to_dataframe()
 
     def set_fillvalue(self, field, where=None):
