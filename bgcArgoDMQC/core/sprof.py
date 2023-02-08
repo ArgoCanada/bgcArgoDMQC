@@ -49,19 +49,13 @@ class sprof:
             self.check_range('DOXY')
 
     def __getitem__(self, index):
-        try:
-            return self.df[index]
-        except KeyError:
-            return pd.Series(self.__floatdict__[index])
-    
+        return pd.Series(self.__floatdict__[index])
+
     def __setitem__(self, index, value):
         self.df[index] = value
 
     def __getattr__(self, index):
-        try:
-            return self.df[index]
-        except KeyError:
-            return pd.Series(self.__floatdict__[index])
+        return pd.Series(self.__floatdict__[index])
 
     def rm_fillvalue(self):
         '''
