@@ -12,3 +12,7 @@ dist/
 build/
 figures/
 *.egg*
+/tests/test_data/Argo/dac/coriolis/
+/tests/test_data/NCEP/
+/tests/test_data/WOA18/
+
