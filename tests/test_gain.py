@@ -8,19 +8,19 @@ class gainTest(unittest.TestCase):
 
     def test_gain(self):
 
-        ncep_path = Path('test_data/NCEP').absolute()
-        woa_path = Path('test_data/WOA18').absolute()
+        ncep_path = Path(__file__).absolute().parent / 'test_data/NCEP'
+        woa_path = Path(__file__).absolute().parent / 'test_data/WOA18'
 
         ncep_path.mkdir(exist_ok=True)
         woa_path.mkdir(exist_ok=True)
 
-        bgc.io.get_ncep('rhum', local_path=ncep_path, overwrite=True, years=[2019, 2020])
-        bgc.io.get_ncep('pres', local_path=ncep_path, overwrite=True, years=[2019, 2020])
-        bgc.io.get_ncep('land', local_path=ncep_path, overwrite=True, years=[2019, 2020])
+        bgc.io.get_ncep('rhum', local_path=ncep_path, overwrite=True, years=[2019, 2022])
+        bgc.io.get_ncep('pres', local_path=ncep_path, overwrite=True, years=[2019, 2022])
+        bgc.io.get_ncep('land', local_path=ncep_path, overwrite=True, years=[2019, 2022])
         bgc.io.get_woa18('O2sat', local_path=woa_path)
 
-        wmo = 6902807
-        argo_path = Path('test_data/Argo/dac').absolute()
+        wmo = 6902870
+        argo_path = Path(__file__).absolute().parent / 'test_data/Argo/dac'
         argo_path.mkdir(exist_ok=True)
         bgc.io.get_argo(wmo, local_path=argo_path, overwrite=True, nfiles=5)
 
@@ -34,9 +34,5 @@ class gainTest(unittest.TestCase):
         woa_gains = flt.calc_gains(ref='WOA')
         ncep_gains = flt.calc_gains()
 
-        flt.plot('gains', ref='WOA')
-        flt.plot('gains', ref='NCEP')
-
-if __name__ == '__main__':
-
-    unittest.main()
+        flt.plot('gain', ref='WOA')
+        flt.plot('gain', ref='NCEP')
