@@ -20,6 +20,6 @@ class downloadTest(unittest.TestCase):
     def test_download_argo(self):
 
         wmo = 4901784
-        argo_path = Path('test_data/Argo/dac').absolute()
+        argo_path = Path(__file__).absolute().parent / 'test_data/Argo/dac'
         argo_path.mkdir(exist_ok=True)
         bgc.io.get_argo(wmo, local_path=argo_path, overwrite=True, nfiles=2)
