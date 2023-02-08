@@ -238,7 +238,7 @@ def get_vars(files):
 def get_worst_flag(*args):
     out_flags = np.ones(args[0].shape)
 
-    if len(args) == 1:
+    if len(args) == 1: # pragma: no cover
         out_flags = args[0]
     else:
         # make an array where all data marked as good

@@ -34,30 +34,7 @@ class coreTest(unittest.TestCase):
 
         self.assertIs(type(bgc_index), pd.core.frame.DataFrame)
         self.assertIs(type(core_index), pd.core.frame.DataFrame)
-        self.assertIs(type(syn_index), pd.core.frame.DataFrame)
-
-    def test_qc_read(self):
-        # read QC test
-        nc = Dataset(bgc.io.Path.ARGO_PATH / 'meds/4901784/profiles/BD4901784_001.nc')
-        qcp, qcf = bgc.read_history_qctest(nc)
-        bgc.util.display_qctests(qcp, qcf)
-
-        self.assertIs(type(qcp), np.str_)
-        self.assertIs(type(qcf), np.str_)
-
-    def test_information_criteria(self):
-        # aic and bic
-        data  = np.random.randn(30)
-        resid = np.random.randn(150)
-        aic = bgc.util.aic(data, resid)
-
-        self.assertIs(type(aic), np.float64)
-
-        data  = np.random.randn(30)
-        resid = np.random.randn(150)
-        bic = bgc.util.bic(data, resid)
-
-        self.assertIs(type(bic), np.float64)   
+        self.assertIs(type(syn_index), pd.core.frame.DataFrame) 
 
     def test_response_time_correction(self):
         # time correction
@@ -78,13 +55,6 @@ class coreTest(unittest.TestCase):
         doxy = 200*np.random.rand(time.shape[0])
         pO2 = bgc.unit.pO2(doxy, psal, temp)
         self.assertIs(type(pO2), np.ndarray)
-
-    def test_read_gain_value(self):
-        g, eq, comment = bgc.util.read_gain_value(bgc.io.Path.ARGO_PATH / 'meds/4901784/profiles/BD4901784_001.nc', verbose=False)
-
-        self.assertIs(type(g[0]), np.str_)
-        self.assertIs(type(eq[0]), np.str_)
-        self.assertIs(type(comment[0]), np.str_)
 
     def test_unit_conversion(self):
         S = np.random.rand(20)

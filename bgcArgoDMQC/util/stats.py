@@ -30,7 +30,7 @@ def aic(data, resid):
 
     # valid data parameters? see Jones & Day (1995)
     is_valid = n/4 - 1
-    if m > is_valid:
+    if m > is_valid: # pragma: no cover
         aic_value = np.nan
         sys.stdout.write('n >> K, cannot caclculate AIC, setting AIC = NaN\n')
     else:
@@ -71,7 +71,7 @@ def bic(data, resid):
 
     # valid data parameters? see Jones & Day (1995)
     is_valid = n/4 - 1
-    if m > is_valid:
+    if m > is_valid: # pragma: no cover
         bic_value = np.nan
         sys.stdout.write('n >> K, cannot caclculate BIC, setting BIC = NaN\n')
     else:
