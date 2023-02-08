@@ -32,7 +32,7 @@ __version__ = '0.2.14'
 [resource.path(r).mkdir(exist_ok=True, parents=True) for r in ['Argo', 'NCEP', 'WOA18', 'Index']]
 
 # check age of index file, or if it exists
-if not io.index_exists():
+if not io.index_exists(): # pragma: no cover
     io.update_index()
 
 from .core import *

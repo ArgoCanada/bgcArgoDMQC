@@ -36,3 +36,7 @@ class gainTest(unittest.TestCase):
 
         flt.plot('gain', ref='WOA')
         flt.plot('gain', ref='NCEP')
+
+        flt.update_field('DOXY_ADJUSTED', flt.gain*flt.DOXY)
+        flt.update_field('DOXY_ADJUSTED_QC', flt.__fillvalue__['DOXY'], where=flt.DOXY_ADJUSTED_QC == 4)
+        flt.export_files(glob='BD*.nc')
