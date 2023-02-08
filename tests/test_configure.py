@@ -33,6 +33,3 @@ class configureTest(unittest.TestCase):
             ncep_path='/Users/GordonC/Doduments/data/NCEP',
             woa_path='/Users/GordonC/Doduments/data/WOA18',
         )
-
-if __name__ == '__main__':
-    unittest.main()

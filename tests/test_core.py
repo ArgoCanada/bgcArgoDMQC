@@ -104,6 +104,3 @@ class coreTest(unittest.TestCase):
 
         self.assertIs(type(pO2), np.ndarray)
         self.assertIs(type(doxy_back), np.ndarray)
-
-if __name__ == '__main__':
-    unittest.main()

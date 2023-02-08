@@ -23,7 +23,3 @@ class downloadTest(unittest.TestCase):
         argo_path = Path('test_data/Argo/dac').absolute()
         argo_path.mkdir(exist_ok=True)
         bgc.io.get_argo(wmo, local_path=argo_path, overwrite=True, nfiles=2)
-
-if __name__ == '__main__':
-
-    unittest.main()

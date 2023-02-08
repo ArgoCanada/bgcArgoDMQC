@@ -38,7 +38,3 @@ class sprofTest(unittest.TestCase):
 
         self.assertIsInstance(sprof, bgc.sprof)
         self.assertIs(type(df), pd.core.frame.DataFrame)
-
-if __name__ == '__main__':
-
-    unittest.main()
