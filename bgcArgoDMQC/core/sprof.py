@@ -224,7 +224,7 @@ class sprof:
         elif kind == 'cscatter':
             var = kwargs.pop('varname')
 
-            g = plot.var_cscatter(self.df, varname=var, **kwargs)
+            g = plot.variable_color_scatter(self.df, varname=var, **kwargs)
 
         elif kind == 'profiles':
             varlist = kwargs.pop('varlist')
