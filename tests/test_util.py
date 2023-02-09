@@ -68,3 +68,52 @@ class coreTest(unittest.TestCase):
         self.assertEqual(ff[0], 2)
         self.assertEqual(ff[5], 4)
         self.assertEqual(ff[1], 9)
+
+    def test_nc_array_functions(self):
+
+        N = 2
+        M = N+1
+
+        for i in range(4):
+            dim = i+1
+            for ax in range(dim):
+                if dim == 1:
+                    old_array = np.array(N*[1])
+                    new_array = np.array(M*[2])
+                    final = bgc.util.refill_array(ax, dim, new_array, old_array)
+                    self.assertTrue(np.all(final[:N] == 1))
+                    self.assertTrue(final[-1] == 2)
+                elif dim == 2:
+                    old_array = np.ones((N, N))
+                    if ax == 0:
+                        new_array = 2*np.ones((M, N))
+                    else:
+                        new_array = 2*np.ones((N, M))
+                    final = bgc.util.refill_array(ax, dim, new_array, old_array)
+                    final = bgc.util.refill_array(ax, dim, new_array, old_array)
+                    self.assertTrue(np.all(final[:N, :N] == 1))
+                    self.assertTrue(final[-1, -1] == 2)
+                elif dim == 3:
+                    old_array = np.ones((N, N, N))
+                    if ax == 0:
+                        new_array = 2*np.ones((M, N, N))
+                    elif ax == 1:
+                        new_array = 2*np.ones((N, M, N))
+                    else:
+                        new_array = 2*np.ones((N, N, M))
+                    final = bgc.util.refill_array(ax, dim, new_array, old_array)
+                    self.assertTrue(np.all(final[:N, :N, :N] == 1))
+                    self.assertTrue(final[-1, -1, -1] == 2)
+                elif dim == 4:
+                    old_array = np.ones((N, N, N, N))
+                    if ax == 0:
+                        new_array = 2*np.ones((M, N, N, N))
+                    elif ax == 1:
+                        new_array = 2*np.ones((N, M, N, N))
+                    elif ax == 2:
+                        new_array = 2*np.ones((N, N, M, N))
+                    else:
+                        new_array = 2*np.ones((N, N, N, M))
+                    final = bgc.util.refill_array(ax, dim, new_array, old_array)
+                    self.assertTrue(np.all(final[:N, :N, :N, :N] == 1))
+                    self.assertTrue(final[-1, -1, -1, -1] == 2)
