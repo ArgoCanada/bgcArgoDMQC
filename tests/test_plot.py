@@ -71,6 +71,3 @@ class plottingTest(unittest.TestCase):
         syn.add_independent_data(syn.SDN[1], lat=syn.LATITUDE[1], lon=syn.LONGITUDE[1], label='Fake Oxygen', data_dict=data)
         g = syn.compare_independent_data()
         self.assertIsInstance(g, bgc.plot.pltClass)
-
-if __name__ == '__main__':
-    unittest.main()
