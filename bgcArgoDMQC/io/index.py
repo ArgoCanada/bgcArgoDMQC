@@ -178,7 +178,7 @@ def check_index(mode=None):
         local_synth = resource.path('Index') / synth
         local_traj  = resource.path('Index') / traj
 
-        check_index_time(local_meta, local_index, local_bgc, local_synth)
+        check_index_time(local_meta, local_index, local_bgc, local_synth, local_traj)
 
     elif mode == 'install':
         meta  = 'ar_index_global_meta.txt.gz'
