@@ -134,7 +134,6 @@ class sprof:
 
         for k in set(self.__floatdict__.keys()) - set(df.columns):
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
-            print(k, dim)
             if dim == n_level:
                 df[k.replace('_GRID', '')] = self.__floatdict__[k]
         
@@ -270,9 +269,9 @@ class sprof:
     def export_files(self, data_mode='D', glob=None):
 
         glob = 'BR*.nc' if glob is None else glob
-        r_files = (self.__Sprof__.parent / 'profiles').glob(glob)
+        files = (self.__Sprof__.parent / 'profiles').glob(glob)
 
-        io.export_files(self.__floatdict__, r_files, self.gain, data_mode=data_mode)
+        io.export_files(self.__floatdict__, files, self.gain, data_mode=data_mode)
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
