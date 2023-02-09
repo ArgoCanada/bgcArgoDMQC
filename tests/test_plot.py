@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import numpy as np
 import matplotlib.pyplot as plt
 import unittest
 from pathlib import Path
@@ -42,4 +43,34 @@ class plottingTest(unittest.TestCase):
 
     def test_independent_data(self):
 
-        return
+        # define a function to create an oxygen profile with arbitrary properties
+        def oxygen_profile(depth, oxygen_range, central_value, max_grad, depth_grad):
+
+            oxygen = oxygen_range/2*np.tanh((-2*max_grad/oxygen_range)*(depth - depth_grad)) + central_value
+
+            return oxygen
+
+        # just as an example, show the truth, sampled, and corrected
+        depth = np.arange(0, 2000, 0.5)[::-1]
+        oxy_range = 200 # umol kg-1
+        max_grad = 7 # umol kg-1 dbar-1
+        oxycline = 100 # dbar
+
+        wmo = 4901784
+        syn = bgc.sprof(wmo)
+
+        # create a fake DOXY profile, call it independent
+        doxy_mean = syn.DOXY.mean()
+        oxygen = oxygen_profile(depth, oxy_range, doxy_mean, max_grad, oxycline)
+
+        data = dict(
+            PRES=depth,
+            DOXY=oxygen
+        )
+
+        syn.add_independent_data(syn.SDN[1], lat=syn.LATITUDE[1], lon=syn.LONGITUDE[1], label='Fake Oxygen', data_dict=data)
+        g = syn.compare_independent_data()
+        self.assertIsInstance(g, bgc.plot.pltClass)
+
+if __name__ == '__main__':
+    unittest.main()

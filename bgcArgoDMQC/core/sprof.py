@@ -39,6 +39,8 @@ class sprof:
         self.woa_path  = io.Path.WOA_PATH
         self.ncep_path = io.Path.NCEP_PATH
 
+        self.WMO = wmo
+
         self.get_track()
         self.to_dataframe()
 
@@ -341,7 +343,7 @@ class sprof:
             self.__indepdict__ = {label:data_dict}
             self.__indepmeta__ = {label:meta_dict}
 
-    def compare_independent_data(self, fmt='*', **kwargs):
+    def compare_independent_data(self, fmt='*'):
         '''
         Plot the independent data overtop of the nearest profile in time
         '''
@@ -349,5 +351,7 @@ class sprof:
         plot_dict = copy.deepcopy(self.__indepdict__)
         meta_dict = copy.deepcopy(self.__indepmeta__)
 
-        fig, ax_list = plot.compare_independent_data(self.df, plot_dict, meta_dict, fmt, **kwargs)
-        return fig, ax_list
+        print(self.df, self.WMO, plot_dict, meta_dict, fmt)
+
+        g = plot.compare_independent_data(self.df, self.WMO, plot_dict, meta_dict, fmt=fmt)
+        return g

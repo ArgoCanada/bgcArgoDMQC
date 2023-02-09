@@ -318,7 +318,7 @@ def qc_profiles(df, varlist=['DOXY'], Ncycle=1, Nprof=np.inf, zvar='PRES', xlabe
 
     return g
 
-def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
+def compare_independent_data(df, wmo, plot_dict, meta_dict, fmt='*'):
     var_keys = []
     for label in plot_dict.keys():
         var_keys = var_keys + list(plot_dict[label].keys())
@@ -343,13 +343,12 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
             cyc = util.cycle_from_time(meta_dict[label]['date'], df.SDN, df.CYCLE)
             dstr = mdates.num2date(meta_dict[label]['date']).strftime('%b %d, %Y')
 
-        meta_data_string = meta_data_string + '{} date: {}\n'.format(label, dstr)
-    meta_data_string = meta_data_string + 'Argo profile #{} date: {}'.format(cyc, mdates.num2date(df.SDN[df.CYCLE == cyc][0]).strftime('%b %d, %Y'))
+        meta_data_string = meta_data_string + f'{label} date: {dstr}\n'
+    meta_data_string = meta_data_string + f'Argo profile #{cyc} date: {mdates.num2date(df.SDN.loc[df.CYCLE == cyc].iloc[0]).strftime("%b %d, %Y")}'
 
     map_num = 0
     if 'lat' in meta_keys and 'lon' in meta_keys and carto_flag:
-        map_num = 1 # change to 1 later, just broken right now
-
+        map_num = 1
     
     nvar = len(set(var_keys))
     fig = plt.figure()
@@ -394,11 +393,11 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
             c.append(c1)
             c.append(c2)
             mx.plot(c1[1], c1[0], fmt, transform=ccrs.PlateCarree(), label=label, color=clist[ccount])
-            dist_str = dist_str + '\n{:.1f}km ({}) '.format(util.haversine(c1,c2), label)
+            dist_str = dist_str + f'\n{util.haversine(c1,c2):.1f}km ({label})'
             ccount += 1
         
             mx.plot(c2[1], c2[0], 'o', color=fcol, label=None, transform=ccrs.PlateCarree())
-        mx.plot(np.nan, np.nan, 'o', color=fcol, label='Float {}'.format(df.WMO.iloc[0]))
+        mx.plot(np.nan, np.nan, 'o', color=fcol, label=f'Float {wmo}')
 
         c = np.array(c)
         minlon, maxlon = np.nanmin(c[:,1]), np.nanmax(c[:,1])
@@ -450,3 +449,8 @@ def compare_independent_data(df, plot_dict, meta_dict, fmt='*'):
 
     fig.set_size_inches(10,6)
 
+    g = pltClass()
+    g.fig  = fig
+    g.axes = ax_list
+
+    return g

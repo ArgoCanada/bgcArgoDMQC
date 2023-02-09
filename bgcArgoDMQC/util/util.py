@@ -218,7 +218,7 @@ def get_var_by(v1, v2, float_data):
 
 def cycle_from_time(time, t_arr, c_arr):
     ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))
-    return c_arr[ix][0]
+    return c_arr.loc[ix].iloc[0]
 
 def get_vars(files):
 
