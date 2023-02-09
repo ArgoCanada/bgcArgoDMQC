@@ -84,3 +84,8 @@ class downloadTest(unittest.TestCase):
         for a, g in zip(test_flag_arrays, ['F', 'E', 'D', 'C', 'B', 'A']):
             grade = bgc.io.profile_qc(a)
             self.assertEqual(grade, g)
+    
+    def test_index(self):
+
+        traj = bgc.io.read_index('T')
+        traj = bgc.io.read_index('T', remote=True)
