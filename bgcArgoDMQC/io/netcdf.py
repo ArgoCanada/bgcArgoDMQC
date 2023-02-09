@@ -243,8 +243,9 @@ def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=Non
 
     for fn in r_files:
         # define path to file, make directory if it does not exist
+        dac = fn.as_posix().split('/')[-4]
         D_file = Path(fn.as_posix().replace('BR', f'B{data_mode}').\
-            replace('dac/meds/', 'dac/meds/D/'))
+            replace(f'dac/{dac}/', f'dac/{dac}/D/'))
         if not D_file.parent.exists():
             D_file.parent.mkdir(parents=True)
         sys.stdout.write(f'Working on D-mode file {D_file.as_posix()}...')
@@ -253,7 +254,7 @@ def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=Non
         last_calib = D_nc.dimensions['N_CALIB'].size-1
 
         # index for this cycle
-        cycle = int(fn.as_posix().split('_')[-1].split('.')[0])
+        cycle = int(fn.as_posix().split('_')[-1].split('.')[0].replace('D', ''))
         ix = fdict['CYCLE_GRID'] == cycle
         N = D_nc.dimensions['N_LEVELS'].size
 
@@ -295,10 +296,11 @@ def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=Non
 
         parameter_data_mode = create_fillvalue_array(D_nc['PARAMETER_DATA_MODE'])
         for i in range(D_nc.dimensions['N_PROF'].size):
-            tmp_pdm = D_nc['PARAMETER_DATA_MODE'][:].data
-            tmp_pdm[i, get_parameter_index(D_nc['PARAMETER'][:][i,0,:,:].data, 'DOXY')] = data_mode
+            tmp_pdm = D_nc['PARAMETER_DATA_MODE'][:].data[i,:]
+            tmp_pdm[get_parameter_index(D_nc['PARAMETER'][:][i,0,:,:].data, 'DOXY')] = data_mode
             parameter_data_mode[i,:] = tmp_pdm
         D_nc['PARAMETER_DATA_MODE'][:] = parameter_data_mode
+
 
         history_dict = dict(
             HISTORY_INSTITUTION='BI',
