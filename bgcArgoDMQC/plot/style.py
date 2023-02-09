@@ -23,33 +23,30 @@ var_units = dict(
 )
 
 # define colormaps
-if cmocean_flag:
-    color_maps = dict(
-        TEMP=cmo.thermal,
-        TEMP_ADJUSTED=cmo.thermal,
-        PSAL=cmo.haline, 
-        PSAL_ADJUSTED=cmo.haline, 
-        PDEN=cmo.dense,
-        CHLA=cmo.algae,
-        CHLA_ADJUSTED=cmo.algae,
-        BBP700=cmo.matter,
-        BBP700_ADJUSTED=cmo.matter,
-        DOXY=cmo.ice,
-        DOXY_ADJUSTED=cmo.ice,
-        DOWNWELLING_IRRADIANCE=cmo.solar,
-    )
-else:
-    color_maps = dict(
-        TEMP=plt.cm.inferno,
-        TEMP_ADJUSTED=plt.cm.inferno,
-        PSAL=plt.cm.viridis, 
-        PSAL_ADJUSTED=plt.cm.viridis, 
-        PDEN=plt.cm.cividis,
-        CHLA=plt.cm.YlGn,
-        CHLA_ADJUSTED=plt.cm.YlGn,
-        BBP700=plt.cm.pink_r,
-        BBP700_ADJUSTED=plt.cm.pink_r,
-        DOXY=plt.cm.YlGnBu_r,
-        DOXY_ADJUSTED=plt.cm.YlGnBu_r,
-        DOWNWELLING_IRRADIANCE=plt.cm.magma,
-    )
+color_maps = dict(
+    TEMP=cmo.thermal,
+    TEMP_ADJUSTED=cmo.thermal,
+    PSAL=cmo.haline, 
+    PSAL_ADJUSTED=cmo.haline, 
+    PDEN=cmo.dense,
+    CHLA=cmo.algae,
+    CHLA_ADJUSTED=cmo.algae,
+    BBP700=cmo.matter,
+    BBP700_ADJUSTED=cmo.matter,
+    DOXY=cmo.ice,
+    DOXY_ADJUSTED=cmo.ice,
+    DOWNWELLING_IRRADIANCE=cmo.solar,
+) if cmocean_flag else dict(
+    TEMP=plt.cm.inferno,
+    TEMP_ADJUSTED=plt.cm.inferno,
+    PSAL=plt.cm.viridis, 
+    PSAL_ADJUSTED=plt.cm.viridis, 
+    PDEN=plt.cm.cividis,
+    CHLA=plt.cm.YlGn,
+    CHLA_ADJUSTED=plt.cm.YlGn,
+    BBP700=plt.cm.pink_r,
+    BBP700_ADJUSTED=plt.cm.pink_r,
+    DOXY=plt.cm.YlGnBu_r,
+    DOXY_ADJUSTED=plt.cm.YlGnBu_r,
+    DOWNWELLING_IRRADIANCE=plt.cm.magma,
+)
