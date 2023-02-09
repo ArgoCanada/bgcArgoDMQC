@@ -167,19 +167,6 @@ def update_history(nc, dct):
         for i in range(nc.dimensions['N_PROF'].size):
             nc[name][hix,i,:] = string_to_array(value, nc.dimensions[nc[name].dimensions[-1]])
 
-def check_for_empty_variables(fn, varlist):
-    '''
-    Return true if all variables in `varlist` are empty
-    '''
-
-    nc = Dataset(fn)
-
-    empty = True
-    for v in varlist:
-        empty = empty & all(nc[v][:].data.flat == nc[v]._FillValue)
-
-    return empty
-
 def profile_qc(flags):
     '''
     Return overall profile quality flag via the following from the Argo User

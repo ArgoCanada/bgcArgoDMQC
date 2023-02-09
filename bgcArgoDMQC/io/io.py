@@ -177,13 +177,13 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     return ftp
 
-def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', nfiles=None):
+def get_argo(argo_list, local_path='./', url=URL, overwrite=False, summary_overwrite=True, ftype=None, mission='CB', mode='RD', nfiles=None):
     '''
     Function to download all data from a single float, or individual
     profiles
 
     Args:
-        *args: list of files, floats, or directories
+        argo_list: wmo number, file, or list of wmo numbers and/or files
         local_path (optional, str or Path): local directory to save float data, defaults to current directory
         url (optional, str): url of the GDAC to connect to, defaults to ifremer or the value in the configuration file
         overwrite (optional, bool): whether to overwrite existing local files, default *False*
@@ -206,175 +206,86 @@ def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite
     helpful to speed up testing/coverage runs
     '''
 
-    if len(args) == 1:
-        local_path = Path(local_path)
+    local_path = Path(local_path)
 
-        ftp = ftplib.FTP(url)
-        ftp.login()
+    ftp = ftplib.FTP(url)
+    ftp.login()
 
-        if type(args[0]) is not list:
-            arglist = [args[0]]
+    if type(argo_list) is not list:
+        arglist = [argo_list]
+    else:
+        arglist = argo_list
+
+    for init_a in arglist:
+        # if its a float number, build ftp paths to floats
+        if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
+            base_path = URL_DIR_DICT[url]
+            a = (Path(base_path) / 'dac' / get_dac(init_a) / str(init_a)).as_posix()
         else:
-            arglist = args[0]
+            a = init_a
 
-        for init_a in arglist:
-            # if its a float number, build ftp paths to floats
-            if type(init_a) in [int, float, np.int32, np.int64, np.float32, np.float64]:
-                base_path = URL_DIR_DICT[url]
-                a = (Path(base_path) / 'dac' / get_dac(init_a) / str(init_a)).as_posix()
-            else:
-                a = init_a
-
-            # if its a file
-            if a[-2:] == 'nc':
-                # if its a profile file
-                if 'profiles' in a:
-                    ftp_wmo_path = '/'.join(a.split('/')[:-2])
-                    wmo = ftp_wmo_path.split('/')[-1]
-                    dac = ftp_wmo_path.split('/')[-2]
-                    ftp.cwd(ftp_wmo_path)
-                    ftp.cwd('profiles')
-                    fn = a.split('/')[-1]
-
-                    # define local location to save file
-                    dac_path = local_path / dac
-                    wmo_path = dac_path / wmo
-                    profile_path = wmo_path / 'profiles'
-
-                    # make the directory if it doesn't exist
-                    if not dac_path.is_dir():
-                        dac_path.mkdir()
-                    if not wmo_path.is_dir():
-                        wmo_path.mkdir()
-                    if not profile_path.is_dir():
-                        profile_path.mkdir()
-
-                    # define the local file to have the same name as on the FTP server
-                    wmo_file = profile_path / fn
-                    # only download the file if 
-                    # local_path (str or Path): local directory to save float data
-                    # url (str): it doesn't already exist locally
-                    if not wmo_file.exists() or overwrite:
-                        print(wmo_file)
-                        # open the local file
-                        lf = open(wmo_file, 'wb')
-                        # retrieve the file on FTP server,
-                        ftp.retrbinary('RETR ' + fn, lf.write)
-                        lf.close()
-
-                # if not - so Sprof, Mprof, BRtraj or meta
-                else:
-                    ftp_wmo_path = '/'.join(a.split('/')[:-1])
-                    wmo = ftp_wmo_path.split('/')[-1]
-                    dac = ftp_wmo_path.split('/')[-2]
-                    ftp.cwd(ftp_wmo_path)
-            # if its a float directory
-            else:
-                ftp_wmo_path = a
+        # if its a file
+        if a[-2:] == 'nc':
+            # if its a profile file
+            if 'profiles' in a:
+                ftp_wmo_path = '/'.join(a.split('/')[:-2])
                 wmo = ftp_wmo_path.split('/')[-1]
                 dac = ftp_wmo_path.split('/')[-2]
                 ftp.cwd(ftp_wmo_path)
+                ftp.cwd('profiles')
+                fn = a.split('/')[-1]
 
-                files = ftp.nlst('*.nc')
-                    
                 # define local location to save file
                 dac_path = local_path / dac
                 wmo_path = dac_path / wmo
+                profile_path = wmo_path / 'profiles'
 
                 # make the directory if it doesn't exist
                 if not dac_path.is_dir():
                     dac_path.mkdir()
                 if not wmo_path.is_dir():
                     wmo_path.mkdir()
-                
+                if not profile_path.is_dir():
+                    profile_path.mkdir()
 
-                # download the files
-                for fn in files:
-                    # define the local file to have the same name as on the FTP server
-                    wmo_file = wmo_path / fn
-                    # only download the file if it doesn't already exist locally
-                    if not wmo_file.exists() or overwrite or summary_overwrite:
-                        print(wmo_file)
-                        # open the local file
-                        lf = open(wmo_file, 'wb')
-                        # retrieve the file on FTP server,
-                        ftp.retrbinary('RETR ' + fn, lf.write)
-                        lf.close()
+                # define the local file to have the same name as on the FTP server
+                wmo_file = profile_path / fn
+                # only download the file if 
+                # local_path (str or Path): local directory to save float data
+                # url (str): it doesn't already exist locally
+                if not wmo_file.exists() or overwrite:
+                    print(wmo_file)
+                    # open the local file
+                    lf = open(wmo_file, 'wb')
+                    # retrieve the file on FTP server,
+                    ftp.retrbinary('RETR ' + fn, lf.write)
+                    lf.close()
 
-                # repeat as above
-                if 'profiles' in ftp.nlst() and ftype != 'summary':
-                    ftp.cwd('profiles')
-                    if mission is None or mission == 'CB':
-                        if mode == 'RD':
-                            files = ftp.nlst('*.nc')
-                        elif mode == 'R':
-                            files = ftp.nlst('*.nc')
-                            ix = np.array(['D' in fn for fn in files])
-                            files = list(np.array(files)[~ix])
-                        elif mode == 'D':
-                            files = ftp.nlst('D*.nc') + ftp.nlst('BD*.nc')
-                    if mission == 'C':
-                        if mode == 'RD':
-                            files = ftp.nlst('*.nc')
-                            ix = np.array(['B' in fn for fn in files])
-                            files = list(np.array(files)[~ix])
-                        elif mode == 'R':
-                            files = ftp.nlst('*.nc')
-                            ix = np.array(['B' in fn or 'D' in fn for fn in files])
-                            files = list(np.array(files)[~ix])
-                        elif mode == 'D':
-                            files = ftp.nlst('D*.nc')
-                    if mission == 'B':
-                        if mode == 'RD':
-                            files = ftp.nlst('B*.nc')
-                        elif mode == 'R':
-                            files = ftp.nlst('B*.nc')
-                            ix = np.array(['D' in fn for fn in files])
-                            files = list(np.array(files)[~ix])
-                        elif mode == 'D':
-                            files = ftp.nlst('BD*.nc')
-
-
-                    if nfiles is not None and nfiles < len(files):
-                        files = files[:nfiles]
-                    profile_path = wmo_path / 'profiles'
-                    if not profile_path.exists():
-                        profile_path.mkdir()
-
-                    for fn in files:
-                        profile_file = profile_path / fn
-                        if not profile_file.exists() or overwrite:
-                            print(profile_file)
-                            lf = open(profile_file, 'wb')
-                            ftp.retrbinary('RETR ' + fn, lf.write)
-                            lf.close()
-
-    else:
-        local_path = Path(local_path)
-
-        dacdir = args[0]
-        ftp = ftplib.FTP(url)
-        ftp.login()
-        ftp.cwd(dacdir)
-
-        wmo_numbers = args[1]
-        for flt in wmo_numbers:
-            if type(flt) is str:
-                wmo = flt
+            # if not - so Sprof, Mprof, BRtraj or meta
             else:
-                wmo = str(flt)
+                ftp_wmo_path = '/'.join(a.split('/')[:-1])
+                wmo = ftp_wmo_path.split('/')[-1]
+                dac = ftp_wmo_path.split('/')[-2]
+                ftp.cwd(ftp_wmo_path)
+        # if its a float directory
+        else:
+            ftp_wmo_path = a
+            wmo = ftp_wmo_path.split('/')[-1]
+            dac = ftp_wmo_path.split('/')[-2]
+            ftp.cwd(ftp_wmo_path)
 
-            # ------------------ SUMMARY FILES (Sprof, BRtraj, meta) --------------
-            # change ftp directory
-            print(wmo)
-            ftp.cwd(wmo)
             files = ftp.nlst('*.nc')
+                
             # define local location to save file
-            wmo_path = local_path / wmo
+            dac_path = local_path / dac
+            wmo_path = dac_path / wmo
 
             # make the directory if it doesn't exist
+            if not dac_path.is_dir():
+                dac_path.mkdir()
             if not wmo_path.is_dir():
                 wmo_path.mkdir()
+            
 
             # download the files
             for fn in files:
@@ -389,15 +300,42 @@ def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite
                     ftp.retrbinary('RETR ' + fn, lf.write)
                     lf.close()
 
-            # ------------------------ INDIVIDUAL PROFILE FILES -------------------
             # repeat as above
             if 'profiles' in ftp.nlst() and ftype != 'summary':
                 ftp.cwd('profiles')
-                files = ftp.nlst('*.nc')
+                if mission is None or mission == 'CB':
+                    if mode == 'RD':
+                        files = ftp.nlst('*.nc')
+                    elif mode == 'R':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('D*.nc') + ftp.nlst('BD*.nc')
+                if mission == 'C':
+                    if mode == 'RD':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['B' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'R':
+                        files = ftp.nlst('*.nc')
+                        ix = np.array(['B' in fn or 'D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('D*.nc')
+                if mission == 'B':
+                    if mode == 'RD':
+                        files = ftp.nlst('B*.nc')
+                    elif mode == 'R':
+                        files = ftp.nlst('B*.nc')
+                        ix = np.array(['D' in fn for fn in files])
+                        files = list(np.array(files)[~ix])
+                    elif mode == 'D':
+                        files = ftp.nlst('BD*.nc')
+
 
                 if nfiles is not None and nfiles < len(files):
                     files = files[:nfiles]
-
                 profile_path = wmo_path / 'profiles'
                 if not profile_path.exists():
                     profile_path.mkdir()
@@ -409,12 +347,6 @@ def get_argo(*args, local_path='./', url=URL, overwrite=False, summary_overwrite
                         lf = open(profile_file, 'wb')
                         ftp.retrbinary('RETR ' + fn, lf.write)
                         lf.close()
-
-                # back to parent directory
-                ftp.cwd('../../')
-            else:
-                ftp.cwd('../')
-
 
     return ftp
 
