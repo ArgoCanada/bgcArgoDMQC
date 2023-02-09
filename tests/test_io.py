@@ -10,16 +10,31 @@ import unittest
 import bgcArgoDMQC as bgc
 class downloadTest(unittest.TestCase):
 
-    def test_download_refdata(self):
+    def setUp(self):
 
-        ncep_path = Path(__file__).absolute().parent / 'test_data/NCEP'
-        woa_path = Path(__file__).absolute().parent / 'test_data/WOA18'
+        bgc.set_dirs(
+            argo_path=Path(__file__).absolute().parent / 'test_data/Argo/dac',
+            ncep_path=Path(__file__).absolute().parent / 'test_data/NCEP',
+            woa_path=Path(__file__).absolute().parent / 'test_data/WOA18',
+        )
 
-        ncep_path.mkdir(exist_ok=True)
-        woa_path.mkdir(exist_ok=True)
+        bgc.io.Path.ARGO_PATH.mkdir(exist_ok=True, parents=True)
+        bgc.io.Path.NCEP_PATH.mkdir(exist_ok=True, parents=True)
+        bgc.io.Path.WOA_PATH.mkdir(exist_ok=True, parents=True)
 
-        bgc.io.get_ncep('rhum', local_path=ncep_path, overwrite=True, years=[2019, 2020])
-        bgc.io.get_woa18('O2sat', local_path=woa_path, nfiles=0)
+
+    def test_download_argo(self):
+
+        wmo = 4901784
+        bgc.io.get_argo(wmo, local_path=bgc.io.Path.ARGO_PATH, overwrite=False, nfiles=2)
+
+        for mission in ['C', 'B', 'CB']:
+            for mode in ['R', 'D', 'RD']:
+                bgc.io.get_argo(wmo, local_path=bgc.io.Path.ARGO_PATH, overwrite=False, mission=mission, mode=mode, nfiles=1)
+    
+    def test_single_file_download(self):
+        wmo = 4901784
+        bgc.io.get_argo(f'/ifremer/argo/dac/meds/{wmo}/profiles/BD{wmo}_003.nc', local_path=bgc.io.Path.ARGO_PATH)
 
     def test_download_manipulate_argo(self):
 

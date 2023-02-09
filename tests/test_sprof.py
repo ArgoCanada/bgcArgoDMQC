@@ -16,9 +16,9 @@ class sprofTest(unittest.TestCase):
     def setUp(self):
 
         bgc.set_dirs(
-            argo_path=Path('test_data/Argo/dac').absolute(),
-            ncep_path=Path('test_data/NCEP').absolute(),
-            woa_path=Path('test_data/WOA18').absolute()
+            argo_path=Path(__file__).absolute().parent / 'test_data/Argo/dac',
+            ncep_path=Path(__file__).absolute().parent / 'test_data/NCEP',
+            woa_path=Path(__file__).absolute().parent / 'test_data/WOA18',
         )
 
         wmo = 4901784

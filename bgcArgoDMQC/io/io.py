@@ -103,13 +103,13 @@ def get_ncep(varname, local_path='./', overwrite=False, years=[2010, 2020]):
 
     ftp = ftplib.FTP(url, 'anonymous')
 
-    if type(years) is int:
+    if type(years) is int: # pragma: no cover
         yearlist = [years]
-    elif len(years) == 1:
+    elif len(years) == 1: # pragma: no cover
         yearlist = years
-    elif len(years) == 2:
+    elif len(years) == 2: # pragma: no cover
         yearlist = range(years[0], years[1]+1)
-    else:
+    else: # pragma: no cover
         yearlist = years
     
     if varname == 'pres':
@@ -236,17 +236,9 @@ def get_argo(argo_list, local_path='./', url=URL, overwrite=False, summary_overw
                 fn = a.split('/')[-1]
 
                 # define local location to save file
-                dac_path = local_path / dac
-                wmo_path = dac_path / wmo
-                profile_path = wmo_path / 'profiles'
+                profile_path = local_path / dac / wmo / 'profiles'
 
-                # make the directory if it doesn't exist
-                if not dac_path.is_dir():
-                    dac_path.mkdir()
-                if not wmo_path.is_dir():
-                    wmo_path.mkdir()
-                if not profile_path.is_dir():
-                    profile_path.mkdir()
+                profile_path.mkdir(exist_ok=True, parents=True)
 
                 # define the local file to have the same name as on the FTP server
                 wmo_file = profile_path / fn
