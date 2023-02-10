@@ -207,7 +207,7 @@ class sprof:
 
     def calc_fixed_error(self, fix_err=6):
 
-        self.DOXY_ADJUSTED_ERROR = calc_fixed_doxy_adjusted_error(self.__floatdict__, fix_err=fix_err)
+        self.DOXY_ADJUSTED_ERROR = calc_fixed_doxy_adjusted_error(self.PSAL, self.TEMP, self.PRES, fix_err=fix_err)
         self.__floatdict__['DOXY_ADJUSTED_ERROR'] = self.DOXY_ADJUSTED_ERROR
 
         return copy.deepcopy(self.DOXY_ADJUSTED_ERROR)
@@ -312,23 +312,18 @@ class sprof:
             syn.add_independent_data(data_dict=data, date='2020-10-04')
         '''
 
-        if type(date) is str:
-            date = mdates.datestr2num(date)
-        if type(date) is mdates.datetime.datetime:
-            date = mdates.date2num(date)
-
+        
+        date = mdates.datestr2num(date) if type(date) is str else date
+        date = mdates.date2num(date) if type(date) is mdates.datetime.datetime else date
         meta_dict = dict(date=date)
-        if lat is None:
-            lat = np.nan
-        if lon is None:
-            lon = np.nan
+
+        lat = np.nan if lat is None else lat
+        lon = np.nan if lon is None else lon
         meta_dict['lat'] = lat
         meta_dict['lon'] = lon
 
         if data_dict is not None and len(kwargs) > 0:
-            # apppend kwargs to dict
-            for k in kwargs.keys():
-                data_dict[k] = kwargs.pop(k)
+            raise ValueError('Cannot input data as both dict and kwargs')
         data_dict = dict(**kwargs) if data_dict is None else data_dict
         
 

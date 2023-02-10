@@ -198,23 +198,6 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def dict_append(d1, d2):
-    
-    result = copy.deepcopy(d1)
-    for k in d1.keys():
-        result[k] = np.append(d1[k], d2[k])
-
-def read_profiles(files):
-
-    floatdict = None
-    for fn in files:
-        nc = Dataset(fn)
-        data = read_flat_variables(nc)
-
-        floatdict = data if floatdict is None else dict_append(floatdict, data)
-
-    return floatdict
-
 def read_flat_variables(nc):
     '''
     Read all variables and dimensions from an Argo netCDF file.
@@ -608,7 +591,7 @@ def range_check(key, floatdict, verbose=True):
     argo_var = floatdict[key]
     r = range_dict[key.replace('_ADJUSTED','')]
     outside_range = np.logical_or(argo_var < r[0], argo_var > r[1])
-    if verbose:
+    if verbose: # pragma: no cover
         sys.stdout.write('{} values found outside RTQC range check, replacing with NaN\n'.format(np.sum(outside_range)))
 
     argo_var[outside_range] = np.nan

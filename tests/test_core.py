@@ -28,13 +28,20 @@ class coreTest(unittest.TestCase):
         bgc.io.update_index()
         
         # get index files
-        bgc_index  = bgc.get_index('bgc')
+        bgc_index  = bgc.get_index('bgc', wmo=4901784)
         core_index = bgc.get_index('global')
         syn_index  = bgc.get_index('synthetic')
+        meta_index  = bgc.get_index('meta')
+        traj_index  = bgc.get_index('traj')
+
+        with self.assertRaises(ValueError):
+            bgc.get_index('not a real index name')
 
         self.assertIs(type(bgc_index), pd.core.frame.DataFrame)
         self.assertIs(type(core_index), pd.core.frame.DataFrame)
         self.assertIs(type(syn_index), pd.core.frame.DataFrame) 
+        self.assertIs(type(meta_index), pd.core.frame.DataFrame) 
+        self.assertIs(type(traj_index), pd.core.frame.DataFrame) 
 
     def test_response_time_correction(self):
         # time correction

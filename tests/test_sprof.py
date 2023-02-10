@@ -36,5 +36,20 @@ class sprofTest(unittest.TestCase):
 
         sprof.describe()
 
+        print(sprof.DOXY)
+        sprof['DOXY'] = sprof['DOXY']*1.1
+        print(sprof['DOXY'])
+        sprof.check_range('all')
+        sprof_dict = sprof.to_dict()
+
+        sprof.clean(bad_flags=[1, 2])
+
+        sprof.calc_fixed_error()
+
+        with self.assertRaises(ValueError):
+            sprof.plot('gain', ref='Not a real ref')
+        with self.assertRaises(ValueError):
+            sprof.plot('Not a real plot')
+
         self.assertIsInstance(sprof, bgc.sprof)
         self.assertIs(type(df), pd.core.frame.DataFrame)
