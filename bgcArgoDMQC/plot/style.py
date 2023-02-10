@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 cmocean_flag = True
 try:
     import cmocean.cm as cmo
-except:
+except: # pragma: no cover
     cmocean_flag = False
 
 # default units for variables
