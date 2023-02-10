@@ -117,3 +117,8 @@ class coreTest(unittest.TestCase):
                     final = bgc.util.refill_array(ax, dim, new_array, old_array)
                     self.assertTrue(np.all(final[:N, :N, :N, :N] == 1))
                     self.assertTrue(final[-1, -1, -1, -1] == 2)
+
+    def test_read_gain(self):
+
+        fn = bgc.io.Path.ARGO_PATH / 'meds/4901784/profiles/BD4901784_001.nc'
+        bgc.util.read_gain_value(fn)
