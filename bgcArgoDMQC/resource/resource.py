@@ -17,11 +17,8 @@ URL_DIR_DICT = {
 }
 
 config = configure.read_config()
-if 'default_url' in config.keys():
-    url_name = config.pop('default_url')
-    URL = URL_DICT[url_name]
-else:
-    URL = 'ftp.ifremer.fr'
+url_name = config.pop('default_url') if 'default_url' in config.keys() else 'ifremer'
+URL = 'ftp.ifremer.fr'
 
 def path(loc):
 
