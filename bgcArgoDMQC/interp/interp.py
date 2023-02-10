@@ -133,81 +133,79 @@ def interp_woa_data(track, woa_track, data, verbose=True):
 
     for i in range(N):
         # leave values as nan if lat/lon/time are nan:
-        if any(np.isnan(track[i,:])):
-            continue
+        if not any(np.isnan(track[i,:])):
+            # ---------------------------------------------------------------------
+            # Get bounding indices, interp weights, and subset before interpolation
+            # ---------------------------------------------------------------------
+            t1 = np.where(woa_yrday < yrday[i])[0]
+            if t1.shape[0] == 0: # early Jan
+                t1 = 0
+                t2 = 11
+                wt = (yrday[i] + 15) / 30
+            elif t1[-1] == 11: # late Dec
+                t1 = t1[-1]
+                t2 = 0
+                wt = (365 - yrday[i] + 15) / 30
+            else:
+                t1 = t1[-1]
+                t2 = t1 + 1
+                dx1 = woa_yrday[t2] - woa_yrday[t1]
+                dx2 = yrday[i] - woa_yrday[t1]
+                wt = (dx1 - dx2) / dx1
 
-        # ---------------------------------------------------------------------
-        # Get bounding indices, interp weights, and subset before interpolation
-        # ---------------------------------------------------------------------
-        t1 = np.where(woa_yrday < yrday[i])[0]
-        if t1.shape[0] == 0: # early Jan
-            t1 = 0
-            t2 = 11
-            wt = (yrday[i] + 15) / 30
-        elif t1[-1] == 11: # late Dec
-            t1 = t1[-1]
-            t2 = 0
-            wt = (365 - yrday[i] + 15) / 30
-        else:
-            t1 = t1[-1]
-            t2 = t1 + 1
-            dx1 = woa_yrday[t2] - woa_yrday[t1]
-            dx2 = yrday[i] - woa_yrday[t1]
-            wt = (dx1 - dx2) / dx1
+            xwt[0].append(wt)
 
-        xwt[0].append(wt)
+            lat_ix1 = np.where(lat < track[i,1])[0][-1]
+            lat_ix2 = lat_ix1 + 1
+            if lat_ix2 == lat.shape[0]:
+                if verbose:
+                    sys.stdout.write('NOTE: latitude is unbounded, giving all averaging weight to nearest observation\n')
+                lat_ix1 -= 1
+                lat_ix2 -= 1
+                lat_wt = 0
+            else:
+                dx1 = lat[lat_ix2] - lat[lat_ix1]
+                dx2 = track[i,1] - lat[lat_ix1]
+                lat_wt = (dx1 - dx2) / dx1
 
-        lat_ix1 = np.where(lat < track[i,1])[0][-1]
-        lat_ix2 = lat_ix1 + 1
-        if lat_ix2 == lat.shape[0]:
-            if verbose:
-                sys.stdout.write('NOTE: latitude is unbounded, giving all averaging weight to nearest observation\n')
-            lat_ix1 -= 1
-            lat_ix2 -= 1
-            lat_wt = 0
-        else:
-            dx1 = lat[lat_ix2] - lat[lat_ix1]
-            dx2 = track[i,1] - lat[lat_ix1]
-            lat_wt = (dx1 - dx2) / dx1
+            xwt[1].append(lat_wt)
 
-        xwt[1].append(lat_wt)
+            lon_ix1 = np.where(lon < track[i,2])[0]
+            if lon_ix1.shape[0] == 0:
+                lon_ix1 = 0
+            else:
+                lon_ix1 = lon_ix1[-1]
+            lon_ix2 = lon_ix1 + 1
 
-        lon_ix1 = np.where(lon < track[i,2])[0]
-        if lon_ix1.shape[0] == 0:
-            lon_ix1 = 0
-        else:
-            lon_ix1 = lon_ix1[-1]
-        lon_ix2 = lon_ix1 + 1
+            if lon_ix2 == lon.shape[0]:
+                if verbose:
+                    sys.stdout.write('NOTE: longitude is unbounded, giving all averaging weight to nearest observation\n')
+                lon_ix1 -= 1
+                lon_ix2 -= 1
+                lon_wt = 0
+            else:
+                dx1 = lon[lon_ix2] - lon[lon_ix1]
+                dx2 = track[i,2] - lon[lon_ix1]
+                lon_wt = (dx1 - dx2) / dx1
 
-        if lon_ix2 == lon.shape[0]:
-            if verbose:
-                sys.stdout.write('NOTE: longitude is unbounded, giving all averaging weight to nearest observation\n')
-            lon_ix1 -= 1
-            lon_ix2 -= 1
-            lon_wt = 0
-        else:
-            dx1 = lon[lon_ix2] - lon[lon_ix1]
-            dx2 = track[i,2] - lon[lon_ix1]
-            lon_wt = (dx1 - dx2) / dx1
+            xwt[2].append(lon_wt)
 
-        xwt[2].append(lon_wt)
+            # ---------------------------------------------------------------------
+            # Interpolation part 1 - get bounding profiles, interp over time
+            # ---------------------------------------------------------------------
+            D3 = wt*data[t1,:,lat_ix1:lat_ix2+1,lon_ix1:lon_ix2+1] + (1-wt)*data[t2,:,lat_ix1:lat_ix2+1,lon_ix1:lon_ix2+1]
 
-        # ---------------------------------------------------------------------
-        # Interpolation part 1 - get bounding profiles, interp over time
-        # ---------------------------------------------------------------------
-        D3 = wt*data[t1,:,lat_ix1:lat_ix2+1,lon_ix1:lon_ix2+1] + (1-wt)*data[t2,:,lat_ix1:lat_ix2+1,lon_ix1:lon_ix2+1]
-
-        # ---------------------------------------------------------------------
-        # Interpolation part 2 - interp over lat + lon
-        # ---------------------------------------------------------------------
-        if np.isnan(D3.flatten()).any():
-            if verbose:
-                sys.stdout.write('Bounding climatological profile(s) missing data')
-                sys.stdout.write(' - taking simple average of available data.\n')
-            woa_interp[:,i] = np.nanmean(np.nanmean(D3, axis=2), axis=1)
-        else:
-            D2 = lat_wt*D3[:,0,:] + (1 - lat_wt)*D3[:,1,:]
-            woa_interp[:,i] = lon_wt*D2[:,0] + (1 - lon_wt)*D2[:,1]
+            # ---------------------------------------------------------------------
+            # Interpolation part 2 - interp over lat + lon
+            # ---------------------------------------------------------------------
+            if np.isnan(D3.flatten()).any():
+                if verbose:
+                    sys.stdout.write('Bounding climatological profile(s) missing data')
+                    sys.stdout.write(' - taking simple average of available data.\n')
+                woa_interp[:,i] = np.nanmean(np.nanmean(D3, axis=2), axis=1)
+            else:
+                D2 = lat_wt*D3[:,0,:] + (1 - lat_wt)*D3[:,1,:]
+                woa_interp[:,i] = lon_wt*D2[:,0] + (1 - lon_wt)*D2[:,1]
 
     xwt = np.array(xwt)
 
