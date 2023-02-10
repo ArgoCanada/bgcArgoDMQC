@@ -38,15 +38,36 @@ class coreTest(unittest.TestCase):
 
     def test_response_time_correction(self):
         # time correction
-        time = np.arange(0,20,1)
+        time = np.arange(0, 5000, 10)
         temp = 12*np.random.rand(time.shape[0])
-        doxy = 200*np.random.rand(time.shape[0])
+        def oxygen_profile(depth, oxygen_range, central_value, max_grad, depth_grad):
 
-        doxy_adj = bgc.correct_response_time(time, doxy, temp, 120)
+            oxygen = oxygen_range/2*np.tanh((-2*max_grad/oxygen_range)*(depth - depth_grad)) + central_value
+
+            return oxygen
+
+        # just as an example, show the truth, sampled, and corrected
+        depth = np.arange(0, 500, 1)[::-1]
+        oxy_range = 200 # umol kg-1
+        central = 120 # umol kg-1
+        max_grad = 7 # umol kg-1 dbar-1
+        oxycline = 100 # dbar
+        oxygen = oxygen_profile(depth, oxy_range, central, max_grad, oxycline)
+
+        vel = np.mean(np.diff(depth)/np.diff(time))
+        Il = bgc.estimate_boundary_layer(vel)
+
+        doxy_adj = bgc.correct_response_time(time, oxygen, temp, Il)
         self.assertIs(type(doxy_adj), np.ndarray)
 
-        doxy_adj_Tconst = bgc.correct_response_time_Tconst(time, doxy, 70)
+        doxy_adj_Tconst = bgc.correct_response_time_Tconst(time, oxygen, 70)
         self.assertIs(type(doxy_adj_Tconst), np.ndarray)
+
+        doxy_original = bgc.sample(time, doxy_adj_Tconst, temp, Il)
+        self.assertTrue(np.all(np.abs(doxy_original - oxygen) < 1))
+
+        doxy_original_Tconst = bgc.sample_Tconst(time, doxy_adj_Tconst, 70)
+        self.assertTrue(np.all(np.abs(doxy_original_Tconst - oxygen) < 1))
 
     def test_pO2(self):
         time = np.arange(0,20,1)
