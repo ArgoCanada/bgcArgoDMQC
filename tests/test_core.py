@@ -104,7 +104,7 @@ class coreTest(unittest.TestCase):
         pH2O_Pa = bgc.unit.pH2O(T, unit='mbar')
         
         with self.assertRaises(ValueError):
-            pH2O_Pa = bgc.unit.pH2O(T, unit='note a real unit')
+            pH2O_Pa = bgc.unit.pH2O(T, unit='not a real unit')
 
         self.assertIs(type(pO2), np.ndarray)
         self.assertIs(type(doxy_back), np.ndarray)
