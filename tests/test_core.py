@@ -99,6 +99,8 @@ class coreTest(unittest.TestCase):
         T = 15 + 5*np.random.rand(30)
         pO2 = bgc.unit.doxy_to_pO2(doxy, S, T)
         doxy_back = bgc.unit.pO2_to_doxy(pO2, S, T)
+        ml_per_l = bgc.unit.mL_per_L_to_umol_per_L(np.array(10*[6]), np.array(10*[13]))
 
         self.assertIs(type(pO2), np.ndarray)
         self.assertIs(type(doxy_back), np.ndarray)
+        self.assertIs(type(ml_per_l), np.ndarray)
