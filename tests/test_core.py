@@ -100,7 +100,14 @@ class coreTest(unittest.TestCase):
         pO2 = bgc.unit.doxy_to_pO2(doxy, S, T)
         doxy_back = bgc.unit.pO2_to_doxy(pO2, S, T)
         ml_per_l = bgc.unit.mL_per_L_to_umol_per_L(np.array(10*[6]), np.array(10*[13]))
+        pH2O_mbar = bgc.unit.pH2O(T, unit='mbar')
+        pH2O_Pa = bgc.unit.pH2O(T, unit='mbar')
+        
+        with self.assertRaises(ValueError):
+            pH2O_Pa = bgc.unit.pH2O(T, unit='mbar')
 
         self.assertIs(type(pO2), np.ndarray)
         self.assertIs(type(doxy_back), np.ndarray)
         self.assertIs(type(ml_per_l), np.ndarray)
+        self.assertIs(type(pH2O_mbar), np.ndarray)
+        self.assertIs(type(pH2O_Pa), np.ndarray)
