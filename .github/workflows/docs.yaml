@@ -27,7 +27,6 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Build documentation
         run: |
-          python -m jupyter nbconvert README.ipynb --execute --to rst --output README.rst --output-dir docs
           sphinx-build docs docs/_build/html
       - name: Clone gh-pages branch
         if: success() && (github.ref == 'refs/heads/main')
