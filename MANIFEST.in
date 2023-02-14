@@ -1,4 +1,0 @@
-include requirements.txt
-include LICENSE.txt
-include bgcArgoDMQC/resource/Index/*.txt.gz
-include bgcArgoDMQC/resource/*.dat
