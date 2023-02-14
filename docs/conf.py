@@ -22,7 +22,7 @@ copyright = '2020, Christopher Gordon'
 author = 'Christopher Gordon'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.9'
+release = '0.2.13'
 
 
 # -- General configuration ---------------------------------------------------

@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-bgcArgo
+bgcArgoDMQC
 =======
 
 Getting Started
@@ -26,9 +26,9 @@ Documentation
 External Links
 ^^^^^^^^^^^^^^
 
-- `Github <https://github.com/ArgoCanada/bgcArgo>`_
-- `Anaconda <https://anaconda.org/conda-forge/bgcargo>`_
-- `PyPI <https://pypi.org/project/bgcArgo/>`_
+- `Github <https://github.com/ArgoCanada/bgcArgoDMQC>`_
+- `Anaconda <https://anaconda.org/conda-forge/bgcargodmqc>`_
+- `PyPI <https://pypi.org/project/bgcArgoDMQC/>`_
 
 Indices and tables
 ==================
