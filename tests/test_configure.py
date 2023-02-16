@@ -11,9 +11,9 @@ class configureTest(unittest.TestCase):
             operator='Chris Gordon', 
             affiliation='Fisheries and Oceans Canada',
             orcid='0000-0002-1756-422X',
-            argo_path='/Users/GordonC/Doduments/data/Argo/dac',
-            ncep_path='/Users/GordonC/Doduments/data/NCEP',
-            woa_path='/Users/GordonC/Doduments/data/WOA18',
+            argo_path='/Users/GordonC/Documents/data/Argo/dac',
+            ncep_path='/Users/GordonC/Documents/data/NCEP',
+            woa_path='/Users/GordonC/Documents/data/WOA18',
         )
         bgc.configure.configure(operator='Christopher Gordon')
         config = bgc.configure.read_config()
@@ -29,7 +29,7 @@ class configureTest(unittest.TestCase):
             operator='Christopher Gordon', 
             affiliation='Fisheries and Oceans Canada',
             orcid='0000-0002-1756-422X',
-            argo_path='/Users/GordonC/Doduments/data/Argo/dac',
-            ncep_path='/Users/GordonC/Doduments/data/NCEP',
-            woa_path='/Users/GordonC/Doduments/data/WOA18',
+            argo_path='/Users/GordonC/Documents/data/Argo/dac',
+            ncep_path='/Users/GordonC/Documents/data/NCEP',
+            woa_path='/Users/GordonC/Documents/data/WOA18',
         )
