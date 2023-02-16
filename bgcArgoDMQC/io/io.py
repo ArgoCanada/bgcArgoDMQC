@@ -273,11 +273,7 @@ def get_argo(argo_list, local_path='./', url=URL, overwrite=False, summary_overw
             wmo_path = dac_path / wmo
 
             # make the directory if it doesn't exist
-            if not dac_path.is_dir():
-                dac_path.mkdir()
-            if not wmo_path.is_dir():
-                wmo_path.mkdir()
-            
+            wmo_path.mkdir(exist_ok=True, parents=True) 
 
             # download the files
             for fn in files:
