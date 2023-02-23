@@ -198,6 +198,28 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
+def load_profiles(wmo, cycles=None):
+
+    return
+
+def get_files(wmo, cycles=None, mission='B', mode='RD'):
+
+    mode = '' if mode == 'RD' else mode
+    glob = f'{mission}{mode}*'
+    all_files = list((io.Path.ARGO_PATH / io.get_dac(wmo) / f'{wmo}' / 'profiles').glob(glob))
+    all_cycles = set([int(f.as_posix().split('_')[-1].split('.')[0]) for f in all_files])
+
+    cycles = all_cycles if cycles is None else cycles
+    cycles = set([cycles]) if type(cycles) is int else cycles
+    cycles = range(cycles[0], cycles[1]+1) if type(cycles) in [list, tuple] and len(cycles) == 2 else cycles
+    cycles = set(cycles) if hasattr(cycles, '__iter__') else cycles
+
+    ind_dict = dict((k,i) for i,k in enumerate(all_cycles))
+    inter = set(ind_dict.keys()).intersection(cycles)
+    index = [ind_dict[k] for k in inter]
+
+    return [all_files[i] for i in index]
+
 def read_flat_variables(nc):
     '''
     Read all variables and dimensions from an Argo netCDF file.
@@ -219,7 +241,7 @@ def read_flat_variables(nc):
 
 def read_gridded_variables(nc):
     '''
-    Read all variables and dimensions from an Argo Sprof file, do not flatten
+    Read all variables and dimensions from an Argo netCDF file, do not flatten
     arrays, keep as 2D arrays.
 
     Args:
