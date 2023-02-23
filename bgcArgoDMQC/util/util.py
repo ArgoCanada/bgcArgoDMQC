@@ -216,6 +216,21 @@ def get_var_by(v1, v2, float_data):
     
     return out_array
 
+def dict_append(d1, d2, mismatch_ok=False):
+    '''
+    Append two dicts or the intersection of their keys. Values for each key
+    must be compatible with `np.append`.
+    '''
+
+    if mismatch_ok:
+        keys = list(set(d1.keys()).intersection(set(d2.keys())))
+    else:
+        keys = d1.keys()
+    
+    d_out = {}
+    for k in keys:
+        d_out[k] = np.append(d1[k], d2[k])
+
 def cycle_from_time(time, t_arr, c_arr):
     ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))
     return c_arr.loc[ix].iloc[0]
