@@ -200,6 +200,9 @@ def check_index(mode=None):
 
 def get_dac(wmo):
 
+    if type(wmo) is not int:
+        raise ValueError('WMO input must be type int')
+
     if '__globalindex__' not in globals():
             global __globalindex__
             __globalindex__ = read_index(mission='C')
