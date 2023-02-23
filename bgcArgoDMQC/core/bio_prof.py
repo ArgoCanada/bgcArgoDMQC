@@ -8,7 +8,7 @@ from .. import util
 from .. import plot
 from .. import io
 
-class sprof:
+class bio_prof:
     '''
     Class that loads Argo synthetic profile data for a given float ID number
     (wmo). 
@@ -16,17 +16,9 @@ class sprof:
     Then, load the individual variables into fields in the class, for
     example::
 
-        syn = sprof(wmo)
-        print(syn.DOXY)
-
-    Or load it into a pandas dataframe::
-
-        df = syn.to_dataframe()
-
-    THe main function serves to minimize the onus on the user to organize
-    variables for quality control. Calculating an oxygen gain becomes simple::
-
-        gains = syn.calc_gains(ref='NCEP')
+        profiles = bio_prof(wmo)
+        # dataframe-like, can export to actual df using profiles.to_dataframe()
+        print(profiles.DOXY)
     '''
     
     set_dirs = set_dirs
@@ -39,11 +31,11 @@ class sprof:
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
+        self.argo_path = io.Path.ARGO_PATH
+        self.woa_path  = io.Path.WOA_PATH
+        self.ncep_path = io.Path.NCEP_PATH
 
-        self.to_dataframe()
+        # self.to_dataframe()
 
         if not keep_fillvalue:
             self.rm_fillvalue()
@@ -52,13 +44,13 @@ class sprof:
             self.check_range('DOXY')
 
     def __getitem__(self, index):
-        return self.df[index]
-    
+        return pd.Series(self.__floatdict__[index])
+
     def __setitem__(self, index, value):
         self.df[index] = value
 
     def __getattr__(self, index):
-        return self.df[index]
+        return pd.Series(self.__floatdict__[index])
 
     def rm_fillvalue(self):
         '''
