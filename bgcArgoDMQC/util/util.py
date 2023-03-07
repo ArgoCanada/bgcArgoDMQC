@@ -1,4 +1,5 @@
 import sys
+import copy
 from pathlib import Path
 import numpy as np
 from netCDF4 import Dataset
@@ -227,9 +228,11 @@ def dict_append(d1, d2, mismatch_ok=False):
     else:
         keys = d1.keys()
     
-    d_out = {}
+    d_out = {} if len(keys) > 0 else copy.deepcopy(d2)
     for k in keys:
         d_out[k] = np.append(d1[k], d2[k])
+
+    return d_out
 
 def cycle_from_time(time, t_arr, c_arr):
     ix = np.abs(t_arr - time) == np.nanmin(np.abs(t_arr - time))

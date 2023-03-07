@@ -11,6 +11,7 @@ from netCDF4 import Dataset
 from .. import io
 from .. import interp
 from .. import unit
+from .. import util
 
 # ----------------------------------------------------------------------------
 # LOCAL MACHINE SETUP
@@ -198,9 +199,20 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def load_profiles(wmo, cycles=None):
+def load_profiles(wmo, cycles=None, mission='B', mode='RD'):
 
-    return
+    files = get_files(wmo, cycles=cycles, mission=mission, mode=mode)
+    floatDict = {}
+    for i,f in enumerate(files):
+        nc = Dataset(f, 'r')
+        if i == 0:
+            fillvalue = {k:nc[k]._FillValue for k in nc.variables.keys()}
+        d2 = read_flat_variables(nc)
+        floatDict = util.dict_append(floatDict, d2)
+        dmode = f.split('/')[-1][1] if mission in ['B', 'S'] else f.split('/')[-1][0]
+        floatDict['data_mode'] = np.append(floatDict['data_mode'], np.array(d2['N_LEVELS']*[dmode]))
+
+    return floatDict, files, fillvalue
 
 def get_files(wmo, cycles=None, mission='B', mode='RD'):
 
