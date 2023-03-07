@@ -45,12 +45,20 @@
 </ul>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#core-functions">Core Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#file-i-o-functions">File I/O Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#interpolation-functions">Interpolation Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#unit-conversion">Unit Conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bgcArgoDMQC.core">Core Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bgcArgoDMQC.io">File I/O Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bgcArgoDMQC.interp">Interpolation Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bgcArgoDMQC.unit">Unit Conversion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.doxy_to_pO2"><code class="docutils literal notranslate"><span class="pre">doxy_to_pO2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.mL_per_L_to_umol_per_L"><code class="docutils literal notranslate"><span class="pre">mL_per_L_to_umol_per_L()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.oxy_sol"><code class="docutils literal notranslate"><span class="pre">oxy_sol()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.pH2O"><code class="docutils literal notranslate"><span class="pre">pH2O()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.pO2_to_doxy"><code class="docutils literal notranslate"><span class="pre">pO2_to_doxy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bgcArgoDMQC.unit.umol_per_sw_to_mmol_per_L"><code class="docutils literal notranslate"><span class="pre">umol_per_sw_to_mmol_per_L()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#other-functions">Other Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-bgcArgoDMQC.util">Other Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -81,23 +89,165 @@
              
   <section id="documentation">
 <h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h1>
-<section id="core-functions">
-<h2>Core Functions<a class="headerlink" href="#core-functions" title="Permalink to this heading"></a></h2>
+<section id="module-bgcArgoDMQC.core">
+<span id="core-functions"></span><h2>Core Functions<a class="headerlink" href="#module-bgcArgoDMQC.core" title="Permalink to this heading"></a></h2>
 </section>
-<section id="file-i-o-functions">
-<h2>File I/O Functions<a class="headerlink" href="#file-i-o-functions" title="Permalink to this heading"></a></h2>
+<section id="module-bgcArgoDMQC.io">
+<span id="file-i-o-functions"></span><h2>File I/O Functions<a class="headerlink" href="#module-bgcArgoDMQC.io" title="Permalink to this heading"></a></h2>
 </section>
-<section id="interpolation-functions">
-<h2>Interpolation Functions<a class="headerlink" href="#interpolation-functions" title="Permalink to this heading"></a></h2>
+<section id="module-bgcArgoDMQC.interp">
+<span id="interpolation-functions"></span><h2>Interpolation Functions<a class="headerlink" href="#module-bgcArgoDMQC.interp" title="Permalink to this heading"></a></h2>
 </section>
-<section id="unit-conversion">
-<h2>Unit Conversion<a class="headerlink" href="#unit-conversion" title="Permalink to this heading"></a></h2>
+<section id="module-bgcArgoDMQC.unit">
+<span id="unit-conversion"></span><h2>Unit Conversion<a class="headerlink" href="#module-bgcArgoDMQC.unit" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.doxy_to_pO2">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">doxy_to_pO2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">O2conc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.doxy_to_pO2" title="Permalink to this definition"></a></dt>
+<dd><p>convert molar oxygen concentration to oxygen partial pressure</p>
+<dl class="simple">
+<dt>inputs:</dt><dd><p>O2conc - oxygen concentration in umol L-1
+T      - temperature in deg C
+S      - salinity (PSS-78)
+P      - hydrostatic pressure in dbar (default: 0 dbar)</p>
+</dd>
+<dt>output:</dt><dd><p>pO2    - oxygen partial pressure in mbar</p>
+</dd>
+</dl>
+<p>according to recommendations by SCOR WG 142 “Quality Control Procedures
+for Oxygen and Other Biogeochemical Sensors on Floats and Gliders”</p>
+<p>Written in matlab by:
+Henry Bittig
+Laboratoire d’Oceanographie de Villefranche-sur-Mer, France
+<a class="reference external" href="mailto:bittig&#37;&#52;&#48;obs-vlfr&#46;fr">bittig<span>&#64;</span>obs-vlfr<span>&#46;</span>fr</a>
+28.10.2015
+19.04.2018, v1.1, fixed typo in B2 exponent</p>
+<p>Translated to python by:
+Christopher Gordon
+Bedford Institute of Oceanography, Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a>
+02.10.2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.mL_per_L_to_umol_per_L">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">mL_per_L_to_umol_per_L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ppt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.mL_per_L_to_umol_per_L" title="Permalink to this definition"></a></dt>
+<dd><p>Convert oxygen measured in mL L-1 to concentration in umol L-1.</p>
+<p>Args:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.oxy_sol">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">oxy_sol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PDEN</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a4330</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.oxy_sol" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate oxygen saturation concentration in seawater as a function of
+S &amp; T, in equilibrium with standard coponsition moist air at 1atm total
+pressure. From Garcia &amp; Gordon (1992) eq. 8 (p. 1310) using coefficients
+of Benson &amp; Krause in table 1, as used in Sarmiento &amp; Gruber’s “Ocean
+Biogeochemical Dynamics” ch. 3, p. 81, table 3.2.4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>S</strong> (<em>float</em><em> or </em><em>array-like</em>) – salinity, psu</p></li>
+<li><p><strong>T</strong> (<em>float</em><em> or </em><em>array-like</em>) – temperature, deg C</p></li>
+<li><p><strong>a4330</strong> (<em>bool</em>) – True or False for Aanderaa 4330 optode</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>oxygen solubility</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>O2sol (float or array-like)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.pH2O">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">pH2O</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pa'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.pH2O" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate vapor pressure of water</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>T</strong> (<em>float</em><em> or </em><em>array-like</em>) – temperature, deg C</p></li>
+<li><p><strong>S</strong> (<em>optional</em><em>, </em><em>float</em><em> or </em><em>array-like</em>) – salinity, only necessary for mbar unit, default 0</p></li>
+<li><p><strong>unit</strong> (<em>optional</em><em>, </em><em>str</em>) – “Pa” or “mbar” for unit of vapor pressure, defauly “Pa”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>vapor pressure of water, Pa or mbar</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>vapor_pressure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.pO2_to_doxy">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">pO2_to_doxy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pO2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.pO2_to_doxy" title="Permalink to this definition"></a></dt>
+<dd><p>convert oxygen partial pressure to molar oxygen concentration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pO2</strong> (<em>float</em><em> or </em><em>array-like</em>) – oxygen partial pressure in mbar</p></li>
+<li><p><strong>T</strong> (<em>float</em><em> or </em><em>array-like</em>) – temperature in deg C</p></li>
+<li><p><strong>S</strong> (<em>float</em><em> or </em><em>array-like</em>) – salinity (PSS-78)</p></li>
+<li><p><strong>P</strong> (<em>optional</em><em>, </em><em>float</em><em> or </em><em>array-like</em>) – hydrostatic pressure in dbar (default: 0 dbar)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>oxygen concentration in umol L-1</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DOXY</p>
+</dd>
+</dl>
+<p>according to recommendations by SCOR WG 142 “Quality Control Procedures
+for Oxygen and Other Biogeochemical Sensors on Floats and Gliders”</p>
+<p>Written in matlab by:
+Henry Bittig
+Laboratoire d’Oceanographie de Villefranche-sur-Mer, France
+<a class="reference external" href="mailto:bittig&#37;&#52;&#48;obs-vlfr&#46;fr">bittig<span>&#64;</span>obs-vlfr<span>&#46;</span>fr</a>
+28.10.2015
+19.04.2018, v1.1, fixed typo in B2 exponent</p>
+<p>Translated to python by:
+Christopher Gordon
+Bedford Institute of Oceanography, Fisheries and Oceans Canada
+<a class="reference external" href="mailto:chris&#46;gordon&#37;&#52;&#48;dfo-mpo&#46;gc&#46;ca">chris<span>&#46;</span>gordon<span>&#64;</span>dfo-mpo<span>&#46;</span>gc<span>&#46;</span>ca</a>
+02.10.2020</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bgcArgoDMQC.unit.umol_per_sw_to_mmol_per_L">
+<span class="sig-prename descclassname"><span class="pre">bgcArgoDMQC.unit.</span></span><span class="sig-name descname"><span class="pre">umol_per_sw_to_mmol_per_L</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doxy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bgcArgoDMQC.unit.umol_per_sw_to_mmol_per_L" title="Permalink to this definition"></a></dt>
+<dd><p>Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>doxy</strong> (<em>float</em><em> or </em><em>array-like</em>) – dissolved oxygen in umol kg-1</p></li>
+<li><p><strong>S</strong> (<em>float</em><em> or </em><em>array-like</em>) – salinity, array of same length as <cite>doxy</cite> or single value</p></li>
+<li><p><strong>T</strong> (<em>float</em><em> or </em><em>array-like</em>) – temperature (deg C), array of same length  as <cite>doxy</cite> or single value</p></li>
+<li><p><strong>P</strong> (<em>float</em><em> or </em><em>array-like</em>) – pressure (dbar), array of same length  as <cite>doxy</cite> or single value</p></li>
+<li><p><strong>Pref</strong> (<em>optional</em><em>, </em><em>float</em>) – reference pressure (dbar) for potential density calculation, default 0</p></li>
+<li><p><strong>lat</strong> (<em>optional</em><em>, </em><em>float</em><em> or </em><em>array-like</em>) – latitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it</p></li>
+<li><p><strong>lon</strong> (<em>optional</em><em>, </em><em>float</em><em> or </em><em>array-like</em>) – longitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dissolved oxygen concentration in umol L-1 (or equivalently mmol m-3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>umol_L_conc (float or array-like)</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="plotting">
 <h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading"></a></h2>
 </section>
-<section id="other-functions">
-<h2>Other Functions<a class="headerlink" href="#other-functions" title="Permalink to this heading"></a></h2>
+<section id="module-bgcArgoDMQC.util">
+<span id="other-functions"></span><h2>Other Functions<a class="headerlink" href="#module-bgcArgoDMQC.util" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 
