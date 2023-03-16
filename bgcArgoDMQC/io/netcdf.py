@@ -223,12 +223,12 @@ def profile_qc(flags):
 
     return grade
 
-def export_files(fdict, r_files, gain, data_mode='D', comment=None, equation=None, coeff=None):
+def export_files(fdict, files, gain, data_mode='D', comment=None, equation=None, coeff=None):
 
     config = read_config()
     dmqc_date = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
 
-    for fn in r_files:
+    for fn in files:
         # define path to file, make directory if it does not exist
         dac = fn.as_posix().split('/')[-4]
         D_file = Path(fn.as_posix().replace('BR', f'B{data_mode}').\
