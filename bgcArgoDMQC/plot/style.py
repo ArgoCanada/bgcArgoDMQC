@@ -19,6 +19,7 @@ var_units = dict(
     BBP700_ADJUSTED='$\mathsf{b_{bp}}$ (m$^{-1}$)',
     DOXY='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
     DOXY_ADJUSTED='Diss. Oxygen ($\mathregular{\mu}$mol kg$^{-1}$)',
+    O2Sat='%',
     DOWNWELLING_IRRADIANCE='Downwelling Irradiance (W m$^{-2}$)',
 )
 
@@ -35,6 +36,7 @@ color_maps = dict(
     BBP700_ADJUSTED=cmo.matter,
     DOXY=cmo.ice,
     DOXY_ADJUSTED=cmo.ice,
+    O2Sat=cmo.ice,
     DOWNWELLING_IRRADIANCE=cmo.solar,
 ) if cmocean_flag else dict(
     TEMP=plt.cm.inferno,
@@ -48,5 +50,6 @@ color_maps = dict(
     BBP700_ADJUSTED=plt.cm.pink_r,
     DOXY=plt.cm.YlGnBu_r,
     DOXY_ADJUSTED=plt.cm.YlGnBu_r,
+    O2Sat=plt.cm.YlGnBu_r,
     DOWNWELLING_IRRADIANCE=plt.cm.magma,
 )
