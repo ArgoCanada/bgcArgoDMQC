@@ -10,6 +10,7 @@ from ..util import refill_array
 from ..configure import read_config
 
 def read_ncstr(arr):
+    arr = arr.data if hasattr(arr, 'mask') else arr
     decode_str = np.array([f.decode('utf-8') for f in arr])
     out = ''.join(decode_str)
 
@@ -250,8 +251,11 @@ def export_files(fdict, files, gain, data_mode='D', comment=None, equation=None,
 
         # fill in string info
         temp_comment  = f'Oxygen gain calculated following Johnson et al. 2015, doi:10.1175/JTECH-D-15-0101.1, using comparison between float and WOA data. Adjustment applied by {config["operator"]} ({config["affiliation"]}, orcid: {config["orcid"]})'
+        comment  = read_ncstr(D_nc['SCIENTIFIC_CALIB_COMMENT'][0,last_calib,doxy_index,:]) if comment == 'previous' else comment
         comment  = temp_comment if comment is None else comment
+        equation = read_ncstr(D_nc['SCIENTIFIC_CALIB_EQUATION'][0,last_calib,doxy_index,:]) if equation == 'previous' else equation
         equation = 'DOXY_ADJUSTED = G*DOXY' if equation is None else equation
+        coeff    = read_ncstr(D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][0,last_calib,doxy_index,:]) if coeff == 'previous' else coeff
         coeff    = f'G = {gain:f}' if coeff is None else coeff
  
         # apply info to all profiles in file (not sure if this would ever not apply 

@@ -268,12 +268,12 @@ class sprof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def export_files(self, data_mode='D', glob=None):
+    def export_files(self, data_mode='D', glob=None, **kwargs):
 
         glob = 'BR*.nc' if glob is None else glob
         files = (self.__Sprof__.parent / 'profiles').glob(glob)
 
-        io.export_files(self.__floatdict__, files, self.gain, data_mode=data_mode)
+        io.export_files(self.__floatdict__, files, self.gain, data_mode=data_mode, **kwargs)
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
