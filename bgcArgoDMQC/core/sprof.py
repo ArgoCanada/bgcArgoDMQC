@@ -253,6 +253,9 @@ class sprof:
     
     def update_field(self, field, value, where=None):
 
+        current_float_dict = copy.deepcopy(self.__floatdict__)
+        self.reset()
+
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
 
@@ -261,7 +264,8 @@ class sprof:
             self.__floatdict__['O2Sat'] = unit.oxy_saturation(self.__floatdict__['DOXY'], self.__floatdict__['PSAL'], self.__floatdict__['TEMP'], self.__floatdict__['PDEN'], a4330=optode_flag)
         elif field == 'DOXY_QC':
             self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
-
+        
+        self.__floatdict__ = current_float_dict
         self.to_dataframe()
 
     def set_fillvalue(self, field, where=None):
@@ -270,10 +274,15 @@ class sprof:
     
     def export_files(self, data_mode='D', glob=None, **kwargs):
 
+        current_float_dict = copy.deepcopy(self.__floatdict__)
+        self.reset()
+
         glob = 'BR*.nc' if glob is None else glob
         files = (self.__Sprof__.parent / 'profiles').glob(glob)
+        self.reset()
 
         io.export_files(self.__floatdict__, files, self.gain, data_mode=data_mode, **kwargs)
+        self.__floatdict__ = current_float_dict
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
         '''
