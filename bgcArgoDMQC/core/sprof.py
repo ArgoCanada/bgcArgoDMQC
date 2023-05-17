@@ -32,7 +32,8 @@ class sprof:
     def __init__(self, wmo, keep_fillvalue=False, rcheck=True, verbose=False):
 
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(io.Path.ARGO_PATH, wmo, grid=True, verbose=verbose)
-        self.__rawfloatdict__ = self.__floatdict__
+        self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
+        self._dict = 'raw'
 
         # local path info
         self.argo_path = io.Path.ARGO_PATH
@@ -65,6 +66,7 @@ class sprof:
         '''
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
+        self._dict = 'nofill'
         self.to_dataframe()
 
     def clean(self, bad_flags=None):
@@ -75,6 +77,7 @@ class sprof:
         '''
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
+        self._dict = 'clean'
         self.to_dataframe()
 
     def reset(self):
@@ -82,8 +85,23 @@ class sprof:
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
+        self.__floatdict__ = self.__rawfloatdict__
+        self._dict = 'raw'
         self.to_dataframe()
+    
+    def set_dict(self, name):
+        '''
+        Call on the proper dict function given a dictionary name
+        '''
+
+        if name == 'raw':
+            self.reset()
+        elif name == 'nofill':
+            self.rm_fillvalue()
+        elif name == 'clean':
+            self.clean()
+        else:
+            raise ValueError('Unregognized dict type name, should be one of "clean", "nofill", "raw"')
 
     def check_range(self, key, verbose=False):
         '''
@@ -253,7 +271,7 @@ class sprof:
     
     def update_field(self, field, value, where=None):
 
-        current_float_dict = copy.deepcopy(self.__floatdict__)
+        current_float_dict = copy.deepcopy(self._dict)
         self.reset()
 
         where = slice(None) if where is None else where
@@ -265,7 +283,7 @@ class sprof:
         elif field == 'DOXY_QC':
             self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
         
-        self.__floatdict__ = current_float_dict
+        self.set_dict(current_float_dict)
         self.to_dataframe()
 
     def set_fillvalue(self, field, where=None):
