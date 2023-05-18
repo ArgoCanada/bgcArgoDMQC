@@ -133,11 +133,28 @@ def unlimit_dimension(infile, outfile, dimension_to_unlimit):
                     raise ValueError(f'{dimension_to_unlimit} is already unlimited')
                 else:
                     raise IOError(f'Cannot make dimension {dimension_to_unlimit} unlimited as dimension {name} is already unlimited')
-    
+        
+        dst.setncatts(src.__dict__)
         for name, dimension in src.dimensions.items():
-            if dimension_to_unlimit == name:
+            if name == dimension_to_unlimit:
                 dst.createDimension(name, None)
             else:
+                dst.createDimension(name, len(dimension))
+        # copy file data 
+        for name, variable in src.variables.items():
+            x = dst.createVariable(name, variable.datatype, variable.dimensions)
+            # copy variable attributes all at once via dictionary
+            dst[name].setncatts(src[name].__dict__)
+            dst[name][:] = src[name][:]
+
+    return Dataset(outfile, 'r+')
+
+def delete_dimension(infile, outfile, dimension_to_delete):
+
+    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+        dst.setncatts(src.__dict__)
+        for name, dimension in src.dimensions.items():
+            if name != dimension_to_delete:
                 dst.createDimension(name, len(dimension))
         # copy file data 
         for name, variable in src.variables.items():
