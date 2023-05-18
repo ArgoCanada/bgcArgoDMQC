@@ -120,6 +120,34 @@ def iterate_dimension(infile, outfile, iterated_dimension, n=1):
 
     return Dataset(outfile, 'r+')
 
+def unlimit_dimension(infile, outfile, dimension_to_unlimit):
+    '''
+    Make a dimension unlimited, errors out if any dimensions are already
+    unlimited as only one is allowed in a single netCDF file.
+    '''
+
+    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+        for name, dimension in src.dimensions.items():
+            if dimension.isunlimited():
+                if name == dimension_to_unlimit:
+                    raise ValueError(f'{dimension_to_unlimit} is already unlimited')
+                else:
+                    raise IOError(f'Cannot make dimension {dimension_to_unlimit} unlimited as dimension {name} is already unlimited')
+    
+        for name, dimension in src.dimensions.items():
+            if dimension_to_unlimit == name:
+                dst.createDimension(name, None)
+            else:
+                dst.createDimension(name, len(dimension))
+        # copy file data 
+        for name, variable in src.variables.items():
+            x = dst.createVariable(name, variable.datatype, variable.dimensions)
+            # copy variable attributes all at once via dictionary
+            dst[name].setncatts(src[name].__dict__)
+            dst[name][:] = src[name][:]
+
+    return Dataset(outfile, 'r+')
+
 def append_variable(fn, *args):
     '''
     Add an arbitrary number of variables (*args) to the existing netcdf file
@@ -239,6 +267,9 @@ def export_files(fdict, files, gain, data_mode='D', comment=None, equation=None,
         sys.stdout.write(f'Working on D-mode file {D_file.as_posix()}...')
 
         D_nc = copy_netcdf(fn, D_file)
+        if not D_nc.dimensions['N_HISTORY'].isunlimited():
+            D_nc.close()
+            D_nc = unlimit_dimension(fn, D_file, 'N_HISTORY')
         last_calib = D_nc.dimensions['N_CALIB'].size-1
 
         # index for this cycle
