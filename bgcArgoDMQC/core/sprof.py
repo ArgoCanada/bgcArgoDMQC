@@ -298,7 +298,7 @@ class sprof:
         glob = 'BR*.nc' if glob is None else glob
         files = (self.__Sprof__.parent / 'profiles').glob(glob)
 
-        io.export_files(self.__floatdict__, files, self.gain, data_mode=data_mode, **kwargs)
+        io.export_delayed_files(self.__floatdict__, files, self.gain, data_mode=data_mode, **kwargs)
         self.__floatdict__ = current_float_dict
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):

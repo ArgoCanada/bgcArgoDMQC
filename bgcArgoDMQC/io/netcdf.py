@@ -269,7 +269,7 @@ def profile_qc(flags):
 
     return grade
 
-def export_files(fdict, files, gain, data_mode='D', comment=None, equation=None, coeff=None):
+def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equation=None, coeff=None):
 
     config = read_config()
     dmqc_date = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
@@ -354,3 +354,7 @@ def export_files(fdict, files, gain, data_mode='D', comment=None, equation=None,
         update_history(D_nc, history_dict)
         sys.stdout.write('done\n')
         D_nc.close()
+
+def update_nc(fdict, file, history_dict={}):
+
+    return

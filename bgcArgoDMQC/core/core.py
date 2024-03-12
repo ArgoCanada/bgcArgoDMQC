@@ -100,8 +100,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     local_path = Path(local_path)
     dac = io.get_dac(wmo)
 
-    if type(wmo) is not str:
-        wmo = str(wmo)
+    wmo = str(wmo) if type(wmo) is not str else wmo
 
     # check that necessary files exist - can continue without BRtraj file but
     # need Sprof and meta files
@@ -198,6 +197,62 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
+def load_profile(local_path, wmo, cyc, kind='C'):
+    '''
+    Function to load in all data from a single profile file,
+    core or BGC.
+    
+    Args:
+        local_path: local path of float data
+        wmo: float ID number
+        cyc: cycle number
+        kind: core ("C") or B ("B") file
+    
+    Returns:
+        floatData: python dict() object with Argo variables
+    
+        CYCLES, LATITUDE, LONGITUDE, and SDN all also have
+        analogous <VAR>_GRID fields that match the    
+        dimension of PRES, TEMP, PSAL, DOXY, and O2SAT  
+    
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
+    '''
+
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path)
+    dac = io.get_dac(wmo)
+
+    wmo = str(wmo) if type(wmo) is not str else wmo
+    cyc = str(cyc) if type(wmo) is not str else cyc
+
+    kind = '' if kind == 'C' else kind
+
+    # check that the file exists - check for D-mode file first
+    profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}.nc'
+    profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}.nc' if not profFile.exists() else profFile
+
+    if not profFile.exists():
+        raise FileNotFoundError(f'No R- or D-mode file: {profFile.absolute()}')
+    
+    nc = Dataset(profFile, 'r')
+
+    # fillvalue dict
+    fillvalue = {k:nc[k]._FillValue for k in nc.variables.keys()}
+    
+    floatData = read_flat_variables(nc)
+    floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
+    floatData['CYCLES'] = floatData['CYCLE_NUMBER']
+    floatData['WMO'] = wmo
+
+    qc_keys = [s for s in floatData.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
+    for qc in qc_keys:
+        floatData[qc] = io.read_qc(floatData[qc])
+
+    return floatData, profFile, fillvalue
+
 def read_flat_variables(nc):
     '''
     Read all variables and dimensions from an Argo netCDF file.
@@ -266,7 +321,7 @@ def read_history_qctest(nc):
 def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_flags = [k for k in clean_float_data.keys() if '_QC' in k and 'PROFILE' not in k]
+    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
 
     if bad_flags is None:
         for qc_key in qc_flags:
@@ -299,14 +354,15 @@ def dict_clean(float_data, bad_flags=None):
 def dict_fillvalue_clean(float_data):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_keys = [k for k in clean_float_data.keys() if '_QC' in k and 'SDN' not in k and 'PROFILE' not in k]
+    qc_keys = [s for s in clean_float_data.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
 
     for k in qc_keys:
         data_key   = k.replace('_QC','')
         if data_key == 'POSITION':
             for dk in ['LATITUDE', 'LONGITUDE', 'LATITUDE_GRID', 'LONGITUDE_GRID']:
-                fillvalue_index = clean_float_data[dk] >= 99999. # use greater than because date fillval is 999999
-                clean_float_data[dk][fillvalue_index] = np.nan
+                if dk in clean_float_data.keys():
+                    fillvalue_index = clean_float_data[dk] >= 99999. # use greater than because date fillval is 999999
+                    clean_float_data[dk][fillvalue_index] = np.nan
         else:
             fillvalue_index = clean_float_data[data_key] >= 99999. # use greater than because date fillval is 999999
             clean_float_data[data_key][fillvalue_index] = np.nan
@@ -319,8 +375,9 @@ def dict_fillvalue_clean(float_data):
     fillvalue_index = clean_float_data['SDN'] >= 999999.
     clean_float_data['SDN'][fillvalue_index] = np.nan
 
-    fillvalue_index = clean_float_data['SDN_GRID'] >= 999999.
-    clean_float_data['SDN_GRID'][fillvalue_index] = np.nan
+    if 'SDN_GRID' in float_data.keys():
+        fillvalue_index = clean_float_data['SDN_GRID'] >= 999999.
+        clean_float_data['SDN_GRID'][fillvalue_index] = np.nan
 
     return clean_float_data
 

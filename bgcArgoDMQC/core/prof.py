@@ -8,7 +8,7 @@ from .. import util
 from .. import plot
 from .. import io
 
-class sprof:
+class prof:
     '''
     Class that loads Argo synthetic profile data for a given float ID number
     (wmo). 
@@ -16,32 +16,29 @@ class sprof:
     Then, load the individual variables into fields in the class, for
     example::
 
-        syn = sprof(wmo)
-        print(syn.DOXY)
+        p = prof(wmo, cyc)
+        print(p.DOXY)
 
     Or load it into a pandas dataframe::
 
-        df = syn.to_dataframe()
-
-    THe main function serves to minimize the onus on the user to organize
-    variables for quality control. Calculating an oxygen gain becomes simple::
-
-        gains = syn.calc_gains(ref='NCEP')
+        df = p.to_dataframe()
     '''
     
     set_dirs = set_dirs
 
-    def __init__(self, wmo, cycles=None, keep_fillvalue=False, rcheck=True, verbose=False):
+    def __init__(self, wmo, cycle, kind='C', keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__ = {}
-
-        # self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(ARGO_PATH, wmo, grid=True, verbose=verbose)
+        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind)
         self.__rawfloatdict__ = self.__floatdict__
 
         # local path info
-        self.argo_path = ARGO_PATH
-        self.woa_path  = WOA_PATH
-        self.ncep_path = NCEP_PATH
+        self.argo_path = io.Path.ARGO_PATH
+        self.woa_path  = io.Path.WOA_PATH
+        self.ncep_path = io.Path.NCEP_PATH
+
+        self.WMO = wmo
+        self.cycle = cycle
+        self.kind = kind
 
         self.to_dataframe()
 
@@ -52,13 +49,13 @@ class sprof:
             self.check_range('DOXY')
 
     def __getitem__(self, index):
-        return self.df[index]
-    
+        return pd.Series(self.__floatdict__[index])
+
     def __setitem__(self, index, value):
         self.df[index] = value
 
     def __getattr__(self, index):
-        return self.df[index]
+        return pd.Series(self.__floatdict__[index])
 
     def rm_fillvalue(self):
         '''
@@ -106,7 +103,7 @@ class sprof:
                 self.__floatdict__ = self.__rangecheckdict__
 
                 # recalculate O2sat if its DOXY
-                if k == 'DOXY':
+                if k == 'DOXY' and self.kind == 'S':
                     optode_flag = get_optode_type(int(self.__rangecheckdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
                     self.__rangecheckdict__['O2Sat'] = 100*self.__rangecheckdict__['DOXY']/unit.oxy_sol(self.__rangecheckdict__['PSAL'], self.__rangecheckdict__['TEMP'], self.__rangecheckdict__['PDEN'], a4330=optode_flag)
 
@@ -126,8 +123,8 @@ class sprof:
         '''
 
         df = pd.DataFrame()
-        n_level = self.__floatdict__['N_LEVELS']        
-        priority_vars = ['PRES', 'PRES_QC', 'TEMP', 'TEMP_QC', 'PSAL', 'PSAL_QC']
+        n_level = self.__floatdict__['N_LEVELS']
+        priority_vars = ['PRES', 'PRES_QC', 'TEMP', 'TEMP_QC', 'PSAL', 'PSAL_QC'] if self.kind in ['C', 'S'] else ['PRES']
         bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
         priority_vars = priority_vars + bgc_vars
 
@@ -139,18 +136,13 @@ class sprof:
             if dim == n_level:
                 df[k] = self.__floatdict__[k]
 
+        self.df = df
         return copy.deepcopy(self.df)
     
     def update_field(self, field, value, where=None):
 
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
-
-        if field in ['DOXY', 'TEMP', 'PSAL']:
-            optode_flag = get_optode_type(int(self.__floatdict__['WMO'])) == 'AANDERAA_OPTODE_4330'
-            self.__floatdict__['O2Sat'] = unit.oxy_saturation(self.__floatdict__['DOXY'], self.__floatdict__['PSAL'], self.__floatdict__['TEMP'], self.__floatdict__['PDEN'], a4330=optode_flag)
-        elif field == 'DOXY_QC':
-            self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
 
         self.assign(self.__floatdict__)
         self.to_dataframe()
@@ -159,6 +151,6 @@ class sprof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def export_files(self, data_mode=None, glob=None):
+    def export_files(self):
 
-        io.export_files(self.__floatdict__, self.__files__, data_mode=data_mode)
+        io.update_nc(self.__floatdict__, self.__prof__)
