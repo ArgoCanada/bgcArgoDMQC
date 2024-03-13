@@ -355,6 +355,6 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
         sys.stdout.write('done\n')
         D_nc.close()
 
-def update_nc(fdict, file, history_dict={}):
+def update_nc(fdict, file, changelog, history_dict={}):
 
     return
