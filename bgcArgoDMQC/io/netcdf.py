@@ -355,6 +355,45 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
         sys.stdout.write('done\n')
         D_nc.close()
 
-def update_nc(fdict, file, changelog, history_dict={}):
+def update_nc(fdict, fn, changelog, history_dict={}):
 
-    return
+    # get DATE_UPDATE
+    date_update = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
+
+    dac = fn.as_posix().split('/')[-4]
+    output_file = Path(fn.as_posix().replace(f'dac/{dac}/', f'dac/{dac}/E/'))
+    if not output_file.parent.exists():
+        output_file.parent.mkdir(parents=True)
+    sys.stdout.write(f'Working on file {output_file.as_posix()}...')
+
+    O_nc = copy_netcdf(fn, output_file)
+    if not O_nc.dimensions['N_HISTORY'].isunlimited():
+        O_nc.close()
+        O_nc = unlimit_dimension(fn, output_file, 'N_HISTORY')
+
+    for f in changelog:
+
+        O_nc[f][:] = fdict[f]
+
+        # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
+        if f.split('_')[1] == 'QC':
+            for i in range(O_nc.dimensions['N_PROF'].size):
+                flags = read_qc(O_nc[f][:].data[i,:])
+                grade = profile_qc(pd.Series(flags)).encode('utf-8')
+                O_nc[f'PROFILE_{f}'][i] = grade
+
+    history = dict(
+        HISTORY_INSTITUTION=history_dict['HISTORY_INSTITUTION'],
+        HISTORY_STEP=history_dict['HISTORY_STEP'],
+        HISTORY_SOFTWARE='BGQC',
+        HISTORY_SOFTWARE_RELEASE='v0.2',
+        HISTORY_DATE=date_update,
+        HISTORY_ACTION=history_dict['HISTORY_ACTION']
+    )
+
+    O_nc['DATE_UPDATE'][:] = string_to_array(date_update, O_nc.dimensions['DATE_TIME'])
+    update_history(O_nc, history)
+    sys.stdout.write('done\n')
+    O_nc.close()
+    
+    return output_file

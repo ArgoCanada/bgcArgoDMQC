@@ -29,8 +29,9 @@ class prof:
     def __init__(self, wmo, cycle, kind='C', keep_fillvalue=False, rcheck=True, verbose=False):
 
         self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind)
-        self.__rawfloatdict__ = self.__floatdict__
+        self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
+        self._changelog = []
 
         # local path info
         self.argo_path = io.Path.ARGO_PATH
@@ -83,7 +84,7 @@ class prof:
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
+        self.__floatdict__ = self.__rawfloatdict__
         self._dict = 'raw'
         self.to_dataframe()
     
@@ -166,12 +167,14 @@ class prof:
         self.__floatdict__[field][where] = value
 
         self.set_dict(current_float_dict)
+        self._changelog.append(field)
         self.to_dataframe()
     
     def set_fillvalue(self, field, where=None):
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def export_files(self):
+    def update_file(self, history):
 
-        io.update_nc(self.__floatdict__, self.__prof__)
+        export_file = io.update_nc(self.__floatdict__, self.__prof__, self._changelog, history_dict=history)
+        return export_file
