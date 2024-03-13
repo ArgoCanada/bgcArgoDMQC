@@ -30,6 +30,7 @@ class prof:
 
         self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind)
         self.__rawfloatdict__ = self.__floatdict__
+        self._dict = 'raw'
 
         # local path info
         self.argo_path = io.Path.ARGO_PATH
@@ -63,6 +64,7 @@ class prof:
         '''
         self.__nofillvaluefloatdict__ = dict_fillvalue_clean(self.__rawfloatdict__)
         self.__floatdict__ = copy.deepcopy(self.__nofillvaluefloatdict__)
+        self._dict = 'nofill'
         self.to_dataframe()
     
     def clean(self, bad_flags=None):
@@ -73,6 +75,7 @@ class prof:
         '''
         self.__cleanfloatdict__ = dict_clean(self.__floatdict__, bad_flags=bad_flags)
         self.__floatdict__ = copy.deepcopy(self.__cleanfloatdict__)
+        self._dict = 'clean'
         self.to_dataframe()
 
     def reset(self):
@@ -81,7 +84,22 @@ class prof:
         clean(), rm_fillvalue(), check_range().
         '''
         self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
+        self._dict = 'raw'
         self.to_dataframe()
+    
+    def set_dict(self, name):
+        '''
+        Call on the proper dict function given a dictionary name
+        '''
+
+        if name == 'raw':
+            self.reset()
+        elif name == 'nofill':
+            self.rm_fillvalue()
+        elif name == 'clean':
+            self.clean()
+        else:
+            raise ValueError('Unregognized dict type name, should be one of "clean", "nofill", "raw"')
 
     def check_range(self, key, verbose=False):
         '''
@@ -141,10 +159,13 @@ class prof:
     
     def update_field(self, field, value, where=None):
 
+        current_float_dict = copy.deepcopy(self._dict)
+        self.reset()
+
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
 
-        self.assign(self.__floatdict__)
+        self.set_dict(current_float_dict)
         self.to_dataframe()
     
     def set_fillvalue(self, field, where=None):
