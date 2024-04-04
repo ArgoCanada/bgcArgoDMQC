@@ -375,10 +375,15 @@ def update_nc(fdict, fn, changelog, history_dict={}):
 
         O_nc[f][:] = fdict[f]
 
+        # find index along PARAMETER
+        param_index = [read_ncstr(a) for a in O_nc['PARAMETER'][:].data[0,0,:,:]].index(f.replace('_QC','').replace('_ADJUSTED',''))
+        data_mode = O_nc['PARAMETER_DATA_MODE'][:][0,param_index].decode()
+
         # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
-        if f.split('_')[1] == 'QC':
+        if f.split('_')[-1] == 'QC':
             for i in range(O_nc.dimensions['N_PROF'].size):
-                flags = read_qc(O_nc[f][:].data[i,:])
+                grade_var = f.replace('_QC', '_ADJUSTED_QC') if (data_mode in ('A', 'D') and f.split('_')[1] != 'ADJUSTED') else f
+                flags = read_qc(O_nc[grade_var][:].data[i,:])
                 grade = profile_qc(pd.Series(flags)).encode('utf-8')
                 O_nc[f'PROFILE_{f}'][i] = grade
 
@@ -388,7 +393,8 @@ def update_nc(fdict, fn, changelog, history_dict={}):
         HISTORY_SOFTWARE='BGQC',
         HISTORY_SOFTWARE_RELEASE='v0.2',
         HISTORY_DATE=date_update,
-        HISTORY_ACTION=history_dict['HISTORY_ACTION']
+        HISTORY_ACTION=history_dict['HISTORY_ACTION'],
+        HISTORY_PARAMETER=history_dict['HISTORY_PARAMETER'],
     )
 
     O_nc['DATE_UPDATE'][:] = string_to_array(date_update, O_nc.dimensions['DATE_TIME'])
