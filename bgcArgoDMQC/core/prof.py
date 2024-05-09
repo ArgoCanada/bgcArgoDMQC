@@ -26,9 +26,22 @@ class prof:
     
     set_dirs = set_dirs
 
-    def __init__(self, wmo, cycle, kind='C', keep_fillvalue=False, rcheck=True, verbose=False):
+    def __init__(self, wmo=None, cycle=None, file=None, kind='C', direction='A', keep_fillvalue=False, rcheck=True, verbose=False):
 
-        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind)
+        if (wmo is not None and cycle is not None) and file is not None:
+            raise ValueError("wmo/cycle and file cannot be defined at the same time")
+
+        file = file.as_posix() if type(file) is not str else file
+        wmo = file.split('/')[-3] if file is not None else wmo
+        cycle = file.split('_')[-1].split('.')[0] if file is not None else cycle
+        direction = cycle[-1] if cycle[-1] == 'D' else direction
+        cycle = cycle[:-1] if cycle[-1] == 'D' else cycle
+        kind = file.split('/')[-1][0] if file.split('/')[-1][0] == 'B' else kind
+
+        wmo = int(wmo)
+        cycle = int(cycle)
+
+        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction)
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
         self._changelog = []
@@ -41,6 +54,7 @@ class prof:
         self.WMO = wmo
         self.cycle = cycle
         self.kind = kind
+        self.direction = direction
 
         self.to_dataframe()
 

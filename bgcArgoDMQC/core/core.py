@@ -197,7 +197,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def load_profile(local_path, wmo, cyc, kind='C'):
+def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     '''
     Function to load in all data from a single profile file,
     core or BGC.
@@ -207,6 +207,7 @@ def load_profile(local_path, wmo, cyc, kind='C'):
         wmo: float ID number
         cyc: cycle number
         kind: core ("C") or B ("B") file
+        direction: ascending ("A") or descending ("D")
     
     Returns:
         floatData: python dict() object with Argo variables
@@ -229,10 +230,11 @@ def load_profile(local_path, wmo, cyc, kind='C'):
     cyc = str(cyc) if type(wmo) is not str else cyc
 
     kind = '' if kind == 'C' else kind
+    direction = '' if direction == 'A' else direction
 
     # check that the file exists - check for D-mode file first
-    profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}.nc'
-    profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}.nc' if not profFile.exists() else profFile
+    profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}{direction}.nc'
+    profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}{direction}.nc' if not profFile.exists() else profFile
 
     if not profFile.exists():
         raise FileNotFoundError(f'No R- or D-mode file: {profFile.absolute()}')

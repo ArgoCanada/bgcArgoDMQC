@@ -364,7 +364,7 @@ def update_nc(fdict, fn, changelog, history_dict={}):
     output_file = Path(fn.as_posix().replace(f'dac/{dac}/', f'dac/{dac}/E/'))
     if not output_file.parent.exists():
         output_file.parent.mkdir(parents=True)
-    sys.stdout.write(f'Working on file {output_file.as_posix()}...')
+    sys.stdout.write(f'Working on file {output_file.name}...')
 
     O_nc = copy_netcdf(fn, output_file)
     if not O_nc.dimensions['N_HISTORY'].isunlimited():
