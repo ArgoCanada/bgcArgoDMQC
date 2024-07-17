@@ -355,6 +355,25 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
         sys.stdout.write('done\n')
         D_nc.close()
 
+def reshape(data, n_prof, n_levels):
+
+    print(data)
+    out = np.nan*np.ones((n_prof, n_levels))
+    for i in range(n_prof):
+        out[i,:] = data[i*n_levels:(i+1)*n_levels]
+    print(out)
+    return out
+
+def find_param(nc, param):
+
+    for i in range(nc.dimensions['N_PROF'].size):
+        param_list = [read_ncstr(a) for a in nc['PARAMETER'][:].data[i,0,:,:]]
+        if param in param_list:
+            param_index = param_list.index(param)
+            break
+
+    return (i, param_index)
+
 def update_nc(fdict, fn, changelog, history_dict={}):
 
     # get DATE_UPDATE
@@ -372,12 +391,11 @@ def update_nc(fdict, fn, changelog, history_dict={}):
         O_nc = unlimit_dimension(fn, output_file, 'N_HISTORY')
 
     for f in changelog:
-
-        O_nc[f][:] = fdict[f]
+        O_nc[f][:] = reshape(fdict[f], fdict['N_PROF_DIM'], fdict['N_LEVELS_DIM']) if fdict['N_PROF_DIM'] > 1 else fdict[f]
 
         # find index along PARAMETER
-        param_index = [read_ncstr(a) for a in O_nc['PARAMETER'][:].data[0,0,:,:]].index(f.replace('_QC','').replace('_ADJUSTED',''))
-        data_mode = O_nc['PARAMETER_DATA_MODE'][:][0,param_index].decode()
+        param_index = find_param(O_nc, f.replace('_QC','').replace('_ADJUSTED',''))
+        data_mode = O_nc['PARAMETER_DATA_MODE'][:][param_index].decode()
 
         # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
         if f.split('_')[-1] == 'QC':

@@ -156,7 +156,8 @@ class prof:
         '''
 
         df = pd.DataFrame()
-        n_level = self.__floatdict__['N_LEVELS']
+        n_level = self.__floatdict__['N_LEVELS_DIM']
+        n_prof = self.__floatdict__['N_PROF_DIM']
         priority_vars = ['PRES', 'PRES_QC', 'TEMP', 'TEMP_QC', 'PSAL', 'PSAL_QC'] if self.kind in ['C', 'S'] else ['PRES']
         bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
         priority_vars = priority_vars + bgc_vars
@@ -166,8 +167,10 @@ class prof:
 
         for k in set(self.__floatdict__.keys()) - set(df.columns):
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
-            if dim == n_level:
+            if dim == n_level*n_prof:
                 df[k] = self.__floatdict__[k]
+
+        df = df.set_index(['N_PROF', 'N_LEVELS'])
 
         self.df = df
         return copy.deepcopy(self.df)

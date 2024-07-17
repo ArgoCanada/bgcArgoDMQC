@@ -269,6 +269,20 @@ def read_flat_variables(nc):
     floatData = dict()
     for name, dim in nc.dimensions.items():
         floatData[name] = dim.size
+
+    n_prof = nc.dimensions['N_PROF'].size
+    n_levels = nc.dimensions['N_LEVELS'].size
+    n_prof_array = []
+    n_levels_array = []
+    for i in range(n_prof):
+        n_prof_array = n_prof_array + n_levels*[i]
+        n_levels_array = n_levels_array + list(range(n_levels))
+
+    floatData['N_PROF_DIM'] = floatData['N_PROF']
+    floatData['N_LEVELS_DIM'] = floatData['N_LEVELS']
+    floatData['N_PROF'] = np.array(n_prof_array)
+    floatData['N_LEVELS'] = np.array(n_levels_array)
+
     for name, var in nc.variables.items():
         floatData[name] = var[:].data.flatten()
 
