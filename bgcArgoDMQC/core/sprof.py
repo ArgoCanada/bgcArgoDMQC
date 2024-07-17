@@ -269,6 +269,10 @@ class sprof:
 
         return self.df.describe()
     
+    def is_fillvalue(self, field):
+
+        return self.__floatdict__[field] == self.__fillvalue__[field]
+    
     def update_field(self, field, value, where=None):
 
         current_float_dict = copy.deepcopy(self._dict)

@@ -19,7 +19,7 @@ def read_ncstr(arr):
 def read_qc(flags):
 
     decode_flags = np.array([f.decode('utf-8') for f in flags])
-    decode_flags[decode_flags == ' '] = '4'
+    decode_flags[decode_flags == ' '] = '9'
 
     out_flags = np.array([int(f) for f in decode_flags])
 
@@ -295,7 +295,7 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
         N = D_nc.dimensions['N_LEVELS'].size
 
         # find index for DOXY along PARAMETER
-        doxy_index = [read_ncstr(a) for a in D_nc['PARAMETER'][:].data[0,0,:,:]].index('DOXY')
+        doxy_index = find_param('DOXY')
 
         # fill in string info
         temp_comment  = f'Oxygen gain calculated following Johnson et al. 2015, doi:10.1175/JTECH-D-15-0101.1, using comparison between float and WOA data. Adjustment applied by {config["operator"]} ({config["affiliation"]}, orcid: {config["orcid"]})'
