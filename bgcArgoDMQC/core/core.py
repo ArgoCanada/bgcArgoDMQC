@@ -249,7 +249,11 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     floatData['CYCLES'] = floatData['CYCLE_NUMBER']
     floatData['WMO'] = wmo
 
-    qc_keys = [s for s in floatData.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
+    qc_keys = [
+        s for s in floatData.keys() if\
+            (s.split('_')[-1] == 'QC') and (type(floatData[s]) is np.ndarray) and ('PROFILE' not in s)\
+            and (floatData[s].shape[0] == floatData['N_LEVELS_DIM']*floatData['N_PROF_DIM'])
+    ]
     for qc in qc_keys:
         floatData[qc] = io.read_qc(floatData[qc])
 

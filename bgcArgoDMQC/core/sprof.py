@@ -85,7 +85,7 @@ class sprof:
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = self.__rawfloatdict__
+        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self._dict = 'raw'
         self.to_dataframe()
     

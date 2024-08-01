@@ -98,7 +98,7 @@ class prof:
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = self.__rawfloatdict__
+        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self._dict = 'raw'
         self.to_dataframe()
     
@@ -197,5 +197,8 @@ class prof:
     
     def update_file(self, history):
 
+        current_float_dict = copy.deepcopy(self._dict)
+        self.reset()
         export_file = io.update_nc(self.__floatdict__, self.__prof__, self._changelog, history_dict=history)
+        self.set_dict(current_float_dict)
         return export_file

@@ -18,12 +18,9 @@ def read_ncstr(arr):
 
 def read_qc(flags):
 
-    decode_flags = np.array([f.decode('utf-8') for f in flags])
-    decode_flags[decode_flags == ' '] = '9'
+    decode_flags = np.array([int(f.decode('utf-8')) if f != b' ' else -1 for f in flags])
 
-    out_flags = np.array([int(f) for f in decode_flags])
-
-    return out_flags
+    return decode_flags
 
 def get_parameter_index(parameter_array, parameter):
     str_arr = np.array([read_ncstr(s) for s in parameter_array])
@@ -84,7 +81,11 @@ def copy_netcdf(infile, outfile, exclude_vars=[], exclude_dims=[]):
                 x = dst.createVariable(name, variable.datatype, variable.dimensions)
                 # copy variable attributes all at once via dictionary
                 dst[name].setncatts(src[name].__dict__)
-                dst[name][:] = src[name][:]
+                dst[name][:] = np.ma.masked_array(
+                    data=src[name][:].data, mask=False, 
+                    fill_value=src[name][:].fill_value, 
+                    dtype=src[name][:].dtype
+                )
     
     return Dataset(outfile, 'r+')
 
@@ -242,7 +243,7 @@ def profile_qc(flags):
     '''
     
     n_good = flags.isin([1, 2, 5, 8]).sum()
-    n_exclude = flags.isin([9]).sum()
+    n_exclude = flags.isin([9, -1]).sum()
 
     pct = 100*n_good/(flags.size - n_exclude)
 
@@ -357,12 +358,7 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
 
 def reshape(data, n_prof, n_levels):
 
-    print(data)
-    out = np.nan*np.ones((n_prof, n_levels))
-    for i in range(n_prof):
-        out[i,:] = data[i*n_levels:(i+1)*n_levels]
-    print(out)
-    return out
+    return np.array([data[i*n_levels:(i+1)*n_levels] for i in range(n_prof)])
 
 def find_param(nc, param):
 
@@ -391,7 +387,15 @@ def update_nc(fdict, fn, changelog, history_dict={}):
         O_nc = unlimit_dimension(fn, output_file, 'N_HISTORY')
 
     for f in changelog:
-        O_nc[f][:] = reshape(fdict[f], fdict['N_PROF_DIM'], fdict['N_LEVELS_DIM']) if fdict['N_PROF_DIM'] > 1 else fdict[f]
+
+        # encode qc flags
+        if f.split('_')[-1] == 'QC':
+            arr = [f'{x}'.encode('utf-8') if x > 0 else b' ' for x in fdict[f]]
+        else:
+            arr = fdict[f]
+        
+        # assign nc variable data
+        O_nc[f][:] = reshape(arr, fdict['N_PROF_DIM'], fdict['N_LEVELS_DIM']) if fdict['N_PROF_DIM'] > 1 else arr
 
         # find index along PARAMETER
         param_index = find_param(O_nc, f.replace('_QC','').replace('_ADJUSTED',''))
@@ -400,7 +404,7 @@ def update_nc(fdict, fn, changelog, history_dict={}):
         # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
         if f.split('_')[-1] == 'QC':
             for i in range(O_nc.dimensions['N_PROF'].size):
-                grade_var = f.replace('_QC', '_ADJUSTED_QC') if (data_mode in ('A', 'D') and f.split('_')[1] != 'ADJUSTED') else f
+                grade_var = f.replace('_QC', '_ADJUSTED_QC') if (data_mode in ('A', 'D')) and (f.split('_')[1] != 'ADJUSTED') else f
                 flags = read_qc(O_nc[grade_var][:].data[i,:])
                 grade = profile_qc(pd.Series(flags)).encode('utf-8')
                 O_nc[f'PROFILE_{f}'][i] = grade
