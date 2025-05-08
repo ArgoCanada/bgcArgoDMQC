@@ -86,7 +86,7 @@ def pO2(DOXY, S, T):
     # Used for conversions from [O2] to pO2:
     p1  = np.polyval(pB,Ts)
     S_corr = S*p1 + Co*S**2
-    L      = np.polyval(pA,Ts) + S_corr;
+    L      = np.polyval(pA,Ts) + S_corr
     # Oxygen solubility real gas, mmol/m3
     O2sol  = (1000/O2_volume) * np.exp(L)
 
@@ -142,6 +142,18 @@ def mL_per_L_to_umol_per_L(ppt, T):
 
     return umol
 
+def umol_per_L_to_mL_per_L(umol, T):
+    
+    Tk  = T + 273.15 # temperature in kelvin
+    R   = 8.314 # gas constant in J mol-1 K-1
+    nmol = umol / 1e6
+
+    Vm = (nmol * R * Tk)/101.325
+
+    ppt = Vm*1000
+
+    return ppt
+
 # -----------------------------------------------------------------------------
 # Section - conversion code from "SCOR WG 142: Quality Control Procedures for 
 # Oxygen and Other Biogeochemical Sensors on Floats and Gliders". Code
@@ -184,13 +196,13 @@ def doxy_to_pO2(O2conc, S, T, P=0):
     # scaled temperature for use in TCorr and SCorr
     sca_T   = np.log((298.15 - T)/(Tk))
     # temperature correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit mL(STP) L-1; and conversion from mL(STP) L-1 to umol L-1
-    Tcorr   = 44.6596 * np.exp(2.00907 + 3.22014*sca_T + 4.05010*sca_T**2 + 4.94457*sca_T**3 - 2.56847e-1*sca_T**4 + 3.88767*sca_T**5)
+    Tcorr   = 44.6596 * np.exp(2.00907 + 3.22014*sca_T + 4.05010*(sca_T**2) + 4.94457*(sca_T**3) - 2.56847e-1*(sca_T**4) + 3.88767*(sca_T**5))
     # salinity correction part from Garcia and Gordon (1992), Benson and Krause (1984) refit ml(STP) L-1
-    Scorr   = np.exp(S*(-6.24523e-3 - 7.37614e-3*sca_T - 1.03410e-2*sca_T**2 - 8.17083e-3*sca_T**3) - 4.88682e-7*S**2)
+    Scorr   = np.exp(S*(-6.24523e-3 - 7.37614e-3*sca_T - 1.03410e-2*(sca_T**2) - 8.17083e-3*(sca_T**3)) - 4.88682e-7*(S**2))
     Vm      = 0.317 # molar volume of O2 in m3 mol-1 Pa dbar-1 (Enns et al. 1965)
     R       = 8.314 # universal gas constant in J mol-1 K-1
 
-    pO2 = O2conc*(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp(Vm*P/(R*Tk))
+    pO2 = O2conc*(xO2*(1013.25 - pH2Osat))/(Tcorr*Scorr)*np.exp((Vm*P)/(R*Tk))
 
     return pO2
 
