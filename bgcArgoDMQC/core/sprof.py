@@ -33,6 +33,8 @@ class sprof:
 
         self.__floatdict__, self.__Sprof__, self.__BRtraj__, self.__meta__, self.__fillvalue__ = load_argo(io.Path.ARGO_PATH, wmo, grid=True, verbose=verbose)
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
+        # keep for just in case hard reset
+        self.__origfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
 
         # local path info
@@ -80,12 +82,17 @@ class sprof:
         self._dict = 'clean'
         self.to_dataframe()
 
-    def reset(self):
+    def reset(self, hard=False):
         '''
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
+
+        if hard:
+            print('Warning: hard resetting back to original file values. Any changes from update_field() or set_fillvalue() will be lost.')
+            self.__floatdict__ = copy.deepcopy(self.__origfloatdict__)
+        else:
+            self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self._dict = 'raw'
         self.to_dataframe()
     
@@ -278,7 +285,9 @@ class sprof:
         current_float_dict = copy.deepcopy(self._dict)
         self.reset()
 
+        N = 'all' if where is None else sum(where)
         where = slice(None) if where is None else where
+        print(f'Updating {field} on {N} levels')
         self.__floatdict__[field][where] = value
 
         if field in ['DOXY', 'TEMP', 'PSAL']:
@@ -287,6 +296,7 @@ class sprof:
         elif field == 'DOXY_QC':
             self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
         
+        self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self.set_dict(current_float_dict)
         self.to_dataframe()
 

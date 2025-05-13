@@ -43,6 +43,7 @@ class prof:
 
         self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction)
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
+        self.__origfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
         self._changelog = []
 
@@ -93,12 +94,17 @@ class prof:
         self._dict = 'clean'
         self.to_dataframe()
 
-    def reset(self):
+    def reset(self, hard=False):
         '''
         Reset all variables back to original loaded variables. Undoes the effect of
         clean(), rm_fillvalue(), check_range().
         '''
-        self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
+
+        if hard:
+            print('Warning: hard resetting back to original file values. Any changes from update_field() or set_fillvalue() will be lost.')
+            self.__floatdict__ = copy.deepcopy(self.__origfloatdict__)
+        else:
+            self.__floatdict__ = copy.deepcopy(self.__rawfloatdict__)
         self._dict = 'raw'
         self.to_dataframe()
     
@@ -187,6 +193,7 @@ class prof:
         where = slice(None) if where is None else where
         self.__floatdict__[field][where] = value
 
+        self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self.set_dict(current_float_dict)
         self._changelog.append(field)
         self.to_dataframe()
