@@ -52,6 +52,24 @@ configure(argo_path=argo_dir, woa_path=woa_dir, ncep_path=ncep_dir)
 
 Other items like `operator_name` and `operator_orcid` can be set in this matter as well to a `.config` file saved where the package exists on your machine. All required Argo and reference data can be downloaded using the `io` component of the package, see documentation for more details. All data paths should be structured as they are found. For example, the Argo path should follow the dac structure, so in this example, a profile might be found in `'/path/to/my/argo/data/dac/meds/4900869/profiles/BR4900869_024.nc'`.
 
+WOA and NCEP data can also be downloaded using `bgcArgoDMQC`:
+
+```python
+import bgcArgoDMQC as bgc
+
+bgc.io.get_woa18(
+    'O2sat', # or other WOA18 var name
+    local_path=woa_dir # defined above
+)
+
+bgc.io.get_ncep(
+    'pres', # or 'rhum' or 'land'
+    local_path=ncep_dir, # defined above
+    years=(2015, 2025) # year range
+)
+
+```
+
 ## basic functionality
 
 This section will show the two main components of DOXY DMQC, visually inspecting the data, and calculating the gain relative to a reference dataset. There are many more visualizations that are possible, refer to docs for full plotting reference. 
