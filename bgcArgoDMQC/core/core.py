@@ -140,6 +140,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     # fillvalue dict
     fillvalue = {k:Sprof_nc[k]._FillValue for k in Sprof_nc.variables.keys()}
+    fillvalue['O2Sat'] = fillvalue['DOXY']
     
     floatData = read_flat_variables(Sprof_nc)
     floatData['SDN']  = floatData['JULD'] + mdates.datestr2num('1950-01-01')
@@ -346,7 +347,7 @@ def dict_clean(float_data, bad_flags=None):
     if bad_flags is None:
         for qc_key in qc_flags:
             data_key   = qc_key.replace('_QC','')
-            good_index = np.logical_or(np.logical_or(clean_float_data[qc_key] < 4, clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
+            good_index = np.logical_or(np.logical_or(np.logical_and(clean_float_data[qc_key] < 4, clean_float_data[qc_key] > 0), clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
             bad_index  = np.invert(good_index)
 
             if data_key == 'POSITION':
