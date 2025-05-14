@@ -297,6 +297,7 @@ class sprof:
             self.__floatdict__['O2Sat_QC'] = copy.deepcopy(self.__floatdict__['DOXY_QC'])
         
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
+        self.reset()
         self.set_dict(current_float_dict)
         self.to_dataframe()
 
@@ -304,7 +305,7 @@ class sprof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def export_files(self, data_mode='D', glob=None, **kwargs):
+    def export_files(self, data_mode='D', gain=None, glob=None, **kwargs):
 
         current_float_dict = copy.deepcopy(self.__floatdict__)
         self.reset()
@@ -312,7 +313,9 @@ class sprof:
         glob = 'BR*.nc' if glob is None else glob
         files = (self.__Sprof__.parent / 'profiles').glob(glob)
 
-        io.export_delayed_files(self.__floatdict__, files, self.gain, data_mode=data_mode, **kwargs)
+        gain = self.gain if gain is None else gain
+
+        io.export_delayed_files(self.__floatdict__, files, gain, data_mode=data_mode, **kwargs)
         self.__floatdict__ = current_float_dict
 
     def add_independent_data(self, date=None, lat=None, lon=None, data_dict=None, label=None, **kwargs):
