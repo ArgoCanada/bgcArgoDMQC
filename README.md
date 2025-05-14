@@ -113,7 +113,7 @@ I find this plot particularly useful, as sometimes it is a good indicator to go 
 
 ## future developments
 
-- improved netcdf exporting
-- gain calculation with drift, surface carryover for in-air gains
-- expanded capabilities for DMQC on other BGC variables
-- data access via internet (through a package like argopy or argopandas)
+- [x] improved netcdf exporting
+- [ ] gain calculation with drift, surface carryover for in-air gains
+- [ ] expanded capabilities for DMQC on other BGC variables
+- [ ] data access via internet (through a package like argopy or argopandas)
