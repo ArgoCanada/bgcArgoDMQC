@@ -1,0 +1,85 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "d1c1823e-541d-495d-ac49-c2d1b643e73f",
+   "metadata": {},
+   "source": [
+    "# NOAA Lapenta Internship Project \n",
+    "\n",
+    "**My Project:** Extension of a Python package for quality control of Argo float data (OAR)\n",
+    "\n",
+    "**Project Description** The goal of this project is to extend the capabilities of an existing Python package for delayed mode quality control of Argo float data. \n",
+    "* It currently handles only oxygen, the goal is to handle at least one other biogeochemical variable, e.g., nitrate. (The full set also includes pH, chlorophyll, and backscatter.) \n",
+    "* New functions and notebooks to demonstrate the new features need to be developed.\n",
+    "\n",
+    "**Expected Outcome** The expected outcome is an expanded Python package with the capability to perform delayed mode quality control on oxygen and at least one other biogeochemical variable.\n",
+    "\n",
+    "**Duties and Responsibilities** The intern will act as the primary software developer. This will include design, implementation, debugging, testing, and documenting of the code.\n",
+    "\n",
+    "## Back Ground Information \n",
+    "\n",
+    "Link to BCG Argo Website: https://biogeochemical-argo.org/index.php"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e269aedc-afbe-4bed-aa98-fa1f14115272",
+   "metadata": {},
+   "source": [
+    "## Setting up the Github\n",
+    "\n",
+    "Link to reference Github: https://github.com/ArgoCanada/bgcArgoDMQC\n",
+    "\n",
+    "Link to our forked Github: https://github.com/hfrenzel-noaa/bgcArgoDMQC\n",
+    "\n",
+    "**Vocab**\n",
+    "* DMQC - Delayed Mode Quality Control\n",
+    "* WOA - World Ocean Atlas"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "39f5b75d-d0a5-4025-b6fa-076e73a0498c",
+   "metadata": {},
+   "source": [
+    "## Plans:\n",
+    "Look into the files bgcArgoDMQC and take notes on the code to understand it \n",
+    "* Familiarize flt object  - in core, \n",
+    "* calc gains - sprof calc_gains function\n",
+    "* netcdf read and see files\n",
+    "\n",
+    "Main plan is to create the background functions especially one called calcadjustments which will work behinds the scenes and calculate gain and mean"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "669ceaf0-1105-4de5-b998-059d7382cd20",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
