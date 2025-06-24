@@ -35,6 +35,7 @@ def read_index(mission='B', source='argopy', url=resource.URL):
     '''
 
     if source != 'argopy':
+        warnings.warn('For most use cases loading the index via argopy (source="argopy") is preferred.')
         url_dir = resource.URL_DIR_DICT[url]
         if mission == 'bgc-b':
             local_filename = resource.path('Index') / 'argo_bio-profile_index.txt.gz'
