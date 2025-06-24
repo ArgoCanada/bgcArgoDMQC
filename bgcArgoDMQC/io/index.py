@@ -55,6 +55,8 @@ def read_index(mission='B', source='argopy', url=resource.URL):
             raise ValueError('Input {} not recognized'.format(mission))
 
     if source == 'argopy':
+        if mission == 'traj' or mission == 'meta':
+            raise ValueError('argopy does not support traj or meta file handling yet - use source="local" or source="remote" to load.')
         import argopy
         df = argopy.ArgoIndex(index_file=mission).to_dataframe()
     elif source == 'remote':
