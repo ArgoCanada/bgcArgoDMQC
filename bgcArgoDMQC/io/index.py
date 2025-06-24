@@ -214,8 +214,8 @@ def get_dac(wmo):
 
     if '__globalindex__' not in globals():
             global __globalindex__
-            __globalindex__ = read_index(mission='C')
+            __globalindex__ = read_index(mission='core')
     
-    dac = __globalindex__.loc[__globalindex__.wmo == wmo].dac.iloc[0]
+    dac = __globalindex__.loc[__globalindex__.wmo == wmo, 'dac'].iloc[0]
 
     return dac
