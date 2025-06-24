@@ -52,7 +52,7 @@ def read_index(mission='B', source='argopy', url=resource.URL):
             local_filename = resource.path('Index') / 'ar_index_global_traj.txt.gz'
             remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
         else: # pragma: no cover
-            raise ValueError('Input {} not recognized'.format(mission))
+            raise ValueError(f'Input {mission} not recognized - must be *bgc-b*, *core*, *bgc-s*, *traj*, or *meta*')
 
     if source == 'argopy':
         if mission == 'traj' or mission == 'meta':
