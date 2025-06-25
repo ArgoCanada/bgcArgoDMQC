@@ -25,7 +25,7 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists(), local_traj.exists()])
 
-def read_index(mission='B', source='argopy', url=resource.URL):
+def read_index(mission='bgc-b', source='argopy', url=resource.URL):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
