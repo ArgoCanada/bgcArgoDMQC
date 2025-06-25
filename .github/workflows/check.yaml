@@ -30,6 +30,7 @@ jobs:
       - name: Build dist
         run: |
           python -m build
+          ls dist/*
       - name: Test dist
         run: |
           cd tests
