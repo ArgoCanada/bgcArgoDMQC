@@ -30,37 +30,37 @@ def set_dirs(**kwargs):
 
     io.Path.set_dirs(**kwargs)
 
-def get_index(index='bgc', **kwargs):
+def get_index(index='bgc-b', **kwargs):
     '''
     Get the global, biogeochemical, synthetic, or metadata Argo index. 
 
     Args:
-        index (str): *bgc* for the biogeochemical Argo index, *global* for the core index, *synthetic* for the synthetic index, or *meta* for the metadata index
+        index (str): *bgc-b* for the biogeochemical Argo index, *core* for the core index, *bgc-s* for the synthetic index, *traj* for the trajectory index, or *meta* for the metadata index
     '''
-    if index == 'bgc':
+    if index == 'bgc-b':
         if '__bgcindex__' not in globals():
             global __bgcindex__
             __bgcindex__ = io.read_index()
         return_index = __bgcindex__
-    elif index == 'global':
+    elif index == 'core':
         if '__globalindex__' not in globals():
             global __globalindex__
-            __globalindex__ = io.read_index(mission='C')
+            __globalindex__ = io.read_index(mission='core')
         return_index = __globalindex__
-    elif index == 'synthetic':
+    elif index == 'bgc-s':
         if '__synthindex__' not in globals():
             global __synthindex__
-            __synthindex__ = io.read_index(mission='S')
+            __synthindex__ = io.read_index(mission='bgc-s')
         return_index = __synthindex__
     elif index == 'meta':
         if '__metaindex__' not in globals():
             global __metaindex__
-            __metaindex__ = io.read_index(mission='M')
+            __metaindex__ = io.read_index(mission='meta', source='remote')
         return_index = __metaindex__
     elif index == 'traj':
         if '__trajindex__' not in globals():
             global __trajindex__
-            __trajindex__ = io.read_index(mission='T')
+            __trajindex__ = io.read_index(mission='traj', source='remote')
         return_index = __trajindex__
     else:
         raise ValueError(f'Input "{index}" is unrecognized')
@@ -68,7 +68,7 @@ def get_index(index='bgc', **kwargs):
     for arg, val in kwargs.items():
         return_index = return_index[return_index[arg] == val]
     
-    return return_index.reset_index()
+    return return_index
 
 # ----------------------------------------------------------------------------
 # FUNCTIONS
@@ -689,7 +689,7 @@ def calc_fixed_doxy_adjusted_error(S, T, P, fix_err=10):
 def get_optode_type(wmo):
     if '__metaindex__' not in globals():
         global __metaindex__
-        __metaindex__ = get_index(index='meta')
+        __metaindex__ = get_index(index='meta', source='remote')
     
     ix = __metaindex__[__metaindex__.wmo == wmo]
 
