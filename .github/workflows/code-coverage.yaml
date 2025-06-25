@@ -31,6 +31,7 @@ jobs:
       - name: Build dist
         run: |
           python -m build
+          ls dist/*
       - name: Test coverage
         run: |
           pip install $(ls dist/bgcArgoDMQC-*.whl)
