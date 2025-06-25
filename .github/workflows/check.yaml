@@ -29,7 +29,9 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Build dist
         run: |
+          cd dist/
           python -m build
+          cd ../
       - name: Test dist
         run: |
           cd tests
