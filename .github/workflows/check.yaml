@@ -29,14 +29,11 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Build dist
         run: |
-          mkdir dist
-          cd dist/
           python -m build
-          cd ../
       - name: Test dist
         run: |
           cd tests
-          pip install $(ls ../dist/bgcArgoDMQC-*.whl)
+          pip install $(ls ../dist/bgcargodmqc-*.whl)
           pytest
       - name: Upload dist
         uses: actions/upload-artifact@main
