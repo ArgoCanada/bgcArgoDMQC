@@ -31,9 +31,11 @@ jobs:
       - name: Build dist
         run: |
           python -m build
+          ls dist/*
       - name: Test coverage
         run: |
-          pip install $(ls dist/bgcArgoDMQC-*.whl)
+          ls dist/bgcargodmqc-*.whl
+          pip install $(ls dist/bgcargodmqc-*.whl)
           coverage run -m pytest
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v2

@@ -86,6 +86,7 @@ class downloadTest(unittest.TestCase):
             self.assertEqual(grade, g)
     
     def test_index(self):
-
-        traj = bgc.io.read_index('T')
-        traj = bgc.io.read_index('T', remote=True)
+        
+        core = bgc.io.read_index('core')
+        traj = bgc.io.read_index('traj', source='local')
+        traj = bgc.io.read_index('traj', source='remote')
