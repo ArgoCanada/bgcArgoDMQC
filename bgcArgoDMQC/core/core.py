@@ -30,7 +30,7 @@ def set_dirs(**kwargs):
 
     io.Path.set_dirs(**kwargs)
 
-def get_index(index='bgc-b', **kwargs):
+def get_index(index='bgc-b', source='argopy', **kwargs):
     '''
     Get the global, biogeochemical, synthetic, or metadata Argo index. 
 
@@ -40,27 +40,27 @@ def get_index(index='bgc-b', **kwargs):
     if index == 'bgc-b':
         if '__bgcindex__' not in globals():
             global __bgcindex__
-            __bgcindex__ = io.read_index()
+            __bgcindex__ = io.read_index(source=source)
         return_index = __bgcindex__
     elif index == 'core':
         if '__globalindex__' not in globals():
             global __globalindex__
-            __globalindex__ = io.read_index(mission='core')
+            __globalindex__ = io.read_index(mission='core', source=source)
         return_index = __globalindex__
     elif index == 'bgc-s':
         if '__synthindex__' not in globals():
             global __synthindex__
-            __synthindex__ = io.read_index(mission='bgc-s')
+            __synthindex__ = io.read_index(mission='bgc-s', source=source)
         return_index = __synthindex__
     elif index == 'meta':
         if '__metaindex__' not in globals():
             global __metaindex__
-            __metaindex__ = io.read_index(mission='meta', source='remote')
+            __metaindex__ = io.read_index(mission='meta', source=source)
         return_index = __metaindex__
     elif index == 'traj':
         if '__trajindex__' not in globals():
             global __trajindex__
-            __trajindex__ = io.read_index(mission='traj', source='remote')
+            __trajindex__ = io.read_index(mission='traj', source=source)
         return_index = __trajindex__
     else:
         raise ValueError(f'Input "{index}" is unrecognized')

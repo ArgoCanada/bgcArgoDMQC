@@ -28,11 +28,11 @@ class coreTest(unittest.TestCase):
         bgc.io.update_index()
         
         # get index files
-        bgc_index  = bgc.get_index('bgc', wmo=4901784)
-        core_index = bgc.get_index('global')
-        syn_index  = bgc.get_index('synthetic')
-        meta_index  = bgc.get_index('meta')
-        traj_index  = bgc.get_index('traj')
+        bgc_index  = bgc.get_index('bgc-b', wmo=4901784)
+        core_index = bgc.get_index('core')
+        syn_index  = bgc.get_index('bgc-b')
+        meta_index  = bgc.get_index('meta', source='remote')
+        traj_index  = bgc.get_index('traj', source='local')
 
         with self.assertRaises(ValueError):
             bgc.get_index('not a real index name')
