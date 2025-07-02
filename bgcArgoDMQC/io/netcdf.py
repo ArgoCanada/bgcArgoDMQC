@@ -310,13 +310,14 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
         # apply info to all profiles in file (not sure if this would ever not apply 
         # take caution when N_PROF > 1)
         for i in range(D_nc.dimensions['N_PROF'].size):
+            print(D_nc['SCIENTIFIC_CALIB_COMMENT'].dimensions, i, last_calib, doxy_index)
             D_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,doxy_index,:] = string_to_array(comment, D_nc.dimensions['STRING256'])
             D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,doxy_index,:] = string_to_array(equation, D_nc.dimensions['STRING256'])
             D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,doxy_index,:] = string_to_array(coeff, D_nc.dimensions['STRING256'])
         
         D_nc['DOXY_QC'][:] = fdict['DOXY_QC'][ix][:N]
         D_nc['DOXY_ADJUSTED'][:] = fdict['DOXY_ADJUSTED'][ix][:N]
-        D_nc['DOXY_ADJUSTED_QC'][:] = fdict['DOXY_ADJUSTED_QC'][ix][:N]
+        D_nc['DOXY_ADJUSTED_QC'][:] = [f'{x}'.encode('utf-8') if x > 0 else b' ' for x in fdict['DOXY_ADJUSTED_QC'][ix][:N]]
         D_nc['DOXY_ADJUSTED_ERROR'][:] = fdict['DOXY_ADJUSTED_ERROR'][ix][:N]
 
         for i in range(D_nc.dimensions['N_PROF'].size):

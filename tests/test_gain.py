@@ -31,6 +31,9 @@ class gainTest(unittest.TestCase):
         )
 
         flt = bgc.sprof(wmo)
+        print(flt.__BRtraj__)
+        print([f for f in (argo_path / 'coriolis/6902870').iterdir()])
+
         woa_gains = flt.calc_gains(ref='WOA')
         ncep_gains = flt.calc_gains()
 
@@ -42,3 +45,6 @@ class gainTest(unittest.TestCase):
         flt.update_field('DOXY_QC', 3, where=flt.DOXY_QC == 1)
         flt.update_field('DOXY', 1.0*flt.DOXY)
         flt.export_files()
+
+if __name__ == '__main__':
+    unittest.main()

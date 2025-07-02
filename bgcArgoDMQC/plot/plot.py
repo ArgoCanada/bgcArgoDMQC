@@ -5,7 +5,7 @@ import matplotlib.dates as mdates
 from matplotlib.offsetbox import AnchoredText
 
 import seaborn as sns
-sns.set(style='ticks', context='paper', palette='colorblind')
+sns.set_theme(style='ticks', context='paper', palette='colorblind')
 
 try:
     import cartopy.crs as ccrs
