@@ -21,7 +21,7 @@ class profTest(unittest.TestCase):
 
     def test_prof(self):
         wmo = 4901784
-        cyc = 2
+        cyc = 208
 
         # information for HISTORY_ variables
         history = {
@@ -32,6 +32,6 @@ class profTest(unittest.TestCase):
         }
 
         # load profile
-        prof = bgc.prof(wmo, cyc, kind='B')
+        prof = bgc.prof(wmo=wmo, cycle=cyc, kind='B')
         # load again so that file option can be used
-        prof = bgc.prof(fn=f'test_data/BR{wmo}_{cyc:02d}.nc')
+        prof = bgc.prof(file=f'test_data/Argo/dac/meds/{wmo}/profiles/BR{wmo}_{cyc:02d}.nc')
