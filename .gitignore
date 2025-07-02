@@ -8,7 +8,7 @@
 .DS_Store
 .config
 admt/
-dist/
+# dist/
 build/
 figures/
 *.egg*
