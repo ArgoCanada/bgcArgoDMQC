@@ -106,7 +106,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     # need Sprof and meta files
     BRtraj = local_path / dac / wmo / f'{wmo}_BRtraj.nc'
     # try for combined (v3) traj file if not B traj file
-    BRtraj = local_path / dac / wmo / f'{wmo}_traj.nc' if not BRtraj.exists() else BRtraj
+    BRtraj = local_path / dac / wmo / f'{wmo}_Rtraj.nc' if not BRtraj.exists() else BRtraj
     Sprof  = local_path / dac / wmo / f'{wmo}_Sprof.nc'
     meta   = local_path / dac / wmo / f'{wmo}_meta.nc'
 
