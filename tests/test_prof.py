@@ -9,7 +9,6 @@ import bgcArgoDMQC as bgc
 class profTest(unittest.TestCase):
 
     def setUp(self):
-
         bgc.set_dirs(
             argo_path=Path(__file__).absolute().parent / 'test_data/Argo/dac',
             ncep_path=Path(__file__).absolute().parent / 'test_data/NCEP',
@@ -23,4 +22,16 @@ class profTest(unittest.TestCase):
     def test_prof(self):
         wmo = 4901784
         cyc = 2
-        sprof = bgc.prof(wmo, cyc, kind='B')
+
+        # information for HISTORY_ variables
+        history = {
+            "HISTORY_INSTITUTION":"BI",
+            "HISTORY_STEP":"ARGQ",
+            "HISTORY_ACTION":"CF",
+            "HISTORY_PARAMETER":"DOXY",
+        }
+
+        # load profile
+        prof = bgc.prof(wmo, cyc, kind='B')
+        # load again so that file option can be used
+        prof = bgc.prof(fn=f'test_data/BR{wmo}_{cyc:02d}.nc')
