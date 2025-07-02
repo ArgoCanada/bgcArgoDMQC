@@ -42,3 +42,6 @@ class gainTest(unittest.TestCase):
         flt.update_field('DOXY_QC', 3, where=flt.DOXY_QC == 1)
         flt.update_field('DOXY', 1.0*flt.DOXY)
         flt.export_files()
+
+if __name__ == '__main__':
+    unittest.main()
