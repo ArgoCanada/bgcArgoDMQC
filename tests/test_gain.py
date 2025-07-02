@@ -31,6 +31,9 @@ class gainTest(unittest.TestCase):
         )
 
         flt = bgc.sprof(wmo)
+        print(flt.__BRtraj__)
+        print([f for f in (argo_path / 'coriolis/6902870').iterdir()])
+
         woa_gains = flt.calc_gains(ref='WOA')
         ncep_gains = flt.calc_gains()
 
