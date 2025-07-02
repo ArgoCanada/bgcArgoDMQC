@@ -31,12 +31,13 @@ class prof:
         if (wmo is not None and cycle is not None) and file is not None:
             raise ValueError("wmo/cycle and file cannot be defined at the same time")
 
-        file = file.as_posix() if type(file) is not str else file
-        wmo = file.split('/')[-3] if file is not None else wmo
-        cycle = file.split('_')[-1].split('.')[0] if file is not None else cycle
-        direction = cycle[-1] if cycle[-1] == 'D' else direction
-        cycle = cycle[:-1] if cycle[-1] == 'D' else cycle
-        kind = file.split('/')[-1][0] if file.split('/')[-1][0] == 'B' else kind
+        if file is not None:
+            file = file.as_posix() if type(file) is not str else file
+            wmo = file.split('/')[-3]
+            cycle = file.split('_')[-1].split('.')[0]
+            direction = cycle[-1] if cycle[-1] == 'D' else direction
+            cycle = cycle[:-1] if cycle[-1] == 'D' else cycle
+            kind = file.split('/')[-1][0] if file.split('/')[-1][0] == 'B' else kind
 
         wmo = int(wmo)
         cycle = int(cycle)
