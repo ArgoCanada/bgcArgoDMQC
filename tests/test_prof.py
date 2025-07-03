@@ -67,3 +67,6 @@ class profTest(unittest.TestCase):
 
         # update the file
         prof.update_file(history)
+
+if __name__ == '__main__':
+    unittest.main()
