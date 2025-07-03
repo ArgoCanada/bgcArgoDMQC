@@ -36,14 +36,13 @@ class profTest(unittest.TestCase):
         # load again so that file option can be used
         prof = bgc.prof(file=f'test_data/Argo/dac/meds/{wmo}/profiles/BR{wmo}_{cyc:02d}.nc')
 
+        # set dicts (usually internal function)
+        [prof.set_dict(d) for d in ['clean', 'raw', 'nofill']]
+
         # clean and reset
         prof.clean(bad_flags=[3,4])
         prof.reset()
 
-        # update DOXY_QC values
-        print(prof.DOXY_QC)
-        prof.update_field('DOXY_QC', 3, where=prof.DOXY_QC == 1)
-        print(prof.DOXY_QC)
         # hard reset
         prof.reset(hard=True)
 
@@ -54,3 +53,17 @@ class profTest(unittest.TestCase):
         self.assertIsInstance(prof, bgc.prof)
         self.assertIs(type(df), pd.core.frame.DataFrame)
         self.assertIs(type(prof_dict), dict)
+
+        # update DOXY_QC values
+        print(prof.DOXY_QC)
+        prof.update_field('DOXY_QC', 4, where=prof['DOXY'] < 150)
+        print(prof.DOXY_QC)
+
+        # set fillvalues for adjusted where DOXY_QC == 4
+        prof.set_fillvalue('DOXY_ADJUSTED', where=prof.DOXY_QC == 4)
+
+        # set a value - would not usually recommend this method but it is possible
+        prof['DOXY_QC'][0] = 1
+
+        # update the file
+        prof.update_file(history)
