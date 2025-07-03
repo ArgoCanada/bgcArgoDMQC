@@ -35,3 +35,22 @@ class profTest(unittest.TestCase):
         prof = bgc.prof(wmo=wmo, cycle=cyc, kind='B')
         # load again so that file option can be used
         prof = bgc.prof(file=f'test_data/Argo/dac/meds/{wmo}/profiles/BR{wmo}_{cyc:02d}.nc')
+
+        # clean and reset
+        prof.clean(bad_flags=[3,4])
+        prof.reset()
+
+        # update DOXY_QC values
+        print(prof.DOXY_QC)
+        prof.update_field('DOXY_QC', 3, where=prof.DOXY_QC == 1)
+        print(prof.DOXY_QC)
+        # hard reset
+        prof.reset(hard=True)
+
+        # extract dataframe, dict
+        df = prof.to_dataframe()
+        prof_dict = prof.to_dict()
+
+        self.assertIsInstance(prof, bgc.prof)
+        self.assertIs(type(df), pd.core.frame.DataFrame)
+        self.assertIs(type(prof_dict), dict)
