@@ -254,8 +254,7 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
 
     qc_keys = [
         s for s in floatData.keys() if\
-            (s.split('_')[-1] == 'QC') and (type(floatData[s]) is np.ndarray) and ('PROFILE' not in s)\
-            and (floatData[s].shape[0] == floatData['N_LEVELS_DIM']*floatData['N_PROF_DIM'])
+            (s.split('_')[-1] == 'QC') and (type(floatData[s]) is np.ndarray) and ('PROFILE' not in s)
     ]
     for qc in qc_keys:
         floatData[qc] = io.read_qc(floatData[qc])

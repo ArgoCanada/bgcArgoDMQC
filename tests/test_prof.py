@@ -36,6 +36,8 @@ class profTest(unittest.TestCase):
         # load again so that file option can be used
         prof = bgc.prof(file=f'test_data/Argo/dac/meds/{wmo}/profiles/BR{wmo}_{cyc:02d}.nc')
 
+        self.prof = prof
+
         # set dicts (usually internal function)
         [prof.set_dict(d) for d in ['clean', 'raw', 'nofill']]
 
