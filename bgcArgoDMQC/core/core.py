@@ -344,7 +344,7 @@ def read_history_qctest(nc):
 def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and (s not in ['PROFILE', 'HISTORY', 'JULD'])]
+    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and (not any([ss in s for ss in ['PROFILE', 'HISTORY', 'JULD']]))]
 
     if bad_flags is None:
         for qc_key in qc_flags:
