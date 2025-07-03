@@ -344,11 +344,12 @@ def read_history_qctest(nc):
 def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
+    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and (s not in ['PROFILE', 'HISTORY', 'JULD'])]
 
     if bad_flags is None:
         for qc_key in qc_flags:
             data_key   = qc_key.replace('_QC','')
+            print('hello', qc_key)
             good_index = np.logical_or(np.logical_or(np.logical_and(clean_float_data[qc_key] < 4, clean_float_data[qc_key] > 0), clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
             bad_index  = np.invert(good_index)
 
