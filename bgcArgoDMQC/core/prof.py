@@ -28,7 +28,7 @@ class prof:
 
     def __init__(self, wmo=None, cycle=None, file=None, kind='C', direction='A', keep_fillvalue=False, rcheck=True, verbose=False):
 
-        if (wmo is not None and cycle is not None) and file is not None:
+        if (wmo is not None and cycle is not None) and file is not None: # pragma: no cover
             raise ValueError("wmo/cycle and file cannot be defined at the same time")
 
         if file is not None:
