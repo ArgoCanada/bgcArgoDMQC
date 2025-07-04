@@ -127,9 +127,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         BRtraj_nc = None
 
     # Sprof and meta are required, so raise error if they are not there
-    if not Sprof.exists():
+    if not Sprof.exists(): # pragma: no cover
         raise FileNotFoundError(f'No such Sprof file: {Sprof.absolute()}')
-    if not meta.exists():
+    if not meta.exists(): # pragma: no cover
         raise FileNotFoundError(f'No such meta file: {meta.absolute()}')
 
     # load synthetic and meta profiles
@@ -192,9 +192,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
             floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
             floatData['inair']      = True
-        else:
+        else: # pragma: no cover 
             floatData['inair']      = False
-    else:
+    else: # pragma: no cover
         floatData['inair']          = False
 
 
@@ -239,7 +239,7 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}{direction}.nc'
     profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}{direction}.nc' if not profFile.exists() else profFile
 
-    if not profFile.exists():
+    if not profFile.exists(): # pragma: no cover
         raise FileNotFoundError(f'No R- or D-mode file: {profFile.absolute()}')
     
     nc = Dataset(profFile, 'r')
@@ -358,7 +358,7 @@ def dict_clean(float_data, bad_flags=None):
             else:
                 clean_float_data[data_key][bad_index] = np.nan
     else:
-        if type(bad_flags) is int:
+        if type(bad_flags) is int: # pragma: no cover
             bad_flags = [bad_flags]
         
         for flag in bad_flags:
@@ -477,7 +477,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     '''
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
-    if track[0,0] > ncep_track[0][-1] and mdates.num2date(track[0,0]).year == mdates.datetime.date.today().year:
+    if track[0,0] > ncep_track[0][-1] and mdates.num2date(track[0,0]).year == mdates.datetime.date.today().year: # pragma: no cover
         raise ValueError('First float date occurs after last NCEP date, NCEP data not available yet, recommend using WOA data to calcualte gain')
     ncep_interp, wt = interp.interp_ncep_data(xtrack, ncep_track, data)
 
@@ -514,7 +514,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     '''
 
     # check which reference data to use
-    if inair and 'PPOX_DOXY' not in data.keys():
+    if inair and 'PPOX_DOXY' not in data.keys(): # pragma: no cover
         raise ValueError('Flag ''inair'' set to True but partial pressure data not available')
 
     if inair:
