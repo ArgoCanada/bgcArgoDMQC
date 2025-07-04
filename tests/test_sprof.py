@@ -2,12 +2,7 @@
 
 from pathlib import Path
 
-from netCDF4 import Dataset
-
-import matplotlib.pyplot as plt
-
 import unittest
-import numpy as np
 import pandas as pd
 import bgcArgoDMQC as bgc
 
