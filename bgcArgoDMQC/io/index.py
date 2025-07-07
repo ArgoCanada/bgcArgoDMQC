@@ -25,47 +25,60 @@ def index_exists():
 
     return all([local_meta.exists(), local_index.exists(), local_bgc.exists(), local_synth.exists(), local_traj.exists()])
 
-def read_index(mission='B', remote=False, url=resource.URL):
+def read_index(mission='bgc-b', source='argopy', url=resource.URL):
     '''
     Function to read and extract information from Argo global index,
     then save it to a dataframe for faster access.
 
     Args:
-        mission (str): *B*, *C*, *S*, or *M* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
+        mission (str): *bgc-b*, *core*, *bgc-s*, *traj*, or *meta* for biogeochemical, global/core, synthetic, and metadata indices respectfully. 
     '''
 
-    url_dir = resource.URL_DIR_DICT[url]
-    if mission == 'B':
-        local_filename = resource.path('Index') / 'argo_bio-profile_index.txt.gz'
-        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_bio-profile_index.txt.gz').as_posix()
-    elif mission == 'C':
-        local_filename = resource.path('Index') / 'ar_index_global_prof.txt.gz'
-        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_prof.txt.gz').as_posix()
-    elif mission == 'S':
-        local_filename = resource.path('Index') / 'argo_synthetic-profile_index.txt.gz'
-        remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_synthetic-profile_index.txt.gz').as_posix()
-    elif mission == 'M':
-        local_filename = resource.path('Index') / 'ar_index_global_meta.txt.gz'
-        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_meta.txt.gz').as_posix()
-    elif mission == 'T':
-        local_filename = resource.path('Index') / 'ar_index_global_traj.txt.gz'
-        remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
-    else: # pragma: no cover
-        raise ValueError('Input {} not recognized'.format(mission))
+    if source != 'argopy':
+        warnings.warn('For most use cases loading the index via argopy (source="argopy") is preferred.')
+        url_dir = resource.URL_DIR_DICT[url]
+        if mission == 'bgc-b':
+            local_filename = resource.path('Index') / 'argo_bio-profile_index.txt.gz'
+            remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_bio-profile_index.txt.gz').as_posix()
+        elif mission == 'core':
+            local_filename = resource.path('Index') / 'ar_index_global_prof.txt.gz'
+            remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_prof.txt.gz').as_posix()
+        elif mission == 'bgc-s':
+            local_filename = resource.path('Index') / 'argo_synthetic-profile_index.txt.gz'
+            remote_filename = 'ftp://' + url + (Path(url_dir) / 'argo_synthetic-profile_index.txt.gz').as_posix()
+        elif mission == 'meta':
+            local_filename = resource.path('Index') / 'ar_index_global_meta.txt.gz'
+            remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_meta.txt.gz').as_posix()
+        elif mission == 'traj':
+            local_filename = resource.path('Index') / 'ar_index_global_traj.txt.gz'
+            remote_filename = 'ftp://' + url + (Path(url_dir) / 'ar_index_global_traj.txt.gz').as_posix()
+        else: # pragma: no cover
+            raise ValueError(f'Input {mission} not recognized - must be *bgc-b*, *core*, *bgc-s*, *traj*, or *meta*')
 
-    if remote:
+    if source == 'argopy':
+        if mission == 'traj' or mission == 'meta':
+            raise ValueError('argopy does not support traj or meta file handling yet - use source="local" or source="remote" to load.')
+        import argopy
+        df = argopy.ArgoIndex(index_file=mission).to_dataframe()
+    elif source == 'remote':
         df = pd.read_csv(remote_filename, compression='gzip', header=8)
-    else:
+
+        df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
+        df['dac'] = np.array([f.split('/')[0] for f in df.file])
+        if mission != 'meta' and mission != 'traj':
+            df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
+
+    elif source == 'local':
         if not Path(local_filename).exists():
             sys.stdout.write('Index file does not exist, downloading now, this may take a few minutes\n')
             update_index(ftype=mission)
 
         df =  pd.read_csv(local_filename, compression='gzip', header=8)
 
-    df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
-    df['dac'] = np.array([f.split('/')[0] for f in df.file])
-    if mission != 'M' and mission != 'T':
-        df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
+        df['wmo'] = np.array([int(f.split('/')[1]) for f in df.file])
+        df['dac'] = np.array([f.split('/')[0] for f in df.file])
+        if mission != 'meta' and mission != 'traj':
+            df['cycle'] = np.array([int(f.split('/')[-1].split('.')[-2].split('_')[-1].replace('D','')) for f in df.file])
 
     return df
 
@@ -202,8 +215,8 @@ def get_dac(wmo):
 
     if '__globalindex__' not in globals():
             global __globalindex__
-            __globalindex__ = read_index(mission='C')
+            __globalindex__ = read_index(mission='core')
     
-    dac = __globalindex__.loc[__globalindex__.wmo == wmo].dac.iloc[0]
+    dac = __globalindex__.loc[__globalindex__.wmo == wmo, 'dac'].iloc[0]
 
     return dac
