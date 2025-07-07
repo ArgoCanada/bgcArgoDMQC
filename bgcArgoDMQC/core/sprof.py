@@ -1,6 +1,7 @@
 
 import numpy as np
 import pandas as pd
+import netCDF4
 
 from .core import *
 from .. import unit
@@ -393,3 +394,20 @@ class sprof:
 
         g = plot.compare_independent_data(self.df, self.WMO, plot_dict, meta_dict, fmt=fmt)
         return g
+
+    def get_sensors(self, prof_idx=0):
+        '''
+        Determine which active sensors the float has for the selected profile.
+        Fill internal variable __sensors__ (list) and return it.
+        '''
+        path = self.argo_path + "/" + str(self.WMO) + "/" + str(self.WMO) + "_Sprof.nc"
+        ncin = netCDF4.Dataset(path, 'r')
+    
+        param = ncin['STATION_PARAMETERS'][:]
+        ncin.close()
+        
+        nprof, nvar, str_len = param.shape
+        self.__sensors__ = []
+        for i in range(nvar):
+            self.__sensors__.append(param[prof_idx,i,:].tobytes().decode().strip())
+        return self.__sensors__      
