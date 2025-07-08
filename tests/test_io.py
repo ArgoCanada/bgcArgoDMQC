@@ -44,8 +44,8 @@ class downloadTest(unittest.TestCase):
         bgc.io.get_argo(wmo, local_path=argo_path, overwrite=True, nfiles=2)
 
         infile = list((argo_path / f'meds/{wmo}/profiles').glob('*.nc'))[0].as_posix()
-        outfile = infile.replace(f'meds/', f'meds/E/')
-        Path(outfile).parent.mkdir(exist_ok=True)
+        outfile = infile.replace('meds/', 'meds/E/')
+        Path(outfile).parent.mkdir(parents=True, exist_ok=True)
         nc_out = bgc.io.iterate_dimension(infile, outfile, 'N_CALIB')
         nc = Dataset(infile, 'r')
         self.assertGreater(nc_out.dimensions['N_CALIB'].size, nc.dimensions['N_CALIB'].size)
