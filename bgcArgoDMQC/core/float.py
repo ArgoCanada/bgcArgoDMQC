@@ -48,7 +48,7 @@ class float:
             warnings.warn(warning)
 
         # load all prof() objects
-        cycles = [f.split('_')[-1].split('.')[0] for f in local_profile_files]
+        cycles = [f.as_posix().split('_')[-1].split('.')[0] for f in local_profile_files]
         direction = [cycle[-1] if cycle[-1] == 'D' else 'A' for cycle in cycles]
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
