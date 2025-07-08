@@ -52,7 +52,7 @@ class float:
         direction = [cycle[-1] if cycle[-1] == 'D' else 'A' for cycle in cycles]
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
-        profs = pd.DataFrame(cycle=cycles, direction=direction)
+        profs = pd.DataFrame(dict(cycle=cycles, direction=direction))
         profs = profs.set_index(('cycle', 'direction'))
 
         for cyc, dir, fn in zip(cycles, direction, local_profile_files):
