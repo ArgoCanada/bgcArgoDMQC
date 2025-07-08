@@ -10,8 +10,8 @@ from .. import io
 
 class prof:
     '''
-    Class that loads Argo synthetic profile data for a given float ID number
-    (wmo). 
+    Class that loads Argo profile data for a given float ID number
+    (wmo) and cycle. 
 
     Then, load the individual variables into fields in the class, for
     example::
@@ -24,8 +24,6 @@ class prof:
         df = p.to_dataframe()
     '''
     
-    set_dirs = set_dirs
-
     def __init__(self, wmo=None, cycle=None, file=None, kind='C', direction='A', keep_fillvalue=False, rcheck=True, verbose=False):
 
         if (wmo is not None and cycle is not None) and file is not None: # pragma: no cover
