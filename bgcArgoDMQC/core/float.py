@@ -31,7 +31,7 @@ class float:
         index_profile_files = get_index_profiles(wmo, index=kind)
 
         # compare and warn if mismatch
-        missing_files = list(set([Path(f).child for f in index_profile_files]) - set([Path(f).child for f in local_profile_files]))
+        missing_files = list(set([Path(f).name for f in index_profile_files]) - set([Path(f).name for f in local_profile_files]))
         if len(missing_files) > 0:
             warning = f'There are {len(missing_files)} files in the index not found locally, consider running bgc.get_argo({wmo})'
             for f in missing_files:
@@ -39,7 +39,7 @@ class float:
             warning = warning + '\nOnly local files will be loaded'
             warnings.warn(warning)
 
-        local_only_files = list(set([Path(f).child for f in local_profile_files]) - set([Path(f).child for f in index_profile_files]))
+        local_only_files = list(set([Path(f).name for f in local_profile_files]) - set([Path(f).name for f in index_profile_files]))
         if len(local_only_files) > 0:
             warning = f'There are {len(local_only_files)} files found only locally but not in the Argo index - has the data mode changed at the GDAC?'
             for f in local_only_files:
