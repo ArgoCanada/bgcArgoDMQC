@@ -74,6 +74,53 @@ def get_index(index='bgc-b', source='argopy', **kwargs):
 # FUNCTIONS
 # ----------------------------------------------------------------------------
 
+def get_local_profiles(local_path, wmo, glob='*'):
+    '''
+    Return a list of local files for a given WMO in bgcArgo.io.Path.ARGO_PATH.
+
+    Args:
+        local_path: local path of float data
+        wmo: float ID number
+    
+    Returns:
+        files: list of files associated with that WMO
+
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
+    '''
+
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path)
+    dac = io.get_dac(wmo)
+
+    wmo = str(wmo) if type(wmo) is not str else wmo
+
+    file_path = local_path / dac / wmo / 'profiles'
+    return list(file_path.glob(glob))
+
+def get_index_profiles(wmo, index='core'):
+    '''
+     Return a list of local files for a given WMO in bgcArgo.io.Path.ARGO_PATH.
+
+    Args:
+        wmo: float ID number
+        index: argopy index string: 'core', 'bgc-b', 'bgc-s'
+    
+    Returns:
+        files: list of files associated with that WMO
+
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca   
+    '''
+
+    ix = get_index(index=index)
+    return list(ix.loc[ix.wmo == wmo, 'file'].values)
+
+
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
