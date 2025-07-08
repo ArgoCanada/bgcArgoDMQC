@@ -4,8 +4,8 @@ import warnings
 import pandas as pd
 
 from .core import *
-from . import prof
-from . import sprof
+from .prof import prof
+from .sprof import sprof
 from .. import io
 
 class float:
@@ -15,7 +15,7 @@ class float:
     synthetic and trajectory data through bgcArgoDMQC.sprof(). 
     '''
 
-    def __init__(self, wmo, kind='bgc-b', direction='A'):
+    def __init__(self, wmo, kind='bgc-b', direction=None):
 
         self.wmo = wmo
         
@@ -53,11 +53,11 @@ class float:
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
         index = pd.MultiIndex.from_tuples([(a, b) for a, b in zip(cycles, direction)])
-        profs = pd.Series([prof.prof(fn) for fn in local_profile_files], index=index)
+        profs = pd.Series([prof(fn) for fn in local_profile_files], index=index)
 
         self.profs = profs
 
         # load sprof() object
-        self.sprof = sprof.sprof(wmo)
+        self.sprof = sprof(wmo)
 
         # load all prof() data into a single dataframe, multi-indexed by cycle, nprof, nlevel
