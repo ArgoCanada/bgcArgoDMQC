@@ -52,11 +52,9 @@ class float:
         direction = [cycle[-1] if cycle[-1] == 'D' else 'A' for cycle in cycles]
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
-        profs = pd.DataFrame(dict(cycle=cycles, direction=direction))
-        profs = profs.set_index(('cycle', 'direction'))
+        index = pd.MultiIndex.from_tuples([(a, b) for a, b in zip(cycles, direction)])
+        profs = pd.Series([prof.prof(fn) for fn in local_profile_files], index=index)
 
-        for cyc, dir, fn in zip(cycles, direction, local_profile_files):
-            profs.loc[(cyc, dir)] = prof.prof(fn)
         self.profs = profs
 
         # load sprof() object
