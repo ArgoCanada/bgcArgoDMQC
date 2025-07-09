@@ -133,8 +133,8 @@ class coreTest(unittest.TestCase):
 
         gain, carryover = bgc.calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water)
 
-        self.assertIs(type(gain), np.ndarray)
-        self.assertIs(type(carryover), np.ndarray)
+        self.assertIs(type(gain), np.array)
+        self.assertIs(type(carryover), np.array)
     
     def test_delta_pres(self):
         p1 = np.arange(0, 100)
@@ -151,4 +151,4 @@ class coreTest(unittest.TestCase):
 
         v_aligned_to_p1 = bgc.vertically_align(p1, p2, v)
 
-        self.assertIs(v_aligned_to_p1, np.ndarray)
+        self.assertIs(v_aligned_to_p1, np.array)
