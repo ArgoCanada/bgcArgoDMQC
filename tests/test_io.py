@@ -62,6 +62,7 @@ class downloadTest(unittest.TestCase):
             valid_min=0,
             valid_max=1e9,
             resolution=0.001,
+            _FillValue=99999.,
             comment='Added by Automated Test - not for Argo use'
         )
 
