@@ -151,4 +151,4 @@ class coreTest(unittest.TestCase):
 
         v_aligned_to_p1 = bgc.vertically_align(p1, p2, v)
 
-        self.assertIs(v_aligned_to_p1, np.ndarray)
+        self.assertIs(type(v_aligned_to_p1), np.ndarray)
