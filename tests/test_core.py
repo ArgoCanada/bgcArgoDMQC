@@ -112,7 +112,7 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(pH2O_mbar), np.ndarray)
         self.assertIs(type(pH2O_Pa), np.ndarray)
     
-    def gridded_var_read(self):
+    def test_gridded_var_read(self):
         
         wmo = 6902870
         argo_path = Path(__file__).absolute().parent / 'test_data/Argo/dac'
