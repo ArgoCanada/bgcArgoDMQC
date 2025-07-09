@@ -292,7 +292,6 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     nc = Dataset(profFile, 'r')
 
     # fillvalue dict
-    [print(k, nc[k]) for k in nc.variables.keys()]
     fillvalue = {k:nc[k]._FillValue for k in nc.variables.keys()}
     
     floatData = read_flat_variables(nc)
