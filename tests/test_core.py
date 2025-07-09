@@ -124,4 +124,31 @@ class coreTest(unittest.TestCase):
 
         self.assertIs(type(float_dict), dict)
         self.assertIs(type(float_dict['TEMP']), np.ndarray)
+    
+    def test_gain_carryover(self):
 
+        pO2_opt_air = 208 + np.random.rand(100)
+        pO2_ref_air = 212 + np.random.rand(100)
+        pO2_opt_water = 206 + np.random.rand(100)
+
+        gain, carryover = bgc.calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water)
+
+        self.assertIs(type(gain), np.ndarray)
+        self.assertIs(type(carryover), np.ndarray)
+    
+    def test_delta_pres(self):
+        p1 = np.arange(0, 100)
+        p2 = np.arange(0, 100) + 0.5 + np.random.rand(100)/10
+
+        dpres = bgc.delta_pres(p1, p2)
+
+        self.assertLess(dpres, 1)
+    
+    def test_vertical_align(self):
+        p1 = np.arange(0, 100)
+        p2 = np.arange(0, 100) + 0.5 + np.random.rand(100)*2
+        v = 100 + np.random.rand(100)*10
+
+        v_aligned_to_p1 = bgc.vertically_align(p1, p2, v)
+
+        self.assertIs(v_aligned_to_p1, np.ndarray)
