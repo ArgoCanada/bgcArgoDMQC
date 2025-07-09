@@ -67,7 +67,7 @@ class downloadTest(unittest.TestCase):
         )
 
         nc.close()
-        nc = bgc.io.append_variable(infile, new_var)
+        nc = bgc.io.append_variable(outfile, new_var)
 
         self.assertTrue('MY_NEW_VARIABLE' in nc.variables.keys())
         nc.close()
