@@ -53,9 +53,10 @@ class float:
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
         index = pd.MultiIndex.from_tuples([(a, b) for a, b in zip(cycles, direction)])
-        profs = pd.Series([prof(file=fn) for fn in local_profile_files], index=index)
+        profs = [prof(file=fn) for fn in local_profile_files]
 
         self.profs = profs
+        self.index = index
 
         # load sprof() object
         self.sprof = sprof(wmo)
