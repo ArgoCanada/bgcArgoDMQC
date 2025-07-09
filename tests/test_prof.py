@@ -40,6 +40,8 @@ class profTest(unittest.TestCase):
 
         # set dicts (usually internal function)
         [prof.set_dict(d) for d in ['clean', 'raw', 'nofill']]
+        with self.assertRaises(ValueError):
+            prof.set_dict('not a dict option')
 
         # clean and reset
         prof.clean(bad_flags=[3,4])
