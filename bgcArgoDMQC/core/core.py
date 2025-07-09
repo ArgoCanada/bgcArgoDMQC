@@ -74,6 +74,53 @@ def get_index(index='bgc-b', source='argopy', **kwargs):
 # FUNCTIONS
 # ----------------------------------------------------------------------------
 
+def get_local_profiles(local_path, wmo, glob='*'):
+    '''
+    Return a list of local files for a given WMO in bgcArgo.io.Path.ARGO_PATH.
+
+    Args:
+        local_path: local path of float data
+        wmo: float ID number
+    
+    Returns:
+        files: list of files associated with that WMO
+
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca
+    '''
+
+    # make local_path a Path() object from a string, account for windows path
+    local_path = Path(local_path)
+    dac = io.get_dac(wmo)
+
+    wmo = str(wmo) if type(wmo) is not str else wmo
+
+    file_path = local_path / dac / wmo / 'profiles'
+    return list(file_path.glob(glob))
+
+def get_index_profiles(wmo, index='core'):
+    '''
+     Return a list of local files for a given WMO in bgcArgo.io.Path.ARGO_PATH.
+
+    Args:
+        wmo: float ID number
+        index: argopy index string: 'core', 'bgc-b', 'bgc-s'
+    
+    Returns:
+        files: list of files associated with that WMO
+
+    Author:   
+        Christopher Gordon
+        Fisheries and Oceans Canada
+        chris.gordon@dfo-mpo.gc.ca   
+    '''
+
+    ix = get_index(index=index)
+    return list(ix.loc[ix.wmo == wmo, 'file'].values)
+
+
 def load_argo(local_path, wmo, grid=False, verbose=True):
     '''
     Function to load in all data from a single float, using BRtraj, meta,
@@ -127,9 +174,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         BRtraj_nc = None
 
     # Sprof and meta are required, so raise error if they are not there
-    if not Sprof.exists():
+    if not Sprof.exists(): # pragma: no cover
         raise FileNotFoundError(f'No such Sprof file: {Sprof.absolute()}')
-    if not meta.exists():
+    if not meta.exists(): # pragma: no cover
         raise FileNotFoundError(f'No such meta file: {meta.absolute()}')
 
     # load synthetic and meta profiles
@@ -192,9 +239,9 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             floatData['TEMP_DOXY']  = BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten()
             floatData['TRAJ_CYCLE'] = BRtraj_nc.variables['CYCLE_NUMBER'][:].data.flatten()
             floatData['inair']      = True
-        else:
+        else: # pragma: no cover 
             floatData['inair']      = False
-    else:
+    else: # pragma: no cover
         floatData['inair']          = False
 
 
@@ -239,7 +286,7 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}{direction}.nc'
     profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}{direction}.nc' if not profFile.exists() else profFile
 
-    if not profFile.exists():
+    if not profFile.exists(): # pragma: no cover
         raise FileNotFoundError(f'No R- or D-mode file: {profFile.absolute()}')
     
     nc = Dataset(profFile, 'r')
@@ -254,8 +301,7 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
 
     qc_keys = [
         s for s in floatData.keys() if\
-            (s.split('_')[-1] == 'QC') and (type(floatData[s]) is np.ndarray) and ('PROFILE' not in s)\
-            and (floatData[s].shape[0] == floatData['N_LEVELS_DIM']*floatData['N_PROF_DIM'])
+            (s.split('_')[-1] == 'QC') and (type(floatData[s]) is np.ndarray) and ('PROFILE' not in s)
     ]
     for qc in qc_keys:
         floatData[qc] = io.read_qc(floatData[qc])
@@ -344,11 +390,12 @@ def read_history_qctest(nc):
 def dict_clean(float_data, bad_flags=None):
 
     clean_float_data = copy.deepcopy(float_data)
-    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and ('PROFILE' not in s and 'HISTORY' not in s)]
+    qc_flags = [s for s in clean_float_data.keys() if '_QC' in s and (not any([ss in s for ss in ['PROFILE', 'HISTORY', 'JULD']]))]
 
     if bad_flags is None:
         for qc_key in qc_flags:
             data_key   = qc_key.replace('_QC','')
+            print('hello', qc_key)
             good_index = np.logical_or(np.logical_or(np.logical_and(clean_float_data[qc_key] < 4, clean_float_data[qc_key] > 0), clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
             bad_index  = np.invert(good_index)
 
@@ -358,7 +405,7 @@ def dict_clean(float_data, bad_flags=None):
             else:
                 clean_float_data[data_key][bad_index] = np.nan
     else:
-        if type(bad_flags) is int:
+        if type(bad_flags) is int: # pragma: no cover
             bad_flags = [bad_flags]
         
         for flag in bad_flags:
@@ -477,7 +524,7 @@ def ncep_to_float_track(varname, track, local_path='./'):
     '''
 
     xtrack, ncep_track, data = io.load_ncep_data(track, varname, local_path=local_path)
-    if track[0,0] > ncep_track[0][-1] and mdates.num2date(track[0,0]).year == mdates.datetime.date.today().year:
+    if track[0,0] > ncep_track[0][-1] and mdates.num2date(track[0,0]).year == mdates.datetime.date.today().year: # pragma: no cover
         raise ValueError('First float date occurs after last NCEP date, NCEP data not available yet, recommend using WOA data to calcualte gain')
     ncep_interp, wt = interp.interp_ncep_data(xtrack, ncep_track, data)
 
@@ -514,7 +561,7 @@ def calc_gain(data, ref, inair=True, zlim=25., verbose=True):
     '''
 
     # check which reference data to use
-    if inair and 'PPOX_DOXY' not in data.keys():
+    if inair and 'PPOX_DOXY' not in data.keys(): # pragma: no cover
         raise ValueError('Flag ''inair'' set to True but partial pressure data not available')
 
     if inair:

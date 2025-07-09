@@ -30,7 +30,7 @@ class coreTest(unittest.TestCase):
         # get index files
         bgc_index  = bgc.get_index('bgc-b', wmo=4901784)
         core_index = bgc.get_index('core')
-        syn_index  = bgc.get_index('bgc-b')
+        syn_index  = bgc.get_index('bgc-s')
         meta_index  = bgc.get_index('meta', source='remote')
         traj_index  = bgc.get_index('traj', source='local')
 
@@ -111,3 +111,44 @@ class coreTest(unittest.TestCase):
         self.assertIs(type(ml_per_l), np.ndarray)
         self.assertIs(type(pH2O_mbar), np.ndarray)
         self.assertIs(type(pH2O_Pa), np.ndarray)
+    
+    def test_gridded_var_read(self):
+        
+        wmo = 6902870
+        argo_path = Path(__file__).absolute().parent / 'test_data/Argo/dac'
+        argo_path.mkdir(exist_ok=True)
+        bgc.io.get_argo(wmo, local_path=argo_path, overwrite=False, nfiles=5)
+
+        nc = Dataset(argo_path / f'coriolis/{wmo}/{wmo}_Sprof.nc')
+        float_dict = bgc.read_gridded_variables(nc)
+
+        self.assertIs(type(float_dict), dict)
+        self.assertIs(type(float_dict['TEMP']), np.ndarray)
+    
+    def test_gain_carryover(self):
+
+        pO2_opt_air = 208 + np.random.rand(100)
+        pO2_ref_air = 212 + np.random.rand(100)
+        pO2_opt_water = 206 + np.random.rand(100)
+
+        gain, carryover = bgc.calc_gain_with_carryover(pO2_opt_air, pO2_ref_air, pO2_opt_water)
+
+        self.assertIs(type(gain), np.ndarray)
+        self.assertIs(type(carryover), np.ndarray)
+    
+    def test_delta_pres(self):
+        p1 = np.arange(0, 100)
+        p2 = np.arange(0, 100) + 0.5 + np.random.rand(100)/10
+
+        dpres = bgc.delta_pres(p1, p2)
+
+        self.assertTrue((dpres < 1).all())
+    
+    def test_vertical_align(self):
+        p1 = np.arange(0, 100)
+        p2 = np.arange(0, 100) + 0.5 + np.random.rand(100)*2
+        v = 100 + np.random.rand(100)*10
+
+        v_aligned_to_p1 = bgc.vertically_align(p1, p2, v)
+
+        self.assertIs(type(v_aligned_to_p1), np.ndarray)
