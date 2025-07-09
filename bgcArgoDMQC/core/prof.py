@@ -45,6 +45,7 @@ class prof:
         self.__origfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
         self._changelog = []
+        self._typ = 'bgcArgoDMQC.profile'
 
         # local path info
         self.argo_path = io.Path.ARGO_PATH
@@ -66,9 +67,6 @@ class prof:
 
     def __getitem__(self, index):
         return pd.Series(self.__floatdict__[index])
-
-    def __setitem__(self, index, value):
-        self.df[index] = value
 
     def __getattr__(self, index):
         return pd.Series(self.__floatdict__[index])
@@ -156,8 +154,7 @@ class prof:
     
     def to_dataframe(self):
         '''
-        Returns a pandas dataframe containing data from the synthetic oxygen
-        profile file.
+        Returns a pandas dataframe containing data from the profile file.
         '''
 
         df = pd.DataFrame()
@@ -179,10 +176,6 @@ class prof:
 
         self.df = df
         return copy.deepcopy(self.df)
-    
-    def is_fillvalue(self, field):
-
-        return self.__floatdict__[field] == self.__fillvalue__[field]
     
     def update_field(self, field, value, where=None):
 
