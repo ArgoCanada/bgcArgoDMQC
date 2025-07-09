@@ -142,7 +142,7 @@ class coreTest(unittest.TestCase):
 
         dpres = bgc.delta_pres(p1, p2)
 
-        self.assertLess(dpres, 1)
+        self.assertTrue((dpres < 1).all())
     
     def test_vertical_align(self):
         p1 = np.arange(0, 100)
