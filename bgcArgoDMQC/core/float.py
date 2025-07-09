@@ -59,5 +59,5 @@ class float:
         self.sprof = sprof(wmo)
 
         # load all prof() data into a single dataframe, multi-indexed by cycle, direction, nprof, nlevel
-        self.profiles = pd.concat([p.df for p in flt.profs])
+        self.profiles = pd.concat([p.df for p in self.profs])
         
