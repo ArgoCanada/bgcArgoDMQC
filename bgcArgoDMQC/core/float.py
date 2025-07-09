@@ -52,13 +52,12 @@ class float:
         direction = [cycle[-1] if cycle[-1] == 'D' else 'A' for cycle in cycles]
         cycles = [int(cycle[:-1]) if cycle[-1] == 'D' else int(cycle) for cycle in cycles]
 
-        index = pd.MultiIndex.from_tuples([(a, b) for a, b in zip(cycles, direction)])
         profs = [prof(file=fn) for fn in local_profile_files]
-
         self.profs = profs
-        self.index = index
 
         # load sprof() object
         self.sprof = sprof(wmo)
 
-        # load all prof() data into a single dataframe, multi-indexed by cycle, nprof, nlevel
+        # load all prof() data into a single dataframe, multi-indexed by cycle, direction, nprof, nlevel
+        self.profiles = pd.concat([p.df for p in flt.profs])
+        
