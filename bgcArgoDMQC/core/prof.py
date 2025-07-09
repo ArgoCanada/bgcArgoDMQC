@@ -164,15 +164,18 @@ class prof:
         bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
         priority_vars = priority_vars + bgc_vars
 
+        df['CYCLE'] = n_level*n_prof*[self.cycle]
+        df['DIRECTION'] = n_level*n_prof*[self.direction]
+
         for v in priority_vars:
             df[v] = self.__floatdict__[v]
 
         for k in set(self.__floatdict__.keys()) - set(df.columns):
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
-            if dim == n_level*n_prof:
+            if dim == n_level*n_prof and k != 'HISTORY_QCTEST':
                 df[k] = self.__floatdict__[k]
 
-        df = df.set_index(['N_PROF', 'N_LEVELS'])
+        df = df.set_index(['CYCLE', 'DIRECTION', 'N_PROF', 'N_LEVELS'])
 
         self.df = df
         return copy.deepcopy(self.df)
