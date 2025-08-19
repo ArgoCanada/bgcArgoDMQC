@@ -395,7 +395,6 @@ def dict_clean(float_data, bad_flags=None):
     if bad_flags is None:
         for qc_key in qc_flags:
             data_key   = qc_key.replace('_QC','')
-            print('hello', qc_key)
             good_index = np.logical_or(np.logical_or(np.logical_and(clean_float_data[qc_key] < 4, clean_float_data[qc_key] > 0), clean_float_data[qc_key] == 5), clean_float_data[qc_key] == 8)
             bad_index  = np.invert(good_index)
 
