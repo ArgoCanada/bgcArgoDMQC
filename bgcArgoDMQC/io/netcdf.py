@@ -284,10 +284,10 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
             D_file.parent.mkdir(parents=True)
         sys.stdout.write(f'Working on D-mode file {D_file.as_posix()}...')
 
-        D_nc = copy_netcdf(fn, D_file)
+        D_nc = copy_netcdf(fn.absolute(), D_file.absolute())
         if not D_nc.dimensions['N_HISTORY'].isunlimited():
             D_nc.close()
-            D_nc = unlimit_dimension(fn, D_file, 'N_HISTORY')
+            D_nc = unlimit_dimension(fn.absolute(), D_file.absolute(), 'N_HISTORY')
         last_calib = D_nc.dimensions['N_CALIB'].size-1
 
         # index for this cycle
