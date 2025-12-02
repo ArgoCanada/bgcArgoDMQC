@@ -165,7 +165,10 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         if verbose:
             sys.stdout.write('Continuing without BRtraj file\n')
     elif BRtraj.exists():
-        BRtraj_nc = Dataset(BRtraj, 'r')
+        try:
+            BRtraj_nc = Dataset(BRtraj, 'r')
+        except FileNotFoundError:
+            BRtraj_nc = Dataset(BRtraj.absolute(), 'r')
         if 'PPOX_DOXY' not in BRtraj_nc.variables.keys() and 'DOXY' not in BRtraj_nc.variables.keys():
             BRtraj_flag = False
             if verbose:
@@ -180,8 +183,12 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
         raise FileNotFoundError(f'No such meta file: {meta.absolute()}')
 
     # load synthetic and meta profiles
-    Sprof_nc = Dataset(Sprof, 'r')
-    meta_nc  = Dataset(meta, 'r')
+    try:
+        Sprof_nc = Dataset(Sprof, 'r')
+        meta_nc  = Dataset(meta, 'r')
+    except FileNotFoundError:
+        Sprof_nc = Dataset(Sprof.absolute(), 'r')
+        meta_nc  = Dataset(meta.absolute(), 'r')
 
     # number of profile cycles
     M = Sprof_nc.dimensions['N_LEVELS'].size
@@ -743,7 +750,10 @@ def get_optode_type(wmo):
     ix = __metaindex__[__metaindex__.wmo == wmo]
 
     local_file = Path(io.Path.ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
-    nc = Dataset(local_file)
+    try:
+        nc = Dataset(local_file)
+    except FileNotFoundError:
+        nc = Dataset(local_file.absolute())
 
     doxy_index = io.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
     if doxy_index.shape[0] == 0:
