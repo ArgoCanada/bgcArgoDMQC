@@ -42,9 +42,12 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
 
+    # clean up any fillvalues that could be in track
+    track[track == 99999.] = np.nan
+
     # check if float track crosses -180/180 meridian
     cross180 = False
-    if np.max(np.abs(np.diff(track[:,2]))) > 340:
+    if np.max(np.abs(np.diff(track[~np.isnan(track[:,2]),2]))) > 340:
         cross180 = True
         lix = track[:,2] < 0
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
@@ -67,7 +70,8 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     for i in range(12):
         mo = i+1
         woa_file = base_woa_file + '{:02d}_01.nc'.format(mo)
-        nc = Dataset(local_path / woa_dir / woa_file, 'r')
+        local_file = local_path / woa_dir / woa_file
+        nc = Dataset(local_file.absolute(), 'r')
 
         if i == 0:
             z   = nc.variables['depth'][:]
