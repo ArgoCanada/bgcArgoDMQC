@@ -167,7 +167,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     elif BRtraj.exists():
         try:
             BRtraj_nc = Dataset(BRtraj, 'r')
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             BRtraj_nc = Dataset(BRtraj.absolute(), 'r')
         if 'PPOX_DOXY' not in BRtraj_nc.variables.keys() and 'DOXY' not in BRtraj_nc.variables.keys():
             BRtraj_flag = False
@@ -186,7 +186,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
     try:
         Sprof_nc = Dataset(Sprof, 'r')
         meta_nc  = Dataset(meta, 'r')
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError):
         Sprof_nc = Dataset(Sprof.absolute(), 'r')
         meta_nc  = Dataset(meta.absolute(), 'r')
 
@@ -752,7 +752,7 @@ def get_optode_type(wmo):
     local_file = Path(io.Path.ARGO_PATH) / ix.dac.iloc[0] / str(wmo) / ix.file.iloc[0].split('/')[-1]
     try:
         nc = Dataset(local_file)
-    except FileNotFoundError:
+    except (FileNotFoundError, OSError):
         nc = Dataset(local_file.absolute())
 
     doxy_index = io.get_parameter_index(nc['SENSOR'][:].data, 'OPTODE_DOXY')
