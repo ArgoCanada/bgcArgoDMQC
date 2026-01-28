@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
@@ -218,3 +219,53 @@ def load_ncep_data(track, varname, local_path='./'):
 
     return xtrack, ncep_track, data
 
+def read_bittig_textfile(fn):
+
+    meta = {}
+
+    data = dict(
+        binflag = [],
+        AIC = [],
+        coefficient = [],
+        OFFSET = [],
+        SLOPE = [],
+        DRIFT = [],
+        INCLINE_T = [],
+        launch_date_juld = [],
+        comment = [],
+    )
+
+    with open(fn) as fid:
+        for i in range(8):
+            line = fid.readline()
+            if line != '\n':
+                key, value = line.split('\t')
+                meta[key.strip()] = value.strip()
+
+        while line.split(':')[0] != '**EXPERIMENTAL**' and line != '':
+            line = fid.readline()
+            if line.split(' ')[0] == 'binflag':
+                data['binflag'].append(int(line.split(' ')[1].split('\t')[0]))
+                data['AIC'].append(float(line.split(' ')[2].strip(')\n')))
+                
+                line = fid.readline()
+                data['coefficient'].append(line.split('\t')[1].strip())
+                vals = line.split('=')
+
+                data['OFFSET'].append(float(vals[1].split(',')[0]))
+                data['SLOPE'].append(float(vals[2].split(',')[0]))
+                data['DRIFT'].append(float(vals[3].split(',')[0]))
+                data['INCLINE_T'].append(float(vals[4].split(',')[0]))
+                data['launch_date_juld'].append(vals[5])
+
+                line = fid.readline()
+                data['comment'].append(line.split('\t')[1].strip())
+        
+        print()
+        suggested_binflag = -1
+        if line.split(':')[0] == '**EXPERIMENTAL**':
+            line = fid.readline().strip()
+            print(line)
+            suggested_binflag = int(line.split('BINFLAG')[1][1])
+
+    return meta, pd.DataFrame(data).set_index('binflag'), suggested_binflag

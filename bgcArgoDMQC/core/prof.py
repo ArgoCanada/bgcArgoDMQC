@@ -166,6 +166,9 @@ class prof:
 
         df['CYCLE'] = n_level*n_prof*[self.cycle]
         df['DIRECTION'] = n_level*n_prof*[self.direction]
+        df['JULD'] = np.concat([n_level*[self.__floatdict__['JULD'][i]] for i in range(n_prof)])
+        df['LATITUDE'] = np.concat([n_level*[self.__floatdict__['LATITUDE'][i]] for i in range(n_prof)])
+        df['LONGITUDE'] = np.concat([n_level*[self.__floatdict__['LONGITUDE'][i]] for i in range(n_prof)])
 
         for v in priority_vars:
             df[v] = self.__floatdict__[v]
@@ -197,10 +200,15 @@ class prof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def update_file(self, history):
+    def update_file(self, history, data_mode=None, sci_calib=None):
 
         current_float_dict = copy.deepcopy(self._dict)
         self.reset()
-        export_file = io.update_nc(self.__floatdict__, self.__prof__, self._changelog, history_dict=history)
+        export_file = io.update_nc(
+            self.__floatdict__, self.__prof__, self._changelog, 
+            history_dict=history, 
+            sci_calib=sci_calib, 
+            data_mode=data_mode
+        )
         self.set_dict(current_float_dict)
         return export_file

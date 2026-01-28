@@ -1,5 +1,6 @@
 import warnings
 
+import pandas as pd
 import numpy as np
 import gsw
 
@@ -102,7 +103,7 @@ def atmos_pO2(P, pH2O):
 
     return pO2
 
-def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
+def umol_per_sw_to_umol_per_L(doxy, S, T, P, lat=None, lon=None):
     '''
     Convert dissolved oxygen concentration in umol kg-1 to mmol L-1.
 
@@ -119,10 +120,32 @@ def umol_per_sw_to_mmol_per_L(doxy, S, T, P, Pref=0, lat=None, lon=None):
         umol_L_conc (float or array-like): dissolved oxygen concentration in umol L-1 (or equivalently mmol m-3)
     '''
 
-    pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, Pref)
+    pot_density = gsw.rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P)
     umol_L_conc = 1000*doxy / pot_density
 
     return umol_L_conc
+
+def umol_per_L_to_umol_per_sw(doxy, S, T, P, lat=None, lon=None):
+    '''
+    Convert dissolved oxygen concentration in umol L-1 to umol kg-1.
+
+    Args:
+        doxy (float or array-like): dissolved oxygen in umol kg-1
+        S (float or array-like): salinity, array of same length as `doxy` or single value
+        T (float or array-like): temperature (deg C), array of same length  as `doxy` or single value
+        P (float or array-like): pressure (dbar), array of same length  as `doxy` or single value
+        Pref (optional, float): reference pressure (dbar) for potential density calculation, default 0
+        lat (optional, float or array-like): latitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+        lon (optional, float or array-like): longitude (deg) for absolute salinity calculation, optional but highly encouraged, function will use practical salinity and produce warning without it
+
+    Returns:
+        umol_kg_conc (float or array-like): dissolved oxygen concentration in umol kg-1
+    '''
+
+    pot_density = gsw.rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P)
+    umol_kg_conc = doxy*pot_density / 1000
+
+    return umol_kg_conc
 
 def mL_per_L_to_umol_per_L(ppt, T):
     '''
@@ -212,8 +235,8 @@ def pO2_to_doxy(pO2, S, T, P=0):
 
     Args:
         pO2 (float or array-like): oxygen partial pressure in mbar
-        T (float or array-like): temperature in deg C
         S (float or array-like): salinity (PSS-78)
+        T (float or array-like): temperature in deg C
         P (optional, float or array-like): hydrostatic pressure in dbar (default: 0 dbar)
 
     Returns:
@@ -255,3 +278,10 @@ def pO2_to_doxy(pO2, S, T, P=0):
 
 def oxy_saturation(doxy, psal, temp, pden, a4330=True):
     return 100*doxy/oxy_sol(psal, temp, pden, a4330=a4330)
+
+def datestr_to_juld(datestr):
+
+    ts = pd.Timestamp(datestr)
+    td = ts - pd.Timestamp('1950-01-01')
+
+    return td.days + td.seconds/60/60/24

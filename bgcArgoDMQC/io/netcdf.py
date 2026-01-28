@@ -212,7 +212,7 @@ def update_history(nc, dct):
     hix = nc.dimensions['N_HISTORY'].size
     for name, value in dct.items():
         for i in range(nc.dimensions['N_PROF'].size):
-            nc[name][hix,i,:] = string_to_array(value, nc.dimensions[nc[name].dimensions[-1]])
+            nc[f'HISTORY_{name}'][hix,i,:] = string_to_array(value, nc.dimensions[nc[f'HISTORY_{name}'].dimensions[-1]])
 
 def profile_qc(flags):
     '''
@@ -269,6 +269,41 @@ def profile_qc(flags):
         raise ValueError('No grade assigned, check input value of `flags`')
 
     return grade
+
+def update_delayed_mode_fields(D_nc, fdict, param, sci_calib):
+
+    # find index for param along PARAMETER
+    _, param_index = find_param(D_nc, 'DOXY')
+    last_calib = D_nc.dimensions['N_CALIB'].size-1
+
+    for i in range(D_nc.dimensions['N_PROF'].size):
+        D_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,param_index,:] = string_to_array(sci_calib['COMMENT'], D_nc.dimensions['STRING256'])
+        D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,param_index,:] = string_to_array(sci_calib['EQUATION'], D_nc.dimensions['STRING256'])
+        D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,param_index,:] = string_to_array(sci_calib['COEFFICIENT'], D_nc.dimensions['STRING256'])
+    
+    for i in range(D_nc.dimensions['N_PROF'].size):
+        flags = read_qc(D_nc['DOXY_ADJUSTED_QC'][:].data[i,:])
+        grade = profile_qc(pd.Series(flags)).encode('utf-8')
+        D_nc['PROFILE_DOXY_QC'][i] = grade
+    
+    data_state_indicator = create_fillvalue_array(D_nc['DATA_STATE_INDICATOR'])
+    for i in range(D_nc.dimensions['N_PROF'].size):
+        data_state_indicator[i,:] = string_to_array('2C+', D_nc.dimensions['STRING4'])
+    D_nc['DATA_STATE_INDICATOR'][:] = data_state_indicator
+
+    nc_data_mode = create_fillvalue_array(D_nc['DATA_MODE'])
+    for i in range(D_nc.dimensions['N_PROF'].size):
+        nc_data_mode[i] = 'D'
+    D_nc['DATA_MODE'][:] = nc_data_mode
+
+    parameter_data_mode = create_fillvalue_array(D_nc['PARAMETER_DATA_MODE'])
+    for i in range(D_nc.dimensions['N_PROF'].size):
+        tmp_pdm = D_nc['PARAMETER_DATA_MODE'][:].data[i,:]
+        tmp_pdm[get_parameter_index(D_nc['PARAMETER'][:][i,0,:,:].data, 'DOXY')] = 'D'
+        parameter_data_mode[i,:] = tmp_pdm
+    D_nc['PARAMETER_DATA_MODE'][:] = parameter_data_mode
+
+    return D_nc
 
 def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equation=None, coeff=None):
 
@@ -343,12 +378,12 @@ def export_delayed_files(fdict, files, gain, data_mode='D', comment=None, equati
 
 
         history_dict = dict(
-            HISTORY_INSTITUTION='BI',
-            HISTORY_STEP='ARSQ',
-            HISTORY_SOFTWARE='BGQC',
-            HISTORY_SOFTWARE_RELEASE='v0.2',
-            HISTORY_DATE=dmqc_date,
-            HISTORY_ACTION='O2QC'
+            INSTITUTION='BI',
+            STEP='ARSQ',
+            SOFTWARE='BGQC',
+            SOFTWARE_RELEASE='v0.2',
+            DATE=dmqc_date,
+            ACTION='O2QC'
         )
         D_nc['DATE_UPDATE'][:] = string_to_array(dmqc_date, D_nc.dimensions['DATE_TIME'])
 
@@ -370,13 +405,15 @@ def find_param(nc, param):
 
     return (i, param_index)
 
-def update_nc(fdict, fn, changelog, history_dict={}):
+def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_mode_param=None):
 
     # get DATE_UPDATE
     date_update = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
 
     dac = fn.as_posix().split('/')[-4]
-    output_file = Path(fn.as_posix().replace(f'dac/{dac}/', f'dac/{dac}/E/'))
+    data_mode = 'E' if data_mode is None else data_mode
+    output_file = Path(fn.as_posix().replace(f'dac/{dac}/', f'dac/{dac}/{data_mode}/'))
+    output_file = Path(output_file.as_posix().replace('BR', 'BD')) if data_mode == 'D' else output_file
     if not output_file.parent.exists():
         output_file.parent.mkdir(parents=True)
     sys.stdout.write(f'Working on file {output_file.name}...')
@@ -409,15 +446,13 @@ def update_nc(fdict, fn, changelog, history_dict={}):
                 grade = profile_qc(pd.Series(flags)).encode('utf-8')
                 O_nc[f'PROFILE_{f}'][i] = grade
 
-    history = dict(
-        HISTORY_INSTITUTION=history_dict['HISTORY_INSTITUTION'],
-        HISTORY_STEP=history_dict['HISTORY_STEP'],
-        HISTORY_SOFTWARE='BGQC',
-        HISTORY_SOFTWARE_RELEASE='v0.2',
-        HISTORY_DATE=date_update,
-        HISTORY_ACTION=history_dict['HISTORY_ACTION'],
-        HISTORY_PARAMETER=history_dict['HISTORY_PARAMETER'],
-    )
+    history = history.update(dict(
+        SOFTWARE='BGQC',
+        SOFTWARE_RELEASE='v0.2',
+    ))
+
+    if data_mode == 'D':
+        O_nc = update_delayed_mode_fields(O_nc, fdict, d_mode_param, sci_calib)
 
     O_nc['DATE_UPDATE'][:] = string_to_array(date_update, O_nc.dimensions['DATE_TIME'])
     update_history(O_nc, history)

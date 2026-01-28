@@ -296,7 +296,10 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     if not profFile.exists(): # pragma: no cover
         raise FileNotFoundError(f'No R- or D-mode file: {profFile.absolute()}')
     
-    nc = Dataset(profFile, 'r')
+    try:
+        nc = Dataset(profFile, 'r')
+    except (FileNotFoundError, OSError):
+        nc = Dataset(profFile.absolute(), 'r')
 
     # fillvalue dict
     fillvalue = {k:nc[k]._FillValue for k in nc.variables.keys()}
