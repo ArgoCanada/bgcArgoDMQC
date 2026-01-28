@@ -68,7 +68,7 @@ def copy_netcdf(infile, outfile, exclude_vars=[], exclude_dims=[]):
     Copy data from a netCDF file with the exception of dimension and variable
     names listed in exclude_vars and exclude_dims.
     '''
-    with Dataset(infile) as src, Dataset(outfile, 'w') as dst:
+    with Dataset(infile.absolute()) as src, Dataset(outfile.absolute(), 'w') as dst:
         # copy global attributes all at once via dictionary
         dst.setncatts(src.__dict__)
         # copy dimensions except for the excluded
@@ -87,7 +87,7 @@ def copy_netcdf(infile, outfile, exclude_vars=[], exclude_dims=[]):
                     dtype=src[name][:].dtype
                 )
     
-    return Dataset(outfile, 'r+')
+    return Dataset(outfile.absolute(), 'r+')
 
 def iterate_dimension(infile, outfile, iterated_dimension, n=1):
     '''
@@ -270,7 +270,7 @@ def profile_qc(flags):
 
     return grade
 
-def update_delayed_mode_fields(D_nc, fdict, param, sci_calib):
+def update_delayed_mode_fields(D_nc, param, sci_calib):
 
     # find index for param along PARAMETER
     _, param_index = find_param(D_nc, 'DOXY')
@@ -280,11 +280,6 @@ def update_delayed_mode_fields(D_nc, fdict, param, sci_calib):
         D_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,param_index,:] = string_to_array(sci_calib['COMMENT'], D_nc.dimensions['STRING256'])
         D_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,param_index,:] = string_to_array(sci_calib['EQUATION'], D_nc.dimensions['STRING256'])
         D_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,param_index,:] = string_to_array(sci_calib['COEFFICIENT'], D_nc.dimensions['STRING256'])
-    
-    for i in range(D_nc.dimensions['N_PROF'].size):
-        flags = read_qc(D_nc['DOXY_ADJUSTED_QC'][:].data[i,:])
-        grade = profile_qc(pd.Series(flags)).encode('utf-8')
-        D_nc['PROFILE_DOXY_QC'][i] = grade
     
     data_state_indicator = create_fillvalue_array(D_nc['DATA_STATE_INDICATOR'])
     for i in range(D_nc.dimensions['N_PROF'].size):
@@ -439,14 +434,14 @@ def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_
         data_mode = O_nc['PARAMETER_DATA_MODE'][:][param_index].decode()
 
         # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
-        if f.split('_')[-1] == 'QC':
+        if f.split('_')[-1] == 'QC' and f.split('_')[-2] != 'ADJUSTED':
             for i in range(O_nc.dimensions['N_PROF'].size):
                 grade_var = f.replace('_QC', '_ADJUSTED_QC') if (data_mode in ('A', 'D')) and (f.split('_')[1] != 'ADJUSTED') else f
                 flags = read_qc(O_nc[grade_var][:].data[i,:])
                 grade = profile_qc(pd.Series(flags)).encode('utf-8')
                 O_nc[f'PROFILE_{f}'][i] = grade
 
-    history = history.update(dict(
+    history.update(dict(
         SOFTWARE='BGQC',
         SOFTWARE_RELEASE='v0.2',
     ))

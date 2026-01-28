@@ -254,7 +254,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
 
     return floatData, Sprof, BRtraj, meta, fillvalue
 
-def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
+def load_profile(local_path, wmo, cyc, kind='C', direction='A', file=None):
     '''
     Function to load in all data from a single profile file,
     core or BGC.
@@ -290,7 +290,7 @@ def load_profile(local_path, wmo, cyc, kind='C', direction='A'):
     direction = '' if direction == 'A' else direction
 
     # check that the file exists - check for D-mode file first
-    profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}{direction}.nc'
+    profFile = local_path / dac / wmo / 'profiles' / f'{kind}D{wmo}_{cyc:03d}{direction}.nc' if file is None else Path(file)
     profFile = profFile.parent / f'{kind}R{wmo}_{cyc:03d}{direction}.nc' if not profFile.exists() else profFile
 
     if not profFile.exists(): # pragma: no cover

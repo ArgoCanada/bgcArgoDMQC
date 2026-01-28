@@ -40,7 +40,7 @@ class prof:
         wmo = int(wmo)
         cycle = int(cycle)
 
-        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction)
+        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction, file=file)
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self.__origfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
@@ -206,9 +206,28 @@ class prof:
         self.reset()
         export_file = io.update_nc(
             self.__floatdict__, self.__prof__, self._changelog, 
-            history_dict=history, 
+            history=history, 
             sci_calib=sci_calib, 
             data_mode=data_mode
         )
         self.set_dict(current_float_dict)
         return export_file
+    
+    def interp(self, data, pres, name, method='nearest'):
+        '''
+        Interpolate input data onto the BGC depth grid
+        '''
+        idata = []
+        dpres = []
+        for p in self.PRES:
+            ix = np.abs(pres - p) == np.min(np.abs(pres - p))
+            idata.append(data[ix].values[0])
+            dpres.append(pres[ix].values[0] - p)
+
+        self.__floatdict__[name] = idata
+        self.__floatdict__[f'dPRES_{name}'] = dpres
+        self.to_dataframe()
+
+        return
+        
+        
