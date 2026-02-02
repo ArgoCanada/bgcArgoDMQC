@@ -268,5 +268,6 @@ def read_bittig_textfile(fn):
             print(line)
             suggested_binflag = int(line.split('BINFLAG')[1][1])
             print(fid.readline().strip())
+        print()
 
     return meta, pd.DataFrame(data).set_index('binflag'), suggested_binflag
