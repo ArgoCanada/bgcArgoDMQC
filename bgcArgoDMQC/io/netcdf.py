@@ -430,7 +430,7 @@ def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_
         O_nc[f][:] = reshape(arr, fdict['N_PROF_DIM'], fdict['N_LEVELS_DIM']) if fdict['N_PROF_DIM'] > 1 else arr
 
         # find index along PARAMETER
-        param_index = find_param(O_nc, f.replace('_QC','').replace('_ADJUSTED',''))
+        param_index = find_param(O_nc, f.replace('_QC','').replace('_ADJUSTED','').replace('_ERROR', ''))
         data_mode = O_nc['PARAMETER_DATA_MODE'][:][param_index].decode()
 
         # if a changed value is QC flags, recalculate PROFILE_<PARAM>_QC
