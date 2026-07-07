@@ -237,7 +237,7 @@ def load_argo(local_path, wmo, grid=False, verbose=True):
             floatData['inair']      = True
         elif 'DOXY' in BRtraj_nc.variables.keys() and 'TEMP_DOXY' in BRtraj_nc.variables.keys():
             # unit conversion from umol kg-1 to pO2, some shaky S and P assumptions?
-            floatData['PPOX_DOXY'] = unit.doxy_to_pO2(unit.umol_per_sw_to_mmol_per_L(
+            floatData['PPOX_DOXY'] = unit.doxy_to_pO2(unit.umol_per_sw_to_umol_per_L(
                 BRtraj_nc.variables['DOXY'][:].data.flatten(),
                 0, # salinity is 0 in air???
                 BRtraj_nc.variables['TEMP_DOXY'][:].data.flatten(),

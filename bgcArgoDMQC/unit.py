@@ -120,8 +120,8 @@ def umol_per_sw_to_umol_per_L(doxy, S, T, P, lat=None, lon=None):
         umol_L_conc (float or array-like): dissolved oxygen concentration in umol L-1 (or equivalently mmol m-3)
     '''
 
-    pot_density = gsw.rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P)
-    umol_L_conc = 1000*doxy / pot_density
+    pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, 0)
+    umol_L_conc = doxy * pot_density / 1000
 
     return umol_L_conc
 
@@ -143,7 +143,7 @@ def umol_per_L_to_umol_per_sw(doxy, S, T, P, lat=None, lon=None):
     '''
 
     pot_density = gsw.pot_rho_t_exact(gsw.SA_from_SP(S, P, lon, lat), T, P, 0)
-    umol_kg_conc = doxy*pot_density / 1000
+    umol_kg_conc = doxy * 1000 / pot_density
 
     return umol_kg_conc
 

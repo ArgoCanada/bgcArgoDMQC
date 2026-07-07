@@ -270,6 +270,20 @@ def profile_qc(flags):
 
     return grade
 
+def update_sci_calib(O_nc, sci_calib):
+
+    for param, calib in sci_calib.items():
+        # find index for param along PARAMETER
+        _, param_index = find_param(O_nc, param)
+        last_calib = O_nc.dimensions['N_CALIB'].size-1
+
+        for i in range(O_nc.dimensions['N_PROF'].size):
+            O_nc['SCIENTIFIC_CALIB_COMMENT'][i,last_calib,param_index,:] = string_to_array(calib['COMMENT'], O_nc.dimensions['STRING256'])
+            O_nc['SCIENTIFIC_CALIB_EQUATION'][i,last_calib,param_index,:] = string_to_array(calib['EQUATION'], O_nc.dimensions['STRING256'])
+            O_nc['SCIENTIFIC_CALIB_COEFFICIENT'][i,last_calib,param_index,:] = string_to_array(calib['COEFFICIENT'], O_nc.dimensions['STRING256'])
+    
+    return O_nc
+
 def update_delayed_mode_fields(D_nc, param, sci_calib):
 
     # find index for param along PARAMETER
@@ -400,7 +414,7 @@ def find_param(nc, param):
 
     return (i, param_index)
 
-def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_mode_param=None):
+def update_nc(fdict, fn, changelog, history={}, sci_calib=None, data_mode=None, d_mode_param=None, skip_history_iteration=False):
 
     # get DATE_UPDATE
     date_update = pd.Timestamp.now(tz='utc').strftime('%Y%m%d%H%M%S')
@@ -419,7 +433,6 @@ def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_
         O_nc = unlimit_dimension(fn, output_file, 'N_HISTORY')
 
     for f in changelog:
-
         # encode qc flags
         if f.split('_')[-1] == 'QC':
             arr = [f'{x}'.encode('utf-8') if x > 0 else b' ' for x in fdict[f]]
@@ -448,10 +461,13 @@ def update_nc(fdict, fn, changelog, history={}, sci_calib={}, data_mode=None, d_
 
     if data_mode == 'D':
         O_nc = update_delayed_mode_fields(O_nc, fdict, d_mode_param, sci_calib)
+    elif sci_calib is not None:
+        O_nc = update_sci_calib(O_nc, sci_calib)
 
-    O_nc['DATE_UPDATE'][:] = string_to_array(date_update, O_nc.dimensions['DATE_TIME'])
-    update_history(O_nc, history)
-    sys.stdout.write('done\n')
-    O_nc.close()
+    if not skip_history_iteration:
+        O_nc['DATE_UPDATE'][:] = string_to_array(date_update, O_nc.dimensions['DATE_TIME'])
+        update_history(O_nc, history)
+        sys.stdout.write('done\n')
+        O_nc.close()
     
     return output_file

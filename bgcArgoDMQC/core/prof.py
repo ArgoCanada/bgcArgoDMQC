@@ -200,7 +200,7 @@ class prof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def update_file(self, history, data_mode=None, sci_calib=None):
+    def update_file(self, history=None, data_mode=None, sci_calib=None, skip_history_iteration=False):
 
         current_float_dict = copy.deepcopy(self._dict)
         self.reset()
@@ -208,7 +208,8 @@ class prof:
             self.__floatdict__, self.__prof__, self._changelog, 
             history=history, 
             sci_calib=sci_calib, 
-            data_mode=data_mode
+            data_mode=data_mode,
+            skip_history_iteration=skip_history_iteration
         )
         self.set_dict(current_float_dict)
         return export_file
