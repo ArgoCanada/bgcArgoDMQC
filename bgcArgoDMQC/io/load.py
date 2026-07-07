@@ -10,9 +10,9 @@ from netCDF4 import Dataset
 
 from .. import util
 
-def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
+def load_woa_data(track, param, zlim=(0,1000), local_path='./', year=23, verbose=True):
     '''
-    Function to load WOA18 climatological data for comparison with autonomous
+    Function to load WOA climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
 
     Args:
@@ -61,7 +61,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     woa_param, woa_ftype, woa_dir = util.decode_woa_var(param)
     var_name  = woa_param + '_an'
 
-    base_woa_file = 'woa18_{}_{}'.format(woa_ftype, woa_param)
+    base_woa_file = f'woa{year}_{woa_ftype}_{woa_param}'
 
     # assign var names to avoid unbound warnings
     data, xlon, z_sub, lat_sub, lon_sub = None, None, None, None, None
