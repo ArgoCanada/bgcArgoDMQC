@@ -3,15 +3,16 @@ import warnings
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import matplotlib.dates as mdates
 
 from netCDF4 import Dataset
 
 from .. import util
 
-def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
+def load_woa_data(track, param, zlim=(0,1000), local_path='./', year=23, verbose=True):
     '''
-    Function to load WOA18 climatological data for comparison with autonomous
+    Function to load WOA climatological data for comparison with autonomous
     floats. Data to be interpolated along the provided track (t, lat, lon).
 
     Args:
@@ -42,9 +43,12 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     # make local_path a Path() object from a string, account for windows path
     local_path = Path(local_path)
 
+    # clean up any fillvalues that could be in track
+    track[track == 99999.] = np.nan
+
     # check if float track crosses -180/180 meridian
     cross180 = False
-    if np.max(np.abs(np.diff(track[:,2]))) > 340:
+    if np.max(np.abs(np.diff(track[~np.isnan(track[:,2]),2]))) > 340:
         cross180 = True
         lix = track[:,2] < 0
         lon_bounds = (np.nanmax(track[lix,2]), np.nanmin(track[~lix,2]))
@@ -57,7 +61,7 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     woa_param, woa_ftype, woa_dir = util.decode_woa_var(param)
     var_name  = woa_param + '_an'
 
-    base_woa_file = 'woa18_{}_{}'.format(woa_ftype, woa_param)
+    base_woa_file = f'woa{year}_{woa_ftype}_{woa_param}'
 
     # assign var names to avoid unbound warnings
     data, xlon, z_sub, lat_sub, lon_sub = None, None, None, None, None
@@ -67,7 +71,8 @@ def load_woa_data(track, param, zlim=(0,1000), local_path='./', verbose=True):
     for i in range(12):
         mo = i+1
         woa_file = base_woa_file + '{:02d}_01.nc'.format(mo)
-        nc = Dataset(local_path / woa_dir / woa_file, 'r')
+        local_file = local_path / woa_dir / woa_file
+        nc = Dataset(local_file.absolute(), 'r')
 
         if i == 0:
             z   = nc.variables['depth'][:]
@@ -214,3 +219,55 @@ def load_ncep_data(track, varname, local_path='./'):
 
     return xtrack, ncep_track, data
 
+def read_bittig_textfile(fn):
+
+    meta = {}
+
+    data = dict(
+        binflag = [],
+        AIC = [],
+        coefficient = [],
+        OFFSET = [],
+        SLOPE = [],
+        DRIFT = [],
+        INCLINE_T = [],
+        launch_date_juld = [],
+        comment = [],
+    )
+
+    with open(fn) as fid:
+        for i in range(8):
+            line = fid.readline()
+            if line != '\n':
+                key, value = line.split('\t')
+                meta[key.strip()] = value.strip()
+
+        while line.split(':')[0] != '**EXPERIMENTAL**' and line != '':
+            line = fid.readline()
+            if line.split(' ')[0] == 'binflag':
+                data['binflag'].append(int(line.split(' ')[1].split('\t')[0]))
+                data['AIC'].append(float(line.split(' ')[2].strip(')\n')))
+                
+                line = fid.readline()
+                data['coefficient'].append(line.split('\t')[1].strip())
+                vals = line.split('=')
+
+                data['OFFSET'].append(float(vals[1].split(',')[0]))
+                data['SLOPE'].append(float(vals[2].split(',')[0]))
+                data['DRIFT'].append(float(vals[3].split(',')[0]))
+                data['INCLINE_T'].append(float(vals[4].split(',')[0]))
+                data['launch_date_juld'].append(vals[5])
+
+                line = fid.readline()
+                data['comment'].append(line.split('\t')[1].strip())
+        
+        print()
+        suggested_binflag = -1
+        if line.split(':')[0] == '**EXPERIMENTAL**':
+            line = fid.readline().strip()
+            print(line)
+            suggested_binflag = int(line.split('BINFLAG')[1][1])
+            print(fid.readline().strip())
+        print()
+
+    return meta, pd.DataFrame(data).set_index('binflag'), suggested_binflag

@@ -148,27 +148,27 @@ def check_index_time(local_meta, local_index, local_bgc, local_synth, local_traj
     synth_delta = curr_time - synth_mtime
     traj_delta = curr_time - traj_mtime
 
-    if meta_delta / 60 / 60 / 24 > 7:
+    if meta_delta / 60 / 60 / 24 > 7: # pragma: no cover
         d = meta_delta / 60 / 60 / 24
         sys.stdout.write('Argo global metadata index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
         update_index(ftype='meta')
 
-    if index_delta / 60 / 60 / 24 > 7:
+    if index_delta / 60 / 60 / 24 > 7: # pragma: no cover
         d = index_delta / 60 / 60 / 24
         sys.stdout.write('Argo global profile index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
         update_index(ftype='profile')
 
-    if bgc_delta / 60 / 60 / 24 > 7:
+    if bgc_delta / 60 / 60 / 24 > 7: # pragma: no cover
         d = bgc_delta / 60 / 60 / 24
         sys.stdout.write('Argo global BGC index is more than 7 days old - has not been updated in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
         update_index(ftype='bgc')
 
-    if synth_delta / 60 / 60 / 24 > 7:
+    if synth_delta / 60 / 60 / 24 > 7: # pragma: no cover
         d = synth_delta / 60 / 60 / 24
         sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
         update_index(ftype='synthetic')
 
-    if traj_delta / 60 / 60 / 24 > 7:
+    if traj_delta / 60 / 60 / 24 > 7: # pragma: no cover
         d = synth_delta / 60 / 60 / 24
         sys.stdout.write('Argo global synthetic profile index is more than 7 days old - has not been updates in {:d} days  - downloading now - this may take some time depending on your internet connection\n'.format(int(d)))
         update_index(ftype='synthetic')

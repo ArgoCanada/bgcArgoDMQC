@@ -12,3 +12,4 @@ from .core import *
 from .oxygen import *
 from .sprof import sprof
 from .prof import prof
+from .float import float

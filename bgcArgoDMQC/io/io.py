@@ -7,7 +7,7 @@ from .. import util
 from .index import get_dac
 from ..resource import URL_DIR_DICT, URL
 
-def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, nfiles=None):
+def get_woa(varname, local_path='./', ftype='netcdf', year=23, overwrite=False, nfiles=None):
     '''
     Function to download WOA data for a given variable
 
@@ -49,7 +49,7 @@ def get_woa18(varname, local_path='./', ftype='netcdf', overwrite=False, nfiles=
     param, dtype, ftpdir = util.decode_woa_var(varname)
 
     ftp = ftplib.FTP(url, 'anonymous', 'chris.gordon@dfo-mpo.gc.ca')
-    ftp.cwd(f'pub/woa/WOA18/DATA/{ftpdir}/{ftype}/{dtype}/1.00/')
+    ftp.cwd(f'pub/woa/WOA{year}/DATA/{ftpdir}/{ftype}/{dtype}/1.00/')
 
     local_path = local_path / ftpdir
 

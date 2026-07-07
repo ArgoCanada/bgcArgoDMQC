@@ -10,8 +10,8 @@ from .. import io
 
 class prof:
     '''
-    Class that loads Argo synthetic profile data for a given float ID number
-    (wmo). 
+    Class that loads Argo profile data for a given float ID number
+    (wmo) and cycle. 
 
     Then, load the individual variables into fields in the class, for
     example::
@@ -24,28 +24,28 @@ class prof:
         df = p.to_dataframe()
     '''
     
-    set_dirs = set_dirs
-
     def __init__(self, wmo=None, cycle=None, file=None, kind='C', direction='A', keep_fillvalue=False, rcheck=True, verbose=False):
 
-        if (wmo is not None and cycle is not None) and file is not None:
+        if (wmo is not None and cycle is not None) and file is not None: # pragma: no cover
             raise ValueError("wmo/cycle and file cannot be defined at the same time")
 
-        file = file.as_posix() if type(file) is not str else file
-        wmo = file.split('/')[-3] if file is not None else wmo
-        cycle = file.split('_')[-1].split('.')[0] if file is not None else cycle
-        direction = cycle[-1] if cycle[-1] == 'D' else direction
-        cycle = cycle[:-1] if cycle[-1] == 'D' else cycle
-        kind = file.split('/')[-1][0] if file.split('/')[-1][0] == 'B' else kind
+        if file is not None:
+            file = file.as_posix() if type(file) is not str else file
+            wmo = file.split('/')[-3]
+            cycle = file.split('_')[-1].split('.')[0]
+            direction = cycle[-1] if cycle[-1] == 'D' else direction
+            cycle = cycle[:-1] if cycle[-1] == 'D' else cycle
+            kind = file.split('/')[-1][0] if file.split('/')[-1][0] == 'B' else kind
 
         wmo = int(wmo)
         cycle = int(cycle)
 
-        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction)
+        self.__floatdict__, self.__prof__, self.__fillvalue__ = load_profile(io.Path.ARGO_PATH, wmo, cycle, kind=kind, direction=direction, file=file)
         self.__rawfloatdict__ = copy.deepcopy(self.__floatdict__)
         self.__origfloatdict__ = copy.deepcopy(self.__floatdict__)
         self._dict = 'raw'
         self._changelog = []
+        self._typ = 'bgcArgoDMQC.profile'
 
         # local path info
         self.argo_path = io.Path.ARGO_PATH
@@ -67,9 +67,6 @@ class prof:
 
     def __getitem__(self, index):
         return pd.Series(self.__floatdict__[index])
-
-    def __setitem__(self, index, value):
-        self.df[index] = value
 
     def __getattr__(self, index):
         return pd.Series(self.__floatdict__[index])
@@ -157,8 +154,7 @@ class prof:
     
     def to_dataframe(self):
         '''
-        Returns a pandas dataframe containing data from the synthetic oxygen
-        profile file.
+        Returns a pandas dataframe containing data from the profile file.
         '''
 
         df = pd.DataFrame()
@@ -168,22 +164,24 @@ class prof:
         bgc_vars = list(set(self.__floatdict__.keys()) & set(['DOXY', 'DOXY_QC', 'DOXY_ADJUSTED', 'DOXY_ADJUSTED_QC', 'CHLA', 'CHLA_QC', 'CHLA_ADJUSTED', 'CHLA_ADJUSTED_QC', 'BBP700', 'BBP700_QC', 'BBP700_ADJUSTED', 'BBP_ADJUSTED_QC']))
         priority_vars = priority_vars + bgc_vars
 
+        df['CYCLE'] = n_level*n_prof*[self.cycle]
+        df['DIRECTION'] = n_level*n_prof*[self.direction]
+        df['JULD'] = np.concat([n_level*[self.__floatdict__['JULD'][i]] for i in range(n_prof)])
+        df['LATITUDE'] = np.concat([n_level*[self.__floatdict__['LATITUDE'][i]] for i in range(n_prof)])
+        df['LONGITUDE'] = np.concat([n_level*[self.__floatdict__['LONGITUDE'][i]] for i in range(n_prof)])
+
         for v in priority_vars:
             df[v] = self.__floatdict__[v]
 
         for k in set(self.__floatdict__.keys()) - set(df.columns):
             dim = self.__floatdict__[k].shape[0] if type(self.__floatdict__[k]) is np.ndarray else np.inf
-            if dim == n_level*n_prof:
+            if dim == n_level*n_prof and k != 'HISTORY_QCTEST':
                 df[k] = self.__floatdict__[k]
 
-        df = df.set_index(['N_PROF', 'N_LEVELS'])
+        df = df.set_index(['CYCLE', 'DIRECTION', 'N_PROF', 'N_LEVELS'])
 
         self.df = df
         return copy.deepcopy(self.df)
-    
-    def is_fillvalue(self, field):
-
-        return self.__floatdict__[field] == self.__fillvalue__[field]
     
     def update_field(self, field, value, where=None):
 
@@ -202,10 +200,35 @@ class prof:
 
         self.update_field(field, self.__fillvalue__[field], where)
     
-    def update_file(self, history):
+    def update_file(self, history=None, data_mode=None, sci_calib=None, skip_history_iteration=False):
 
         current_float_dict = copy.deepcopy(self._dict)
         self.reset()
-        export_file = io.update_nc(self.__floatdict__, self.__prof__, self._changelog, history_dict=history)
+        export_file = io.update_nc(
+            self.__floatdict__, self.__prof__, self._changelog, 
+            history=history, 
+            sci_calib=sci_calib, 
+            data_mode=data_mode,
+            skip_history_iteration=skip_history_iteration
+        )
         self.set_dict(current_float_dict)
         return export_file
+    
+    def interp(self, data, pres, name, method='nearest'):
+        '''
+        Interpolate input data onto the BGC depth grid
+        '''
+        idata = []
+        dpres = []
+        for p in self.PRES:
+            ix = np.abs(pres - p) == np.min(np.abs(pres - p))
+            idata.append(data[ix].values[0])
+            dpres.append(pres[ix].values[0] - p)
+
+        self.__floatdict__[name] = idata
+        self.__floatdict__[f'dPRES_{name}'] = dpres
+        self.to_dataframe()
+
+        return
+        
+        
